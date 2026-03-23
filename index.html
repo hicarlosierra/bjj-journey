@@ -294,7 +294,13 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .btn-primary{flex:1;padding:13px;background:var(--orange);border:none;border-radius:var(--r2);font-size:14px;font-weight:600;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer}
 .btn-primary:hover{opacity:.88}
 .btn-secondary{padding:13px 20px;background:none;border:1px solid var(--border2);border-radius:var(--r2);font-size:14px;color:var(--muted2);font-family:'DM Sans',sans-serif;cursor:pointer}
-.feeling-btns{display:flex;gap:8px}
+.avatar-photo{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.avatar-upload{position:relative;cursor:pointer;flex-shrink:0}
+.avatar-upload:hover .avatar-overlay{opacity:1}
+.avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-size:11px;color:#fff;font-weight:500}
+.profile-avatar-wrap{position:relative;cursor:pointer;flex-shrink:0}
+.profile-avatar-wrap:hover .profile-avatar-overlay{opacity:1}
+.profile-avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-size:12px;color:#fff;font-weight:500;text-align:center;line-height:1.3}
 .feeling-btn{font-size:22px;background:var(--bg3);border:2px solid var(--border2);border-radius:var(--r2);padding:8px 12px;cursor:pointer;transition:all .15s;line-height:1;opacity:.45;font-family:inherit}
 .feeling-btn:hover{opacity:.75;border-color:var(--border3)}
 .feeling-btn.sel{opacity:1;border-color:var(--orange);background:rgba(235,94,40,.1)}
@@ -348,6 +354,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
     <div class="avatar empty" id="sidebar-avatar">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
     </div>
+    <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="uploadPhoto(this)">
     <div>
       <div class="user-name" id="sidebar-name">Configurar perfil</div>
       <div class="user-belt" id="sidebar-belt">Toca para empezar</div>
@@ -1286,10 +1293,19 @@ function renderProfile() {
   }
 
   const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+  const avatarHtml = p.photo
+    ? `<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()">
+        <div class="profile-avatar" style="padding:0;overflow:hidden"><img src="${p.photo}" class="avatar-photo"></div>
+        <div class="profile-avatar-overlay">Cambiar<br>foto</div>
+       </div>`
+    : `<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()">
+        <div class="profile-avatar">${initials}</div>
+        <div class="profile-avatar-overlay">Añadir<br>foto</div>
+       </div>`;
 
   el.innerHTML = `
     <div class="profile-hero">
-      <div class="profile-avatar">${initials}</div>
+      ${avatarHtml}
       <div>
         <div class="profile-name">${p.name}</div>
         <div class="profile-since">${p.gym || '—'} · desde ${fmtDate(p.start) || '—'}</div>
@@ -1391,7 +1407,11 @@ function updateSidebar() {
   if (p.name) {
     const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     ava.className = 'avatar';
-    ava.innerHTML = initials;
+    ava.style.padding = '0';
+    ava.style.overflow = 'hidden';
+    ava.innerHTML = p.photo
+      ? `<img src="${p.photo}" class="avatar-photo">`
+      : initials;
     nameEl.textContent = p.name;
     const totalMinutes = STATE.sessions.reduce((sum,s) => sum + (parseInt(s.duration)||0), 0);
     const totalHours = Math.round(((totalMinutes / 60) + (p.prior_hours || 0)) * 10) / 10;
@@ -1534,6 +1554,39 @@ function importData(input) {
     input.value = '';
   };
   reader.readAsText(file);
+}
+
+// ═══════════════════════════════════════════════════════
+// PHOTO UPLOAD
+// ═══════════════════════════════════════════════════════
+function uploadPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  compressImage(file, 200, (base64) => {
+    STATE.profile.photo = base64;
+    saveState();
+    updateSidebar();
+    renderProfile();
+  });
+  input.value = '';
+}
+
+function compressImage(file, maxSize, callback) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      callback(canvas.toDataURL('image/jpeg', 0.8));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 // ═══ INIT ═══
