@@ -480,15 +480,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
     <div class="modal-title">Tu perfil</div>
     <div class="input-group"><label class="input-label">Nombre</label><input class="input-field" type="text" id="profile-name" placeholder="Tu nombre"></div>
     <div class="input-group"><label class="input-label">Academia</label><input class="input-field" type="text" id="profile-gym" placeholder="Nombre de tu academia"></div>
-    <div class="input-group"><label class="input-label">Cinturón actual</label>
-      <select class="input-field" id="profile-belt">
-        <option value="white">Blanco</option>
-        <option value="blue">Azul</option>
-        <option value="purple">Morado</option>
-        <option value="brown">Marrón</option>
-      </select>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="input-group"><label class="input-label">Cinturón actual</label>
+        <select class="input-field" id="profile-belt">
+          <option value="white">Blanco</option>
+          <option value="blue">Azul</option>
+          <option value="purple">Morado</option>
+          <option value="brown">Marrón</option>
+        </select>
+      </div>
+      <div class="input-group"><label class="input-label">Grado (rayas)</label>
+        <select class="input-field" id="profile-stripe">
+          <option value="0">0 rayas</option>
+          <option value="1">1 raya</option>
+          <option value="2">2 rayas</option>
+          <option value="3">3 rayas</option>
+          <option value="4">4 rayas</option>
+        </select>
+      </div>
     </div>
-    <div class="input-group"><label class="input-label">Fecha de inicio</label><input class="input-field" type="date" id="profile-start"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="input-group"><label class="input-label">Fecha de inicio</label><input class="input-field" type="date" id="profile-start"></div>
+      <div class="input-group"><label class="input-label">Horas previas acumuladas</label><input class="input-field" type="number" id="profile-prior-hours" placeholder="0" min="0" inputmode="numeric"></div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
       <div class="input-group"><label class="input-label">Peso (kg)</label><input class="input-field" type="number" id="profile-weight" placeholder="78"></div>
       <div class="input-group"><label class="input-label">Altura (cm)</label><input class="input-field" type="number" id="profile-height" placeholder="179"></div>
@@ -778,7 +792,8 @@ function renderProgreso() {
   if (p.start) {
     const allSessions = STATE.sessions;
     const totalAllMinutes = allSessions.reduce((sum, s) => sum + (parseInt(s.duration) || 0), 0);
-    const totalAllHours = Math.round(totalAllMinutes / 60 * 10) / 10;
+    const sessionHours = Math.round(totalAllMinutes / 60 * 10) / 10;
+    const totalAllHours = Math.round((sessionHours + (p.prior_hours || 0)) * 10) / 10;
     const target = 250;
     const pct = Math.min(Math.round(totalAllHours / target * 100), 100);
     const beltLabels = { white:'blanco', blue:'azul', purple:'morado', brown:'marrón' };
@@ -1152,7 +1167,7 @@ function renderProfile() {
       <div>
         <div class="profile-name">${p.name}</div>
         <div class="profile-since">${p.gym || '—'} · desde ${fmtDate(p.start) || '—'}</div>
-        <div class="belt-badge-hero"><div class="belt-visual"></div><div class="belt-text">Cinturón ${beltLabels[p.belt] || p.belt} · 0 rayas</div></div>
+        <div class="belt-badge-hero"><div class="belt-visual"></div><div class="belt-text">Cinturón ${beltLabels[p.belt] || p.belt} · ${p.stripe || '0'} ${p.stripe === '1' ? 'raya' : 'rayas'}</div></div>
       </div>
     </div>
     <div class="profile-data-grid">
@@ -1163,6 +1178,10 @@ function renderProfile() {
     <div class="profile-table">
       <div class="profile-row"><div class="pr-label">Nombre</div><div class="pr-right"><div class="pr-value">${p.name}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
       <div class="profile-row"><div class="pr-label">Academia</div><div class="pr-right"><div class="pr-value">${p.gym || '—'}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
+      <div class="profile-row"><div class="pr-label">Cinturón</div><div class="pr-right"><div class="pr-value">${beltLabels[p.belt] || p.belt} · ${p.stripe || '0'} ${p.stripe === '1' ? 'raya' : 'rayas'}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
+      <div class="profile-row"><div class="pr-label">Horas en sesiones</div><div class="pr-right"><div class="pr-value">${Math.round(STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60*10)/10}h registradas en la app</div></div></div>
+      <div class="profile-row"><div class="pr-label">Horas previas</div><div class="pr-right"><div class="pr-value">${p.prior_hours || 0}h antes de usar la app</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
+      <div class="profile-row" style="background:rgba(235,94,40,.04)"><div class="pr-label" style="font-weight:500;color:var(--cream)">Horas totales</div><div class="pr-right"><div class="pr-value" style="color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700">${Math.round((STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60 + (p.prior_hours||0))*10)/10}h</div></div></div>
       <div class="profile-row"><div class="pr-label">Google Calendar</div><div class="pr-right"><div class="pr-value" style="color:var(--muted2)">No conectado</div><div class="pr-edit">Próximamente</div></div></div>
       <div class="profile-row"><div class="pr-label">Bot de Telegram</div><div class="pr-right"><div class="pr-value" style="color:var(--muted2)">No conectado</div><div class="pr-edit">Próximamente</div></div></div>
       <div class="profile-row"><div class="pr-label">Benchmark por raya</div><div class="pr-right"><div class="pr-value">45h por raya</div></div></div>
@@ -1188,7 +1207,9 @@ function openEditProfile() {
   document.getElementById('profile-name').value = p.name || '';
   document.getElementById('profile-gym').value = p.gym || '';
   document.getElementById('profile-belt').value = p.belt || 'white';
+  document.getElementById('profile-stripe').value = p.stripe || '0';
   document.getElementById('profile-start').value = p.start || '';
+  document.getElementById('profile-prior-hours').value = p.prior_hours || '';
   document.getElementById('profile-weight').value = p.weight || '';
   document.getElementById('profile-height').value = p.height || '';
   document.getElementById('profile-sex').value = p.sex || '';
@@ -1200,7 +1221,9 @@ function saveProfile() {
     name: document.getElementById('profile-name').value.trim(),
     gym: document.getElementById('profile-gym').value.trim(),
     belt: document.getElementById('profile-belt').value,
+    stripe: document.getElementById('profile-stripe').value,
     start: document.getElementById('profile-start').value,
+    prior_hours: parseFloat(document.getElementById('profile-prior-hours').value) || 0,
     weight: document.getElementById('profile-weight').value,
     height: document.getElementById('profile-height').value,
     sex: document.getElementById('profile-sex').value,
@@ -1224,7 +1247,10 @@ function updateSidebar() {
     ava.className = 'avatar';
     ava.innerHTML = initials;
     nameEl.textContent = p.name;
-    beltEl.textContent = `${beltLabels[p.belt] || 'Blanco'} · ${p.gym || 'Sin academia'}`;
+    const totalMinutes = STATE.sessions.reduce((sum,s) => sum + (parseInt(s.duration)||0), 0);
+    const totalHours = Math.round(((totalMinutes / 60) + (p.prior_hours || 0)) * 10) / 10;
+    const stripeLabel = p.stripe && p.stripe !== '0' ? ` · ${p.stripe}ª raya` : '';
+    beltEl.textContent = `${beltLabels[p.belt] || 'Blanco'}${stripeLabel} · ${totalHours}h totales`;
   } else {
     ava.className = 'avatar empty';
     ava.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
@@ -1282,7 +1308,9 @@ function openModal(name) {
     document.getElementById('profile-name').value = p.name || '';
     document.getElementById('profile-gym').value = p.gym || '';
     document.getElementById('profile-belt').value = p.belt || 'white';
+    document.getElementById('profile-stripe').value = p.stripe || '0';
     document.getElementById('profile-start').value = p.start || '';
+    document.getElementById('profile-prior-hours').value = p.prior_hours || '';
     document.getElementById('profile-weight').value = p.weight || '';
     document.getElementById('profile-height').value = p.height || '';
     document.getElementById('profile-sex').value = p.sex || '';
