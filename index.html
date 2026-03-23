@@ -294,12 +294,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .btn-primary{flex:1;padding:13px;background:var(--orange);border:none;border-radius:var(--r2);font-size:14px;font-weight:600;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer}
 .btn-primary:hover{opacity:.88}
 .btn-secondary{padding:13px 20px;background:none;border:1px solid var(--border2);border-radius:var(--r2);font-size:14px;color:var(--muted2);font-family:'DM Sans',sans-serif;cursor:pointer}
-.star-row{display:flex;gap:6px;padding:4px 0}
-.star{font-size:28px;color:var(--muted);cursor:pointer;transition:color .1s;line-height:1;user-select:none}
-.star.on{color:var(--amber)}
-.star:hover{color:var(--amber)}
-.feeling-display{display:flex;gap:3px}
-.feeling-display .star-s{font-size:14px;color:var(--amber)}
+.feeling-btns{display:flex;gap:8px}
+.feeling-btn{font-size:22px;background:var(--bg3);border:2px solid var(--border2);border-radius:var(--r2);padding:8px 12px;cursor:pointer;transition:all .15s;line-height:1;opacity:.45;font-family:inherit}
+.feeling-btn:hover{opacity:.75;border-color:var(--border3)}
+.feeling-btn.sel{opacity:1;border-color:var(--orange);background:rgba(235,94,40,.1)}
+.feeling-emoji{font-size:13px}
 .btn-danger{padding:13px 20px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:14px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer}
 
 /* MOBILE */
@@ -493,13 +492,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
     <!-- Feeling -->
     <div class="input-group">
       <label class="input-label">Feeling</label>
-      <div class="star-row" id="star-row">
-        <span class="star" data-v="1" onclick="setStar(1)">★</span>
-        <span class="star" data-v="2" onclick="setStar(2)">★</span>
-        <span class="star" data-v="3" onclick="setStar(3)">★</span>
-        <span class="star" data-v="4" onclick="setStar(4)">★</span>
-        <span class="star" data-v="5" onclick="setStar(5)">★</span>
+      <div class="feeling-btns" id="feeling-btns">
+        <button class="feeling-btn" data-v="5" data-label="En llamas" onclick="setFeeling(this)">🔥</button>
+        <button class="feeling-btn" data-v="4" data-label="Fuerte" onclick="setFeeling(this)">💪</button>
+        <button class="feeling-btn" data-v="3" data-label="Normal" onclick="setFeeling(this)">😐</button>
+        <button class="feeling-btn" data-v="2" data-label="Cansado" onclick="setFeeling(this)">😴</button>
+        <button class="feeling-btn" data-v="1" data-label="Roto" onclick="setFeeling(this)">🤕</button>
       </div>
+      <div id="feeling-label" style="font-size:12px;color:var(--muted2);margin-top:6px;min-height:16px"></div>
     </div>
 
     <!-- Posición del día -->
@@ -932,12 +932,12 @@ function renderProgreso() {
         <div class="col-title">Últimas sesiones</div>
         <div style="display:flex;flex-direction:column;gap:8px">
           ${recent.map(s => {
-            const starsHtml = s.feeling ? `<span style="font-size:12px;color:var(--amber)">${'★'.repeat(s.feeling)}${'☆'.repeat(5-s.feeling)}</span>` : '';
+            const feelingHtml = s.feeling ? `<span style="font-size:14px" title="${FEELINGS[s.feeling]||''}">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>` : '';
             return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:flex-start;gap:12px">
               <div style="width:8px;height:8px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'};margin-top:5px;flex-shrink:0"></div>
               <div style="flex:1;min-width:0">
                 <div style="font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px">${s.type}${s.position?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${s.position}</span>`:''}</div>
-                <div style="font-size:11px;color:var(--muted2);margin-top:2px;display:flex;align-items:center;gap:8px">${fmtDate(s.date)}${starsHtml}</div>
+                <div style="font-size:11px;color:var(--muted2);margin-top:2px;display:flex;align-items:center;gap:8px">${fmtDate(s.date)}${feelingHtml}</div>
                 ${s.notes?`<div style="font-size:11px;color:var(--muted2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.notes}</div>`:''}
               </div>
               <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;flex-shrink:0">${Math.round((parseInt(s.duration)||0)/60*10)/10}h</div>
@@ -980,7 +980,7 @@ function renderSessions() {
 
   el.innerHTML = `<div class="sessions-grid">
     ${sorted.map((s, i) => {
-      const starsHtml = s.feeling ? `<div class="feeling-display">${[1,2,3,4,5].map(v=>`<span class="star-s${v<=s.feeling?'':' off'}">★</span>`).join('')}</div>` : '';
+      const feelingHtml = s.feeling ? `<span style="font-size:18px" title="${FEELINGS[s.feeling]||''}">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>` : '';
       const posHtml = s.position ? `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${s.position}</span>` : '';
       return `
       <div class="session-full">
@@ -990,7 +990,7 @@ function renderSessions() {
             <div class="sf-title">${s.type}</div>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
-            ${starsHtml}
+            ${feelingHtml}
             <div class="sf-dur">${Math.round((parseInt(s.duration)||0)/60*10)/10}h</div>
             <span style="font-size:11px;color:var(--muted2);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r2)" onclick="deleteSession(${i})">✕</span>
           </div>
@@ -1008,11 +1008,13 @@ function renderSessions() {
 let currentStar = 0;
 let currentPos = '';
 
-function setStar(v) {
-  currentStar = v;
-  document.querySelectorAll('.star').forEach(s => {
-    s.classList.toggle('on', parseInt(s.dataset.v) <= v);
-  });
+const FEELINGS = { 5:'🔥 En llamas', 4:'💪 Fuerte', 3:'😐 Normal', 2:'😴 Cansado', 1:'🤕 Roto' };
+
+function setFeeling(btn) {
+  currentStar = parseInt(btn.dataset.v);
+  document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  document.getElementById('feeling-label').textContent = btn.dataset.label;
 }
 
 function selPos(btn) {
@@ -1051,7 +1053,8 @@ function saveSession() {
   currentPos = '';
   document.getElementById('session-duration').value = '';
   document.getElementById('session-notes').value = '';
-  document.querySelectorAll('.star').forEach(s => s.classList.remove('on'));
+  document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('sel'));
+  if(document.getElementById('feeling-label')) document.getElementById('feeling-label').textContent = '';
   document.querySelectorAll('#position-pills .type-pill').forEach(p => p.classList.remove('sel'));
 }
 
@@ -1451,7 +1454,8 @@ function openModal(name) {
     // Reset stars and position
     currentStar = 0;
     currentPos = '';
-    document.querySelectorAll('.star').forEach(s => s.classList.remove('on'));
+    document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('sel'));
+    if(document.getElementById('feeling-label')) document.getElementById('feeling-label').textContent = '';
     document.querySelectorAll('#position-pills .type-pill').forEach(p => p.classList.remove('sel'));
     document.getElementById('session-duration').value = '';
     document.getElementById('session-notes').value = '';
