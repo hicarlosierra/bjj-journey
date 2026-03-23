@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BJJ Journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0D0D0D;--bg2:#161616;--bg3:#1E1E1E;--bg4:#272727;
+  --cream:#FFFCF2;--orange:#EB5E28;--orange2:#FF7A47;
+  --muted:#3a3a3a;--muted2:#777;--muted3:#aaa;
+  --border:rgba(255,252,242,0.07);--border2:rgba(255,252,242,0.13);--border3:rgba(255,252,242,0.22);
+  --green:#4CAF8A;--amber:#E8A838;--purple:#7B74E0;
+  --r:12px;--r2:8px;--sidebar:220px;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);overflow:hidden}
+.app-shell{display:flex;height:100vh;width:100vw}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:24px 0 20px;height:100vh;z-index:10}
+.sidebar-logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;letter-spacing:.04em;color:var(--cream);padding:0 20px 24px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.sidebar-logo span{color:var(--orange)}
+.sidebar-nav{flex:1;display:flex;flex-direction:column;gap:2px;padding:0 10px}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r2);cursor:pointer;transition:background .15s,color .15s;color:var(--muted2);font-size:14px;font-weight:500;user-select:none}
+.nav-item:hover{background:var(--bg3);color:var(--cream)}
+.nav-item.active{background:var(--bg4);color:var(--cream)}
+.nav-item.active .nav-icon{color:var(--orange)}
+.nav-icon{width:18px;height:18px;flex-shrink:0}
+.nav-divider{height:1px;background:var(--border);margin:8px 10px}
+.sidebar-user{padding:16px 14px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer}
+.sidebar-user:hover .user-name{color:var(--orange)}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:var(--cream);flex-shrink:0}
+.avatar.empty{background:var(--bg3);border:1.5px dashed var(--border3)}
+.user-name{font-size:13px;font-weight:500;transition:color .15s}
+.user-belt{font-size:11px;color:var(--muted2);margin-top:1px}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;height:100vh;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent}
+.main::-webkit-scrollbar{width:6px}
+.main::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
+.view{display:none;padding:32px 36px 48px;max-width:960px}
+.view.active{display:block;animation:fadeUp .2s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.page-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--muted2);margin-bottom:28px}
+
+/* ONBOARDING BANNER */
+.onboarding-banner{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--orange);border-radius:var(--r);padding:20px 24px;margin-bottom:24px}
+.ob-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.ob-steps{display:flex;flex-direction:column;gap:8px}
+.ob-step{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ob-step:last-child{border-bottom:none}
+.ob-num{width:22px;height:22px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.ob-step.done .ob-num{background:var(--green)}
+.ob-step-body{}
+.ob-step-title{font-size:14px;font-weight:500;color:var(--cream);margin-bottom:2px}
+.ob-step.done .ob-step-title{color:var(--muted2);text-decoration:line-through}
+.ob-step-desc{font-size:12px;color:var(--muted2);line-height:1.5}
+.ob-step-action{font-size:12px;color:var(--orange);cursor:pointer;font-weight:500;margin-top:4px;display:inline-block}
+.ob-dismiss{font-size:12px;color:var(--muted2);cursor:pointer;margin-top:14px;display:inline-block}
+.ob-dismiss:hover{color:var(--cream)}
+
+/* PROGRESS */
+.progress-hero{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:24px 28px;margin-bottom:20px;position:relative;overflow:hidden}
+.progress-hero::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--orange) var(--prog,0%),var(--bg3) var(--prog,0%))}
+.ph-row{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+.ph-label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted2);margin-bottom:6px}
+.ph-title{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:800;line-height:1}
+.ph-title span{color:var(--orange)}
+.ph-sub{font-size:13px;color:var(--muted2);margin-top:4px}
+.ph-pct{font-family:'Barlow Condensed',sans-serif;font-size:56px;font-weight:800;color:var(--orange);line-height:1;opacity:.18}
+.ph-bar-wrap{background:var(--bg4);border-radius:99px;height:6px;overflow:hidden;margin-bottom:12px}
+.ph-bar-fill{height:100%;background:linear-gradient(90deg,var(--orange),var(--orange2));border-radius:99px;transition:width .6s ease}
+.ph-milestones{display:flex}
+.ph-mile{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px}
+.ph-mile-dot{width:8px;height:8px;border-radius:50%;background:var(--bg4);border:1.5px solid var(--muted)}
+.ph-mile.done .ph-mile-dot{background:var(--orange);border-color:var(--orange)}
+.ph-mile.next .ph-mile-dot{border-color:var(--orange);background:var(--bg2)}
+.ph-mile-label{font-size:11px;color:var(--muted2);text-align:center;line-height:1.3}
+.ph-mile.done .ph-mile-label{color:var(--cream)}
+.ph-mile.next .ph-mile-label{color:var(--orange)}
+.ph-mile-h{font-size:10px;color:var(--muted2)}
+
+/* STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+.stat-card.accent{border-color:rgba(235,94,40,.25)}
+.stat-card.accent::after{content:'';position:absolute;bottom:0;right:0;width:80px;height:80px;background:radial-gradient(circle at 100% 100%,rgba(235,94,40,.1),transparent 70%)}
+.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:8px}
+.stat-value{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;line-height:1}
+.stat-value.orange{color:var(--orange)}
+.stat-value.empty{color:var(--muted);font-size:32px}
+.stat-sub{font-size:11px;color:var(--muted2);margin-top:5px}
+
+/* COACH TIP */
+.coach-tip{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--orange);border-radius:var(--r);padding:18px 20px;display:flex;gap:16px;align-items:flex-start}
+.coach-avatar{width:40px;height:40px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
+.coach-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--orange);margin-bottom:5px;font-weight:600}
+.coach-text{font-size:13px;color:var(--cream);line-height:1.6}
+.coach-action{font-size:12px;color:var(--orange);margin-top:8px;cursor:pointer;font-weight:500}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted2)}
+.empty-icon{width:48px;height:48px;border-radius:50%;background:var(--bg2);border:1.5px dashed var(--border3);display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.empty-title{font-size:15px;font-weight:500;color:var(--cream);margin-bottom:6px}
+.empty-desc{font-size:13px;line-height:1.6;max-width:320px;margin:0 auto}
+.empty-cta{margin-top:18px;display:inline-flex;align-items:center;gap:8px;background:var(--orange);border:none;border-radius:var(--r2);padding:10px 20px;font-size:13px;font-weight:600;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer}
+.empty-cta:hover{opacity:.88}
+
+/* ENCYCLOPEDIA */
+.enc-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.enc-stats{display:flex;gap:18px}
+.enc-stat{font-size:13px;color:var(--muted2)}
+.enc-stat strong{color:var(--cream)}
+.enc-stat.hi strong{color:var(--orange)}
+.filter-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.filter-pill{padding:6px 14px;border-radius:99px;font-size:12px;font-weight:500;border:1px solid var(--border2);background:none;color:var(--muted2);cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif}
+.filter-pill:hover{color:var(--cream)}
+.filter-pill.active{background:var(--orange);border-color:var(--orange);color:var(--cream)}
+.status-legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px;align-items:center;padding:10px 14px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border)}
+.sl-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted2)}
+.sl-dot{width:8px;height:8px;border-radius:50%}
+.sl-sep{width:1px;height:14px;background:var(--border2);margin:0 2px}
+.position-block{margin-bottom:28px}
+.pos-header{display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:12px 16px;background:var(--bg2);border-radius:var(--r2);border:1px solid var(--border)}
+.pos-accent{width:3px;height:32px;border-radius:99px;flex-shrink:0}
+.pos-info{flex:1}
+.pos-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;line-height:1;margin-bottom:2px}
+.pos-desc{font-size:11px;color:var(--muted2)}
+.pos-progress{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.pos-prog-bar{width:80px;height:4px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.pos-prog-fill{height:100%;border-radius:99px;background:var(--orange)}
+.pos-count{font-size:11px;color:var(--muted2)}
+.tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.enc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .15s,transform .12s;position:relative;display:flex;flex-direction:column}
+.enc-card:hover{border-color:var(--border2);transform:translateY(-1px)}
+.enc-card.seen{border-color:rgba(255,252,242,.16)}
+.enc-card.seen-flowing{border-color:rgba(76,175,138,.35)}
+.enc-card.seen-auto{border-color:rgba(235,94,40,.4)}
+.enc-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.belt-pill{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;letter-spacing:.04em}
+.belt-white{background:rgba(255,252,242,.08);color:var(--muted2)}
+.belt-blue{background:rgba(123,116,224,.18);color:var(--purple)}
+.belt-purple{background:rgba(180,80,180,.15);color:#c080c0}
+.status-ring{width:22px;height:22px;border-radius:50%;border:2px solid var(--muted);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;cursor:pointer}
+.enc-card.seen .status-ring,.enc-card.seen-practicing .status-ring,.enc-card.seen-flowing .status-ring,.enc-card.seen-auto .status-ring{border-color:var(--muted2);background:var(--bg3)}
+.enc-card.seen-practicing .status-ring{border-color:var(--amber);background:rgba(232,168,56,.15)}
+.enc-card.seen-flowing .status-ring{border-color:var(--green);background:rgba(76,175,138,.15)}
+.enc-card.seen-auto .status-ring{border-color:var(--orange);background:rgba(235,94,40,.2)}
+.status-ring svg{width:11px;height:11px;opacity:0;transition:opacity .15s}
+.enc-card.seen .status-ring svg{opacity:1;stroke:var(--muted2)}
+.enc-card.seen-practicing .status-ring svg{opacity:1;stroke:var(--amber)}
+.enc-card.seen-flowing .status-ring svg{opacity:1;stroke:var(--green)}
+.enc-card.seen-auto .status-ring svg{opacity:1;stroke:var(--orange)}
+.enc-card:not(.seen):not(.seen-practicing):not(.seen-flowing):not(.seen-auto) .status-ring{border-style:dashed;border-color:var(--muted)}
+.enc-card-type{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted2);margin-bottom:4px}
+.enc-card-name{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;line-height:1.1;margin-bottom:8px}
+.enc-card:not(.seen):not(.seen-practicing):not(.seen-flowing):not(.seen-auto) .enc-card-name{color:rgba(255,252,242,.5)}
+.enc-card:not(.seen):not(.seen-practicing):not(.seen-flowing):not(.seen-auto) .enc-card-type{color:rgba(119,119,119,.55)}
+.enc-card-desc{font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:10px;flex:1}
+.enc-card:not(.seen):not(.seen-practicing):not(.seen-flowing):not(.seen-auto) .enc-card-desc{color:rgba(119,119,119,.5)}
+.enc-card-footer{display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-top:auto}
+.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:600;letter-spacing:.03em}
+.b-gi{background:rgba(123,116,224,.2);color:var(--purple)}
+.b-nogi{background:rgba(76,175,138,.2);color:var(--green)}
+.b-both{background:rgba(255,252,242,.07);color:var(--muted2)}
+.b-priority{background:rgba(235,94,40,.15);color:var(--orange)}
+.b-adv{background:rgba(232,168,56,.12);color:var(--amber)}
+.enc-card:not(.seen):not(.seen-practicing):not(.seen-flowing):not(.seen-auto)::after{content:'';position:absolute;inset:0;border-radius:var(--r);background:repeating-linear-gradient(-45deg,transparent,transparent 8px,rgba(255,252,242,.015) 8px,rgba(255,252,242,.015) 9px);pointer-events:none}
+
+/* SESSIONS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.col-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:12px;font-weight:500}
+.add-btn{display:flex;align-items:center;gap:8px;background:var(--orange);border:none;border-radius:var(--r2);padding:10px 18px;font-size:14px;font-weight:500;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s;margin-bottom:20px}
+.add-btn:hover{opacity:.88}
+.sessions-grid{display:flex;flex-direction:column;gap:12px}
+.session-full{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;cursor:pointer;transition:border-color .12s}
+.session-full:hover{border-color:var(--border2)}
+.sf-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
+.sf-left{display:flex;align-items:center;gap:10px}
+.sf-title{font-size:15px;font-weight:500}
+.sf-dur{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--orange)}
+.sf-date{font-size:12px;color:var(--muted2);margin-bottom:8px}
+.sf-note{font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:10px}
+.sf-tags{display:flex;gap:6px;flex-wrap:wrap}
+.sf-tag{font-size:11px;padding:3px 10px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)}
+.sf-tag.hl{border-color:rgba(235,94,40,.3);color:var(--orange)}
+.type-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dot-gi{background:var(--purple)}.dot-nogi{background:var(--green)}.dot-open{background:var(--orange)}.dot-gym{background:var(--amber)}
+.bar-list{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-label{font-size:12px;color:var(--muted2);width:120px;flex-shrink:0}
+.bar-track{flex:1;height:5px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px}
+.bar-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;width:28px;text-align:right}
+
+/* COACH PAGE */
+.coach-page-hero{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:28px;display:flex;align-items:center;gap:20px;margin-bottom:20px}
+.coach-page-ava{width:68px;height:68px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.coach-page-name{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;margin-bottom:4px}
+.coach-page-sub{font-size:13px;color:var(--muted2);margin-bottom:12px}
+.coming-badge{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:99px;padding:4px 12px;font-size:12px;color:var(--muted2)}
+.coming-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.coach-features{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cf{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;opacity:.55}
+.cf-icon{font-size:22px;margin-bottom:10px}
+.cf-title{font-size:14px;font-weight:500;margin-bottom:4px}
+.cf-sub{font-size:12px;color:var(--muted2);line-height:1.5}
+
+/* PROFILE */
+.profile-hero{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:28px;display:flex;align-items:center;gap:24px;margin-bottom:20px}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;color:var(--cream);flex-shrink:0;border:3px solid rgba(235,94,40,.35)}
+.profile-name{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:800;line-height:1;margin-bottom:4px}
+.profile-since{font-size:13px;color:var(--muted2);margin-bottom:10px}
+.belt-badge-hero{display:inline-flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 12px}
+.belt-visual{width:36px;height:11px;background:#e8e0d0;border-radius:3px;border:1px solid #bfb8a8;position:relative}
+.belt-visual::after{content:'';position:absolute;right:0;top:0;width:10px;height:100%;background:var(--bg);border-radius:0 3px 3px 0}
+.belt-text{font-size:13px;font-weight:500}
+.profile-data-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:24px}
+.pd-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:18px;text-align:center}
+.pd-label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:8px}
+.pd-value{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700}
+.pd-unit{font-size:14px;color:var(--muted2)}
+.profile-table{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.profile-row{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.profile-row:last-child{border-bottom:none}
+.pr-label{font-size:13px;color:var(--muted2)}
+.pr-right{display:flex;align-items:center;gap:14px}
+.pr-value{font-size:13px;font-weight:500}
+.pr-edit{font-size:12px;color:var(--orange);cursor:pointer}
+.pr-green{color:var(--green)}
+
+/* DETAIL PANEL */
+.detail-panel{width:310px;flex-shrink:0;background:var(--bg2);border-left:1px solid var(--border);height:100vh;overflow-y:auto;padding:24px 20px;display:none}
+.detail-panel.open{display:block;animation:fadeUp .18s ease both}
+.dp-close{width:30px;height:30px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted2);font-size:13px;margin-bottom:18px;border:none}
+.dp-close:hover{color:var(--cream)}
+.dp-belt-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.dp-name{font-family:'Barlow Condensed',sans-serif;font-size:32px;font-weight:800;line-height:1;margin-bottom:4px}
+.dp-type{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:14px}
+.dp-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.dp-seen-toggle{width:100%;padding:12px;border-radius:var(--r2);font-size:14px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;border:none}
+.dp-seen-toggle.unseen{background:var(--bg3);border:1.5px dashed var(--border3);color:var(--muted2)}
+.dp-seen-toggle.unseen:hover{border-color:var(--orange);color:var(--orange)}
+.dp-seen-toggle.seen-active{background:rgba(235,94,40,.12);border:1.5px solid var(--orange);color:var(--orange)}
+.dp-status-group{display:none;margin-bottom:18px}
+.dp-status-group.visible{display:block}
+.dp-status-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:8px}
+.dp-status-btns{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.dp-status-btn{padding:8px 10px;border-radius:var(--r2);font-size:12px;font-weight:500;border:1.5px solid var(--border2);cursor:pointer;color:var(--muted2);font-family:'DM Sans',sans-serif;transition:all .12s;background:none;text-align:left;display:flex;align-items:center;gap:6px}
+.dp-status-btn:hover{color:var(--cream);border-color:var(--border3)}
+.dp-status-btn.active-new{border-color:var(--muted2);color:var(--muted3);background:rgba(170,170,170,.06)}
+.dp-status-btn.active-practicing{border-color:var(--amber);color:var(--amber);background:rgba(232,168,56,.08)}
+.dp-status-btn.active-flowing{border-color:var(--green);color:var(--green);background:rgba(76,175,138,.08)}
+.dp-status-btn.active-auto{border-color:var(--orange);color:var(--orange);background:rgba(235,94,40,.08)}
+.dp-s-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dp-section{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:8px;margin-top:18px}
+.dp-desc-text{font-size:13px;color:var(--muted3);line-height:1.7}
+.dp-notes-field{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:12px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none;resize:none;line-height:1.6;min-height:80px}
+.dp-notes-field:focus{border-color:var(--orange)}
+.dp-chains{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+.dp-chain-tag{font-size:11px;padding:3px 9px;border-radius:99px;background:var(--bg3);border:1px solid var(--border2);color:var(--muted2);cursor:pointer;transition:color .12s}
+.dp-chain-tag:hover{color:var(--cream)}
+.dp-paths{display:flex;flex-direction:column;gap:8px}
+.dp-path{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r2);padding:10px 12px}
+.dp-path-label{font-size:11px;font-weight:600;color:var(--orange);margin-bottom:5px}
+.dp-path-seq{font-size:11px;color:var(--muted2);line-height:1.7}
+.dp-path-seq span{color:var(--cream);font-weight:500}
+.dp-sessions{display:flex;flex-direction:column}
+.dp-session-item{padding:7px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--muted2)}
+.dp-session-item:last-child{border-bottom:none}
+.dp-session-item span{color:var(--cream);font-weight:500}
+.dp-empty{font-size:12px;color:var(--muted2);font-style:italic}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;backdrop-filter:blur(6px);align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:28px 30px;width:480px;max-width:92vw;animation:fadeUp .2s ease both}
+.modal-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin-bottom:22px}
+.input-group{margin-bottom:16px}
+.input-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:6px;display:block}
+.input-field{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:11px 14px;font-size:14px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none}
+.input-field:focus{border-color:var(--orange)}
+.input-field option{background:var(--bg3)}
+.type-pills{display:flex;gap:8px;flex-wrap:wrap}
+.type-pill{padding:7px 14px;border-radius:99px;font-size:12px;font-weight:500;border:1px solid var(--border2);background:none;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s}
+.type-pill.sel{background:var(--orange);border-color:var(--orange);color:var(--cream)}
+.modal-actions{display:flex;gap:10px;margin-top:6px}
+.btn-primary{flex:1;padding:13px;background:var(--orange);border:none;border-radius:var(--r2);font-size:14px;font-weight:600;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer}
+.btn-primary:hover{opacity:.88}
+.btn-secondary{padding:13px 20px;background:none;border:1px solid var(--border2);border-radius:var(--r2);font-size:14px;color:var(--muted2);font-family:'DM Sans',sans-serif;cursor:pointer}
+.btn-danger{padding:13px 20px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:14px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer}
+
+/* MOBILE */
+@media(max-width:700px){
+  .sidebar,.detail-panel{display:none !important}
+  .main{padding-bottom:80px}
+  .view{padding:20px 18px 32px;max-width:100%}
+  .page-title{font-size:28px}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .stat-value{font-size:34px}
+  .two-col{grid-template-columns:1fr}
+  .tech-grid{grid-template-columns:1fr 1fr}
+  .coach-features{grid-template-columns:1fr}
+  .mobile-nav{display:flex !important}
+}
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(13,13,13,.94);backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;padding:0 8px}
+.mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 0 14px;cursor:pointer;color:var(--muted2)}
+.mobile-nav-item.active{color:var(--orange)}
+.mobile-nav-item svg{width:20px;height:20px;margin-bottom:3px}
+.mobile-nav-item span{font-size:10px;letter-spacing:.05em;font-weight:500}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<aside class="sidebar">
+  <div class="sidebar-logo">BJJ<span>.</span></div>
+  <nav class="sidebar-nav">
+    <div class="nav-item active" id="snav-progreso" onclick="switchView('progreso')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Progreso
+    </div>
+    <div class="nav-item" id="snav-tecnicas" onclick="switchView('tecnicas')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Técnicas
+    </div>
+    <div class="nav-item" id="snav-sesiones" onclick="switchView('sesiones')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Sesiones
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-item" id="snav-coach" onclick="switchView('coach')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Coach
+    </div>
+    <div class="nav-item" id="snav-perfil" onclick="switchView('perfil')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Perfil
+    </div>
+  </nav>
+  <div class="sidebar-user" onclick="switchView('perfil')">
+    <div class="avatar empty" id="sidebar-avatar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+    </div>
+    <div>
+      <div class="user-name" id="sidebar-name">Configurar perfil</div>
+      <div class="user-belt" id="sidebar-belt">Toca para empezar</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main" id="main-content">
+
+  <!-- PROGRESO -->
+  <div class="view active" id="view-progreso">
+    <div class="page-title" id="progreso-title">Progreso</div>
+    <div class="page-sub" id="progreso-sub">Tu camino en el BJJ</div>
+    <div id="onboarding-banner"></div>
+    <div id="progress-hero-wrap"></div>
+    <div class="stat-grid">
+      <div class="stat-card accent">
+        <div class="stat-label">Horas este mes</div>
+        <div class="stat-value orange" id="stat-hours">0</div>
+        <div class="stat-sub" id="stat-hours-sub">sin sesiones aún</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Sesiones totales</div>
+        <div class="stat-value" id="stat-sessions">0</div>
+        <div class="stat-sub" id="stat-sessions-sub">empieza a entrenar</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Técnicas vistas</div>
+        <div class="stat-value" id="stat-tecnicas">0</div>
+        <div class="stat-sub" id="stat-tecnicas-sub">de esenciales blanco</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Días activos</div>
+        <div class="stat-value" id="stat-streak">0</div>
+        <div class="stat-sub">este mes</div>
+      </div>
+    </div>
+    <div id="recent-sessions-wrap"></div>
+  </div>
+
+  <!-- TÉCNICAS -->
+  <div class="view" id="view-tecnicas">
+    <div class="page-title">Técnicas</div>
+    <div class="page-sub">Enciclopedia completa · Marca las que has visto en clase</div>
+    <div class="filter-row" id="tech-filters">
+      <button class="filter-pill active" data-filter="all">Todas</button>
+      <button class="filter-pill" data-filter="priority">⚡ Esenciales blanco</button>
+      <button class="filter-pill" data-filter="seen">Vistas en clase</button>
+      <button class="filter-pill" data-filter="unseen">Por descubrir</button>
+      <button class="filter-pill" data-filter="gi">Gi</button>
+      <button class="filter-pill" data-filter="nogi">NoGi</button>
+      <button class="filter-pill" data-filter="advanced">Nivel azul+</button>
+    </div>
+    <div class="status-legend">
+      <div class="sl-item"><div class="sl-dot" style="background:transparent;border:1.5px dashed var(--muted);width:9px;height:9px;border-radius:50%"></div>No vista</div>
+      <div class="sl-sep"></div>
+      <div class="sl-item"><div class="sl-dot" style="background:var(--muted2)"></div>Vista · nueva</div>
+      <div class="sl-item"><div class="sl-dot" style="background:var(--amber)"></div>Practicando</div>
+      <div class="sl-item"><div class="sl-dot" style="background:var(--green)"></div>Fluyendo</div>
+      <div class="sl-item"><div class="sl-dot" style="background:var(--orange)"></div>Automática</div>
+      <div class="sl-sep"></div>
+      <div class="sl-item" style="font-size:11px;color:var(--muted2)">Toca el ○ para marcar como vista</div>
+    </div>
+    <div id="enc-container"></div>
+  </div>
+
+  <!-- SESIONES -->
+  <div class="view" id="view-sesiones">
+    <div class="page-title">Sesiones</div>
+    <div class="page-sub" id="sesiones-sub">Tu historial de entrenos</div>
+    <button class="add-btn" onclick="openModal('add-session')">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Nueva sesión
+    </button>
+    <div id="sessions-list"></div>
+  </div>
+
+  <!-- COACH -->
+  <div class="view" id="view-coach">
+    <div class="page-title">Coach</div>
+    <div class="page-sub">Tu asistente personal de BJJ — próximamente vía Telegram</div>
+    <div class="coach-page-hero">
+      <div class="coach-page-ava">🥋</div>
+      <div>
+        <div class="coach-page-name">Tu coach IA</div>
+        <div class="coach-page-sub">Analiza tu progreso y te da consejos basados en tus sesiones y técnicas</div>
+        <div class="coming-badge"><div class="coming-dot"></div>En desarrollo · Fase 2</div>
+      </div>
+    </div>
+    <div class="coach-features">
+      <div class="cf"><div class="cf-icon">💬</div><div class="cf-title">Bot de Telegram</div><div class="cf-sub">Registra sesiones en lenguaje natural desde el vestuario.</div></div>
+      <div class="cf"><div class="cf-icon">🔗</div><div class="cf-title">Análisis de cadenas</div><div class="cf-sub">Detecta qué técnicas abren nuevas cadenas que aún no explotas.</div></div>
+      <div class="cf"><div class="cf-icon">🎯</div><div class="cf-title">Tips personalizados</div><div class="cf-sub">Si llevas tiempo sin trabajar una posición, el coach te lo recuerda.</div></div>
+      <div class="cf"><div class="cf-icon">📊</div><div class="cf-title">Resumen semanal</div><div class="cf-sub">Cada domingo: horas, técnicas y recomendaciones.</div></div>
+    </div>
+  </div>
+
+  <!-- PERFIL -->
+  <div class="view" id="view-perfil">
+    <div class="page-title">Perfil</div>
+    <div class="page-sub">Tu información y configuración</div>
+    <div id="profile-content"></div>
+  </div>
+
+</main>
+
+<aside class="detail-panel" id="detail-panel">
+  <button class="dp-close" onclick="closeDetail()">✕</button>
+  <div id="detail-content"></div>
+</aside>
+</div>
+
+<nav class="mobile-nav">
+  <div class="mobile-nav-item active" id="mnav-progreso" onclick="switchView('progreso')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Progreso</span></div>
+  <div class="mobile-nav-item" id="mnav-tecnicas" onclick="switchView('tecnicas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Técnicas</span></div>
+  <div class="mobile-nav-item" id="mnav-sesiones" onclick="switchView('sesiones')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Sesiones</span></div>
+  <div class="mobile-nav-item" id="mnav-coach" onclick="switchView('coach')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Coach</span></div>
+  <div class="mobile-nav-item" id="mnav-perfil" onclick="switchView('perfil')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Perfil</span></div>
+</nav>
+
+<!-- MODAL: NUEVA SESIÓN -->
+<div class="modal-overlay" id="modal-add-session" onclick="closeModal('add-session')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Nueva sesión</div>
+    <div class="input-group"><label class="input-label">Fecha</label><input class="input-field" type="date" id="session-date"></div>
+    <div class="input-group"><label class="input-label">Tipo</label><div class="type-pills"><button class="type-pill sel" onclick="selType(this)">Gi</button><button class="type-pill" onclick="selType(this)">NoGi</button><button class="type-pill" onclick="selType(this)">Open mat</button><button class="type-pill" onclick="selType(this)">Gym</button><button class="type-pill" onclick="selType(this)">Competición</button></div></div>
+    <div class="input-group"><label class="input-label">Duración (minutos)</label><input class="input-field" type="number" id="session-duration" placeholder="90" inputmode="numeric" min="1"></div>
+    <div class="input-group"><label class="input-label">Notas</label><textarea class="input-field" id="session-notes" rows="3" placeholder="Qué trabajaste, qué salió bien, qué mejorar..."></textarea></div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('add-session')">Cancelar</button><button class="btn-primary" onclick="saveSession()">Guardar sesión</button></div>
+  </div>
+</div>
+
+<!-- MODAL: PERFIL -->
+<div class="modal-overlay" id="modal-edit-profile" onclick="closeModal('edit-profile')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">Tu perfil</div>
+    <div class="input-group"><label class="input-label">Nombre</label><input class="input-field" type="text" id="profile-name" placeholder="Tu nombre"></div>
+    <div class="input-group"><label class="input-label">Academia</label><input class="input-field" type="text" id="profile-gym" placeholder="Nombre de tu academia"></div>
+    <div class="input-group"><label class="input-label">Cinturón actual</label>
+      <select class="input-field" id="profile-belt">
+        <option value="white">Blanco</option>
+        <option value="blue">Azul</option>
+        <option value="purple">Morado</option>
+        <option value="brown">Marrón</option>
+      </select>
+    </div>
+    <div class="input-group"><label class="input-label">Fecha de inicio</label><input class="input-field" type="date" id="profile-start"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+      <div class="input-group"><label class="input-label">Peso (kg)</label><input class="input-field" type="number" id="profile-weight" placeholder="78"></div>
+      <div class="input-group"><label class="input-label">Altura (cm)</label><input class="input-field" type="number" id="profile-height" placeholder="179"></div>
+      <div class="input-group"><label class="input-label">Sexo</label>
+        <select class="input-field" id="profile-sex">
+          <option value="">—</option>
+          <option value="M">Masculino</option>
+          <option value="F">Femenino</option>
+          <option value="O">Otro</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('edit-profile')">Cancelar</button><button class="btn-primary" onclick="saveProfile()">Guardar</button></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// GRAPH DATA (John's JSON)
+// ═══════════════════════════════════════════════════════
+const GRAPH = {
+  nodes: [
+    {id:'tech_bridge',name:'Bridge',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Hip extension used to create force and height. Foundation for all reversals and escapes.'},
+    {id:'tech_shrimp',name:'Shrimp',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Hip escape used to recover space and rebuild frames when pinned.'},
+    {id:'tech_technical_stand_up',name:'Technical Stand-Up',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Safe method of returning to standing while protecting against re-engagement.'},
+    {id:'tech_back_heist',name:'Back Heist',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Hip-heisting movement used to rotate underneath and recover angle or base.'},
+    {id:'tech_sit_out',name:'Sit-Out',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Turn-out movement used from turtle and scrambles to face the opponent.'},
+    {id:'tech_shoulder_roll',name:'Shoulder Roll',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Rolling movement used in guard retention, turtle work, and scramble recovery.'},
+    {id:'tech_granby_roll',name:'Granby Roll',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Inversion-based roll used to escape, reguard, or scramble.'},
+    {id:'tech_inversion',name:'Inversion',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Shoulder-supported inversion used to create angle, retain guard, or attack.'},
+    {id:'tech_guard_pull',name:'Guard Pull',family:'standing',subtype:'transition',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Deliberate transition from standing directly into a preferred guard position.'},
+    {id:'tech_collar_drag',name:'Collar Drag',family:'standing',subtype:'takedown',formats:['gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Forward-dragging takedown entry built around the collar grip. Sets up the back.'},
+    {id:'tech_arm_drag',name:'Arm Drag',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Off-balancing drag that exposes the side or back. Works from standing and butterfly.'},
+    {id:'tech_single_leg_takedown',name:'Single Leg Takedown',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'High-percentage leg attack focused on isolating and finishing one leg.'},
+    {id:'tech_double_leg_takedown',name:'Double Leg Takedown',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Penetration-based takedown attacking both legs simultaneously.'},
+    {id:'tech_ankle_pick',name:'Ankle Pick',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Low-risk takedown combining upper-body pull with a quick ankle capture.'},
+    {id:'tech_snap_down',name:'Snap Down',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Head-and-arm snap used to break posture and enter front headlock or turtle.'},
+    {id:'tech_osoto_gari',name:'Osoto Gari',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Major outer reap from judo used as a direct takedown or finishing reap.'},
+    {id:'tech_scissor_sweep',name:'Scissor Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Classic closed-guard sweep using opposing leg pressure to tip the opponent sideways.'},
+    {id:'tech_hip_bump_sweep',name:'Hip Bump Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Closed-guard sweep built on a sit-up angle and explosive hip drive. Chains naturally with Kimura.'},
+    {id:'tech_pendulum_sweep',name:'Pendulum Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Closed-guard sweep using a swinging leg to tip the opponent over the trapped arm.'},
+    {id:'tech_flower_sweep',name:'Flower Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Closed-guard sweep using a leg pendulum and upper-body pull to tip the opponent sideways.'},
+    {id:'tech_double_ankle_sweep',name:'Double Ankle Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Sweep against a standing opponent by simultaneously knocking out both base points.'},
+    {id:'tech_butterfly_sweep',name:'Butterfly Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Elevating sweep using inside butterfly hooks and an upper-body pull to reverse.'},
+    {id:'tech_tripod_sweep',name:'Tripod Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Open-guard sweep pushing one hip/leg while reaping or pulling the post leg.'},
+    {id:'tech_de_la_riva_sweep',name:'De La Riva Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Primary sweeping family from De La Riva guard using the outside hook.'},
+    {id:'tech_knee_lever_sweep',name:'Knee Lever Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Half-guard sweep that uses knee-line lifting or levering to reverse the top player.'},
+    {id:'tech_single_leg_x_sweep',name:'Single Leg X Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Off-balancing sweep that lifts and turns the isolated leg from Single Leg X position.'},
+    {id:'tech_standing_guard_break',name:'Standing Guard Break',family:'guard_pass',subtype:'guard break',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Opening the closed guard from a standing posture. Essential to pass closed guard.'},
+    {id:'tech_kneeling_guard_break',name:'Kneeling Guard Break',family:'guard_pass',subtype:'guard break',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Opening the closed guard from a kneeling position using posture and wedge pressure.'},
+    {id:'tech_toreando_pass',name:'Toreando Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Lateral guard pass that redirects both legs to the side while the passer moves around.'},
+    {id:'tech_knee_cut_pass',name:'Knee Cut Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Diagonal pass that cuts the knee through the guard to establish side control.'},
+    {id:'tech_stack_pass',name:'Stack Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Folding pressure pass used to collapse the guard and drive through.'},
+    {id:'tech_over_under_pass',name:'Over-Under Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'core',belt_level:'blue',white_belt_priority:false,desc:'Tight pressure pass using chest-to-chest control.'},
+    {id:'tech_leg_drag_pass',name:'Leg Drag Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Pass that pins a leg across the body to create side control.'},
+    {id:'tech_bridge_and_roll_escape',name:'Bridge and Roll Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Mount escape using a hip bridge and rotation to roll the opponent to the side.'},
+    {id:'tech_elbow_knee_escape',name:'Elbow-Knee Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Mount escape using an elbow frame and knee insertion to recover half guard.'},
+    {id:'tech_side_control_hip_escape',name:'Side Control Hip Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Shrimping escape from side control to recover closed or open guard.'},
+    {id:'tech_side_control_underhook_escape',name:'Side Control Underhook Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Underhook-based escape from side control leading to a standup or dog fight.'},
+    {id:'tech_back_escape',name:'Back Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Escape from back control by sliding the hip to remove hooks and recover guard.'},
+    {id:'tech_turtle_recovery',name:'Turtle Recovery',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Return from turtle position to guard or standing while preventing back takes.'},
+    {id:'tech_rear_naked_choke',name:'Rear Naked Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Primary back-control submission using forearm pressure against the carotid arteries.'},
+    {id:'tech_guillotine_choke',name:'Guillotine Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Front headlock choke applied from guard or in the clinch. Many finishing variations.'},
+    {id:'tech_triangle_choke',name:'Triangle Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Leg choke isolating the neck and one arm inside a triangular leg lock.'},
+    {id:'tech_arm_triangle_choke',name:'Arm Triangle Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Head-and-arm choke applied from mount, side control, or while passing.'},
+    {id:'tech_cross_collar_choke',name:'Cross Collar Choke',family:'submission',subtype:'choke',formats:['gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Gi choke using crossed deep lapel grips, applied inside closed guard or from mount.'},
+    {id:'tech_bow_and_arrow_choke',name:'Bow and Arrow Choke',family:'submission',subtype:'choke',formats:['gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'High-percentage collar choke from the back using a leg as a lever for extra torque.'},
+    {id:'tech_north_south_choke',name:'North-South Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Chest-pressure choke applied from the north-south position.'},
+    {id:'tech_anaconda_choke',name:'Anaconda Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Front headlock arm-in choke finished by threading the arm and rolling or squeezing.'},
+    {id:'tech_darce_choke',name:"D'Arce Choke",family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Front headlock arm-in choke where the choking arm threads across the neck.'},
+    {id:'tech_straight_armbar',name:'Straight Armbar',family:'submission',subtype:'joint lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Straight-arm elbow lock using hip extension and elbow control. Applied from guard, mount, and back.'},
+    {id:'tech_kimura',name:'Kimura',family:'submission',subtype:'joint lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Bent-arm shoulder lock with a figure-four grip. Chains with Hip Bump and back takes.'},
+    {id:'tech_americana',name:'Americana',family:'submission',subtype:'joint lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Bent-arm shoulder lock finished with an outside rotational figure-four. Common from side control and mount.'},
+    {id:'tech_omoplata',name:'Omoplata',family:'submission',subtype:'joint lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Shoulder lock using the legs to isolate and rotate the trapped arm. Chains with triangle.'},
+    {id:'tech_straight_ankle_lock',name:'Straight Ankle Lock',family:'submission',subtype:'leg lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Primary straight foot and ankle lock. Entry point for the leg lock system.'},
+    {id:'tech_heel_hook',name:'Heel Hook',family:'submission',subtype:'leg lock',formats:['no-gi'],tier:'advanced_core',belt_level:'purple',white_belt_priority:false,desc:'Rotational leg lock attacking the heel and knee line. High-risk, high-percentage at advanced levels.'},
+    {id:'tech_toe_hold',name:'Toe Hold',family:'submission',subtype:'leg lock',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Figure-four foot lock that rotates the ankle and applies knee torsion simultaneously.'},
+    {id:'tech_kneebar',name:'Kneebar',family:'submission',subtype:'leg lock',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Straight leg lock attacking hyperextension of the knee.'},
+  ],
+  chains:{
+    'tech_straight_armbar':['tech_triangle_choke','tech_omoplata','tech_kimura'],
+    'tech_kimura':['tech_straight_armbar','tech_hip_bump_sweep'],
+    'tech_triangle_choke':['tech_straight_armbar','tech_omoplata'],
+    'tech_hip_bump_sweep':['tech_kimura','tech_guillotine_choke'],
+    'tech_scissor_sweep':['tech_hip_bump_sweep','tech_pendulum_sweep'],
+    'tech_butterfly_sweep':['tech_arm_drag'],
+    'tech_arm_drag':['tech_single_leg_takedown'],
+    'tech_toreando_pass':['tech_knee_cut_pass'],
+    'tech_knee_cut_pass':['tech_toreando_pass'],
+    'tech_guillotine_choke':['tech_anaconda_choke','tech_darce_choke'],
+    'tech_elbow_knee_escape':['tech_bridge_and_roll_escape'],
+    'tech_bridge_and_roll_escape':['tech_elbow_knee_escape'],
+  },
+  paths:[
+    {id:'p1',label:'Closed Guard Submission Cycle',sequence:['tech_triangle_choke','tech_straight_armbar','tech_omoplata'],notes:'Classic closed-guard dilemma chain.'},
+    {id:'p2',label:'Closed Guard Sweep Cycle',sequence:['tech_scissor_sweep','tech_hip_bump_sweep','tech_flower_sweep','tech_pendulum_sweep'],notes:'Core closed-guard sweeping options.'},
+    {id:'p3',label:'Butterfly to Back',sequence:['tech_arm_drag','tech_rear_naked_choke'],notes:'Common butterfly progression to dominant finish.'},
+    {id:'p4',label:'Mount Finishing System',sequence:['tech_arm_triangle_choke','tech_straight_armbar','tech_triangle_choke'],notes:'Core mount submission trio.'},
+    {id:'p5',label:'Front Headlock System',sequence:['tech_guillotine_choke','tech_anaconda_choke','tech_darce_choke'],notes:'Main front-headlock attack family.'},
+    {id:'p6',label:'Escape to Reguard',sequence:['tech_elbow_knee_escape','tech_bridge_and_roll_escape'],notes:'Typical defensive progression from mount back to guard.'},
+  ]
+};
+
+const POSITION_MAP = [
+  {id:'foundational',name:'Foundational Movements',color:'#666',desc:'Movimientos base usados en todo el BJJ',families:['foundational']},
+  {id:'standing',name:'Standing & Takedowns',color:'#E8A838',desc:'Fase de pie, clinch y derribos',families:['standing']},
+  {id:'sweep',name:'Sweeps',color:'#7B74E0',desc:'Reversals desde guardia bottom',families:['sweep']},
+  {id:'guard_pass',name:'Guard Passing',color:'#4CAF8A',desc:'Abrir y pasar la guardia',families:['guard_pass']},
+  {id:'escape',name:'Escapes & Recoveries',color:'#EB5E28',desc:'Escapar de posiciones dominantes',families:['escape']},
+  {id:'submission',name:'Submissions',color:'#E05050',desc:'Finalizaciones por sumisión',families:['submission']},
+];
+
+// ═══════════════════════════════════════════════════════
+// LOCALSTORAGE — persistent state
+// ═══════════════════════════════════════════════════════
+function loadState() {
+  try {
+    const raw = localStorage.getItem('bjj_journey_v1');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return {
+    profile: { name:'', gym:'', belt:'white', start:'', weight:'', height:'', sex:'' },
+    sessions: [],
+    techniques: {},
+    onboarding_dismissed: false
+  };
+}
+
+function saveState() {
+  try { localStorage.setItem('bjj_journey_v1', JSON.stringify(STATE)); } catch(e) {}
+}
+
+let STATE = loadState();
+
+// Init technique state for any missing nodes
+GRAPH.nodes.forEach(n => {
+  if (!STATE.techniques[n.id]) {
+    STATE.techniques[n.id] = { seen: false, status: 'new', notes: '', sessions: [] };
+  }
+});
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function getNode(id) { return GRAPH.nodes.find(n => n.id === id); }
+function seenClass(id) {
+  const st = STATE.techniques[id];
+  if (!st?.seen) return '';
+  const s = st.status;
+  if (s === 'auto') return 'seen-auto';
+  if (s === 'flowing') return 'seen-flowing';
+  if (s === 'practicing') return 'seen-practicing';
+  return 'seen';
+}
+function modeBadge(formats) {
+  const gi = formats.includes('gi'), nogi = formats.includes('no-gi');
+  if (gi && nogi) return '<span class="badge b-both">Gi / NoGi</span>';
+  if (gi) return '<span class="badge b-gi">Gi</span>';
+  return '<span class="badge b-nogi">NoGi</span>';
+}
+function beltPill(bl) {
+  const cls = bl==='white'?'belt-white':bl==='blue'?'belt-blue':'belt-purple';
+  const lbl = bl==='white'?'blanco':bl==='blue'?'azul':'morado';
+  return `<span class="belt-pill ${cls}">${lbl}</span>`;
+}
+function checkSvg() {
+  return `<svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,6 5,9 10,3"/></svg>`;
+}
+function fmtDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' });
+}
+function todayStr() {
+  return new Date().toISOString().slice(0,10);
+}
+function thisMonthSessions() {
+  const now = new Date();
+  return STATE.sessions.filter(s => {
+    const d = new Date(s.date + 'T00:00:00');
+    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// ONBOARDING
+// ═══════════════════════════════════════════════════════
+function renderOnboarding() {
+  const el = document.getElementById('onboarding-banner');
+  if (!el) return;
+  if (STATE.onboarding_dismissed) { el.innerHTML = ''; return; }
+
+  const hasProfile = STATE.profile.name.trim() !== '';
+  const hasSessions = STATE.sessions.length > 0;
+  const hasTecnicas = Object.values(STATE.techniques).some(t => t.seen);
+
+  const steps = [
+    {
+      title: 'Configura tu perfil',
+      desc: 'Añade tu nombre, academia, cinturón y fecha de inicio.',
+      done: hasProfile,
+      action: "openModal('edit-profile')",
+      actionLabel: 'Ir al perfil →'
+    },
+    {
+      title: 'Registra tu primera sesión',
+      desc: 'Anota el entreno de hoy — tipo, duración y notas rápidas.',
+      done: hasSessions,
+      action: "openModal('add-session')",
+      actionLabel: 'Añadir sesión →'
+    },
+    {
+      title: 'Marca tus primeras técnicas',
+      desc: 'Ve a Técnicas y marca con ○ las que ya has visto en clase.',
+      done: hasTecnicas,
+      action: "switchView('tecnicas')",
+      actionLabel: 'Ver técnicas →'
+    },
+  ];
+
+  const allDone = steps.every(s => s.done);
+  if (allDone) {
+    STATE.onboarding_dismissed = true;
+    saveState();
+    el.innerHTML = '';
+    return;
+  }
+
+  el.innerHTML = `<div class="onboarding-banner">
+    <div class="ob-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      Primeros pasos
+    </div>
+    <div class="ob-steps">
+      ${steps.map((s, i) => `
+        <div class="ob-step${s.done ? ' done' : ''}">
+          <div class="ob-num">${s.done ? '✓' : i+1}</div>
+          <div class="ob-step-body">
+            <div class="ob-step-title">${s.title}</div>
+            <div class="ob-step-desc">${s.desc}</div>
+            ${!s.done ? `<span class="ob-step-action" onclick="${s.action}">${s.actionLabel}</span>` : ''}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <span class="ob-dismiss" onclick="dismissOnboarding()">Cerrar guía</span>
+  </div>`;
+}
+
+function dismissOnboarding() {
+  STATE.onboarding_dismissed = true;
+  saveState();
+  renderOnboarding();
+}
+
+// ═══════════════════════════════════════════════════════
+// PROGRESO VIEW
+// ═══════════════════════════════════════════════════════
+function renderProgreso() {
+  const p = STATE.profile;
+  const name = p.name || 'tu BJJ journey';
+
+  // Title
+  document.getElementById('progreso-title').textContent = p.name ? `Hola, ${p.name.split(' ')[0]}` : 'Progreso';
+  document.getElementById('progreso-sub').textContent = p.gym ? `${p.gym} · ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}` : 'Tu camino en el BJJ';
+
+  // Stats
+  const monthSessions = thisMonthSessions();
+  const totalMinutes = monthSessions.reduce((sum, s) => sum + (parseInt(s.duration) || 0), 0);
+  const totalHours = Math.round(totalMinutes / 60 * 10) / 10;
+  const wbNodes = GRAPH.nodes.filter(n => n.white_belt_priority);
+  const seenWB = wbNodes.filter(n => STATE.techniques[n.id]?.seen).length;
+
+  document.getElementById('stat-hours').textContent = totalHours || '0';
+  document.getElementById('stat-hours-sub').textContent = monthSessions.length > 0 ? `${monthSessions.length} sesiones este mes` : 'sin sesiones aún';
+  document.getElementById('stat-sessions').textContent = STATE.sessions.length;
+  document.getElementById('stat-sessions-sub').textContent = STATE.sessions.length > 0 ? `desde el inicio` : 'empieza a entrenar';
+  document.getElementById('stat-tecnicas').textContent = seenWB;
+  document.getElementById('stat-tecnicas-sub').textContent = `de ${wbNodes.length} esenciales blanco`;
+
+  // Streak (unique days this month)
+  const uniqueDays = new Set(monthSessions.map(s => s.date)).size;
+  document.getElementById('stat-streak').textContent = uniqueDays;
+
+  // Progress hero
+  const heroWrap = document.getElementById('progress-hero-wrap');
+  if (p.start) {
+    const allSessions = STATE.sessions;
+    const totalAllMinutes = allSessions.reduce((sum, s) => sum + (parseInt(s.duration) || 0), 0);
+    const totalAllHours = Math.round(totalAllMinutes / 60 * 10) / 10;
+    const target = 250;
+    const pct = Math.min(Math.round(totalAllHours / target * 100), 100);
+    const beltLabels = { white:'blanco', blue:'azul', purple:'morado', brown:'marrón' };
+    const beltName = beltLabels[p.belt] || p.belt;
+
+    const milestonePct = [0, 18, 36, 56, 80, 100];
+    const milestoneLabels = ['Inicio', '1ª raya', '2ª raya', '3ª raya', '4ª raya', 'Azul'];
+    const milestoneH = ['0h', '~45h', '~90h', '~140h', '~200h', '~250h'];
+
+    heroWrap.innerHTML = `<div class="progress-hero" style="--prog:${pct}%">
+      <div class="ph-row">
+        <div>
+          <div class="ph-label">Camino al cinturón ${beltName === 'blanco' ? 'azul' : 'siguiente'}</div>
+          <div class="ph-title"><span>${totalAllHours}h</span> de ${target}h estimadas</div>
+          <div class="ph-sub">${pct < 100 ? `Sigue así — llevas el ${pct}% del camino` : '¡Objetivo alcanzado! Habla con tu profe'}</div>
+        </div>
+        <div class="ph-pct">${pct}%</div>
+      </div>
+      <div class="ph-bar-wrap"><div class="ph-bar-fill" style="width:${pct}%"></div></div>
+      <div class="ph-milestones">
+        ${milestoneLabels.map((l, i) => `
+          <div class="ph-mile${milestonePct[i] <= pct ? ' done' : i > 0 && milestonePct[i-1] <= pct ? ' next' : ''}">
+            <div class="ph-mile-dot"></div>
+            <div class="ph-mile-label">${l}<br><span class="ph-mile-h">${milestoneH[i]}</span></div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+  } else {
+    heroWrap.innerHTML = `<div style="background:var(--bg2);border:1px dashed var(--border3);border-radius:var(--r);padding:24px 28px;margin-bottom:20px;text-align:center">
+      <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">Configura tu perfil para ver tu barra de progreso</div>
+      <button class="empty-cta" onclick="openModal('edit-profile')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Configurar perfil
+      </button>
+    </div>`;
+  }
+
+  // Recent sessions
+  const recentWrap = document.getElementById('recent-sessions-wrap');
+  if (STATE.sessions.length === 0) {
+    recentWrap.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+      <div class="empty-title">Sin sesiones todavía</div>
+      <div class="empty-desc">Registra tu primer entreno para empezar a ver tu progreso.</div>
+      <button class="empty-cta" onclick="openModal('add-session')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        Añadir primera sesión
+      </button>
+    </div>`;
+  } else {
+    const recent = [...STATE.sessions].sort((a,b) => b.date.localeCompare(a.date)).slice(0,3);
+    const typeColors = { Gi:'var(--purple)', NoGi:'var(--green)', 'Open mat':'var(--orange)', Gym:'var(--amber)', 'Competición':'#E05050' };
+    recentWrap.innerHTML = `
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:12px;font-weight:500">Últimas sesiones</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${recent.map(s => `
+          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:flex-start;gap:12px">
+            <div style="width:8px;height:8px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'};margin-top:5px;flex-shrink:0"></div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:14px;font-weight:500">${s.type}</div>
+              <div style="font-size:11px;color:var(--muted2);margin-top:2px">${fmtDate(s.date)}</div>
+              ${s.notes ? `<div style="font-size:12px;color:var(--muted2);margin-top:4px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.notes}</div>` : ''}
+            </div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;flex-shrink:0">${Math.round((parseInt(s.duration)||0)/60*10)/10}h</div>
+          </div>
+        `).join('')}
+        ${STATE.sessions.length > 3 ? `<div style="text-align:center;padding:8px 0"><span style="font-size:12px;color:var(--orange);cursor:pointer" onclick="switchView('sesiones')">Ver todas las sesiones →</span></div>` : ''}
+      </div>`;
+  }
+
+  renderOnboarding();
+}
+
+// ═══════════════════════════════════════════════════════
+// SESSIONS VIEW
+// ═══════════════════════════════════════════════════════
+function renderSessions() {
+  const el = document.getElementById('sessions-list');
+  const sub = document.getElementById('sesiones-sub');
+  const totalMinutes = STATE.sessions.reduce((sum,s) => sum + (parseInt(s.duration)||0), 0);
+  const totalHours = Math.round(totalMinutes/60*10)/10;
+  sub.textContent = `${STATE.sessions.length} sesiones · ${totalHours}h en total`;
+
+  if (STATE.sessions.length === 0) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+      <div class="empty-title">Sin sesiones todavía</div>
+      <div class="empty-desc">Cada entreno que registres quedará aquí. Pulsa el botón naranja para añadir el primero.</div>
+    </div>`;
+    return;
+  }
+
+  const sorted = [...STATE.sessions].sort((a,b) => b.date.localeCompare(a.date));
+  const typeColors = { Gi:'var(--purple)', NoGi:'var(--green)', 'Open mat':'var(--orange)', Gym:'var(--amber)', 'Competición':'#E05050' };
+
+  el.innerHTML = `<div class="sessions-grid">
+    ${sorted.map((s, i) => `
+      <div class="session-full">
+        <div class="sf-header">
+          <div class="sf-left">
+            <div class="type-dot" style="background:${typeColors[s.type]||'var(--muted2)'}"></div>
+            <div class="sf-title">${s.type}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="sf-dur">${Math.round((parseInt(s.duration)||0)/60*10)/10}h</div>
+            <span style="font-size:11px;color:var(--muted2);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r2)" onclick="deleteSession(${i})">✕</span>
+          </div>
+        </div>
+        <div class="sf-date">${fmtDate(s.date)}</div>
+        ${s.notes ? `<div class="sf-note">${s.notes}</div>` : ''}
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+function saveSession() {
+  const date = document.getElementById('session-date').value || todayStr();
+  const type = document.querySelector('.type-pill.sel')?.textContent || 'Gi';
+  const duration = document.getElementById('session-duration').value;
+  const notes = document.getElementById('session-notes').value.trim();
+
+  if (!duration || parseInt(duration) < 1) {
+    document.getElementById('session-duration').focus();
+    return;
+  }
+
+  STATE.sessions.push({ date, type, duration: parseInt(duration), notes });
+  saveState();
+  closeModal('add-session');
+  renderSessions();
+  renderProgreso();
+
+  // Reset form
+  document.getElementById('session-duration').value = '';
+  document.getElementById('session-notes').value = '';
+}
+
+function deleteSession(idx) {
+  const sorted = [...STATE.sessions].sort((a,b) => b.date.localeCompare(a.date));
+  const session = sorted[idx];
+  STATE.sessions = STATE.sessions.filter(s => s !== session);
+  saveState();
+  renderSessions();
+  renderProgreso();
+}
+
+// ═══════════════════════════════════════════════════════
+// ENCYCLOPEDIA
+// ═══════════════════════════════════════════════════════
+let currentFilter = 'all';
+let activeDetailId = null;
+
+function renderEnc(filter) {
+  currentFilter = filter;
+  const container = document.getElementById('enc-container');
+  const total = GRAPH.nodes.length;
+  const totalSeen = GRAPH.nodes.filter(n => STATE.techniques[n.id]?.seen).length;
+  const wb = GRAPH.nodes.filter(n => n.white_belt_priority);
+  const wbSeen = wb.filter(n => STATE.techniques[n.id]?.seen).length;
+
+  let html = `<div class="enc-topbar">
+    <div class="enc-stats">
+      <span class="enc-stat">Total: <strong>${totalSeen}/${total} vistas</strong></span>
+      <span class="enc-stat hi">Esenciales blanco: <strong>${wbSeen}/${wb.length}</strong></span>
+    </div>
+  </div>`;
+
+  POSITION_MAP.forEach(pos => {
+    let nodes = GRAPH.nodes.filter(n => pos.families.includes(n.family));
+    if (filter === 'priority') nodes = nodes.filter(n => n.white_belt_priority);
+    else if (filter === 'seen') nodes = nodes.filter(n => STATE.techniques[n.id]?.seen);
+    else if (filter === 'unseen') nodes = nodes.filter(n => !STATE.techniques[n.id]?.seen);
+    else if (filter === 'gi') nodes = nodes.filter(n => n.formats.includes('gi'));
+    else if (filter === 'nogi') nodes = nodes.filter(n => n.formats.includes('no-gi'));
+    else if (filter === 'advanced') nodes = nodes.filter(n => n.belt_level !== 'white' || !n.white_belt_priority);
+    if (!nodes.length) return;
+
+    const seenInPos = nodes.filter(n => STATE.techniques[n.id]?.seen).length;
+    const pct = nodes.length ? Math.round(seenInPos / nodes.length * 100) : 0;
+
+    html += `<div class="position-block">
+      <div class="pos-header">
+        <div class="pos-accent" style="background:${pos.color}"></div>
+        <div class="pos-info">
+          <div class="pos-name">${pos.name}</div>
+          <div class="pos-desc">${pos.desc}</div>
+        </div>
+        <div class="pos-progress">
+          <div class="pos-prog-bar"><div class="pos-prog-fill" style="width:${pct}%"></div></div>
+          <div class="pos-count">${seenInPos}/${nodes.length} vistas</div>
+        </div>
+      </div>
+      <div class="tech-grid">`;
+
+    nodes.forEach(n => {
+      const sc = seenClass(n.id);
+      const seen = STATE.techniques[n.id]?.seen;
+      html += `<div class="enc-card${sc ? ' ' + sc : ''}" id="card-${n.id}" onclick="openDetail('${n.id}')">
+        <div class="enc-card-top">
+          ${beltPill(n.belt_level)}
+          <div class="status-ring" onclick="event.stopPropagation();toggleSeen('${n.id}')" title="${seen ? 'Marcar como no vista' : 'Marcar como vista en clase'}">
+            ${seen ? checkSvg() : ''}
+          </div>
+        </div>
+        <div class="enc-card-type">${n.subtype}</div>
+        <div class="enc-card-name">${n.name}</div>
+        <div class="enc-card-desc">${n.desc.slice(0,90)}${n.desc.length > 90 ? '…' : ''}</div>
+        <div class="enc-card-footer">
+          ${modeBadge(n.formats)}
+          ${n.white_belt_priority ? '<span class="badge b-priority">esencial</span>' : ''}
+          ${n.tier === 'advanced_core' ? '<span class="badge b-adv">avanzado</span>' : ''}
+        </div>
+      </div>`;
+    });
+
+    html += `</div></div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function toggleSeen(id) {
+  const st = STATE.techniques[id];
+  st.seen = !st.seen;
+  if (!st.seen) st.status = 'new';
+  saveState();
+
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    const sc = seenClass(id);
+    card.className = 'enc-card' + (sc ? ' ' + sc : '');
+    const ring = card.querySelector('.status-ring');
+    if (ring) ring.innerHTML = st.seen ? checkSvg() : '';
+  }
+
+  // Update topbar stats
+  const total = GRAPH.nodes.length;
+  const totalSeen = GRAPH.nodes.filter(n => STATE.techniques[n.id]?.seen).length;
+  const wb = GRAPH.nodes.filter(n => n.white_belt_priority);
+  const wbSeen = wb.filter(n => STATE.techniques[n.id]?.seen).length;
+  const tb = document.querySelector('.enc-topbar');
+  if (tb) tb.innerHTML = `<div class="enc-stats">
+    <span class="enc-stat">Total: <strong>${totalSeen}/${total} vistas</strong></span>
+    <span class="enc-stat hi">Esenciales blanco: <strong>${wbSeen}/${wb.length}</strong></span>
+  </div>`;
+
+  if (activeDetailId === id) openDetail(id);
+  renderProgreso();
+}
+
+function openDetail(id) {
+  activeDetailId = id;
+  const n = getNode(id);
+  if (!n) return;
+  const st = STATE.techniques[id];
+
+  const chains = (GRAPH.chains[id] || []).map(cid => {
+    const cn = getNode(cid);
+    return cn ? `<span class="dp-chain-tag" onclick="openDetail('${cid}')">${cn.name}</span>` : '';
+  }).join('');
+
+  const relPaths = GRAPH.paths.filter(p => p.sequence.includes(id));
+  const pathsHtml = relPaths.length ? relPaths.map(p => {
+    const seq = p.sequence.map(sid => {
+      const sn = getNode(sid);
+      return sn ? `<span${sid === id ? ' style="color:var(--cream);font-weight:500"' : ''}>${sn.name}</span>` : sid;
+    }).join(' → ');
+    return `<div class="dp-path"><div class="dp-path-label">${p.label}</div><div class="dp-path-seq">${seq}</div></div>`;
+  }).join('') : '<div class="dp-empty">Sin common paths definidos.</div>';
+
+  const statusOpts = [
+    {s:'new',label:'Vista · nueva',dot:'var(--muted2)'},
+    {s:'practicing',label:'Practicando',dot:'var(--amber)'},
+    {s:'flowing',label:'Fluyendo',dot:'var(--green)'},
+    {s:'auto',label:'Automática',dot:'var(--orange)'},
+  ];
+
+  document.getElementById('detail-content').innerHTML = `
+    <div class="dp-belt-row">${beltPill(n.belt_level)}</div>
+    <div class="dp-name">${n.name}</div>
+    <div class="dp-type">${n.subtype} · ${n.family.replace('_',' ')}</div>
+    <div class="dp-badges">${modeBadge(n.formats)}${n.white_belt_priority ? '<span class="badge b-priority">esencial blanco</span>' : ''}${n.tier === 'advanced_core' ? '<span class="badge b-adv">nivel avanzado</span>' : ''}</div>
+
+    <button class="dp-seen-toggle ${st.seen ? 'seen-active' : 'unseen'}" onclick="toggleSeen('${id}');setTimeout(()=>openDetail('${id}'),50)">
+      ${st.seen
+        ? `<svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,6 5,9 10,3"/></svg> Vista en clase`
+        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Marcar como vista en clase`}
+    </button>
+
+    <div class="dp-status-group${st.seen ? ' visible' : ''}">
+      <div class="dp-status-label">Nivel de dominio</div>
+      <div class="dp-status-btns">
+        ${statusOpts.map(o => `
+          <button class="dp-status-btn${st.status === o.s ? ' active-' + o.s : ''}" data-s="${o.s}" onclick="setStatus('${id}',this)">
+            <span class="dp-s-dot" style="background:${o.dot}"></span>${o.label}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="dp-section">Descripción</div>
+    <div class="dp-desc-text">${n.desc}</div>
+
+    <div class="dp-section">Notas personales</div>
+    <textarea class="dp-notes-field" placeholder="Escribe tus notas, detalles, errores clave..." oninput="saveNotes('${id}',this.value)">${st.notes || ''}</textarea>
+
+    <div class="dp-section">Cadenas directas</div>
+    ${chains ? `<div class="dp-chains">${chains}</div>` : '<div class="dp-empty">Sin cadenas definidas.</div>'}
+
+    <div class="dp-section">Common paths</div>
+    <div class="dp-paths">${pathsHtml}</div>
+
+    <div class="dp-section">Sesiones donde la trabajé</div>
+    <div class="dp-sessions">${(st.sessions || []).length
+      ? st.sessions.map(s => `<div class="dp-session-item">→ <span>${s}</span></div>`).join('')
+      : '<div class="dp-empty">Sin sesiones registradas aún.</div>'}</div>
+  `;
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function setStatus(id, btn) {
+  STATE.techniques[id].status = btn.dataset.s;
+  saveState();
+  document.querySelectorAll('.dp-status-btn').forEach(b => b.className = 'dp-status-btn');
+  btn.classList.add('active-' + btn.dataset.s);
+  const card = document.getElementById('card-' + id);
+  if (card) {
+    const sc = seenClass(id);
+    card.className = 'enc-card' + (sc ? ' ' + sc : '');
+  }
+}
+
+function saveNotes(id, val) {
+  STATE.techniques[id].notes = val;
+  saveState();
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+  activeDetailId = null;
+}
+
+// ═══════════════════════════════════════════════════════
+// PROFILE VIEW
+// ═══════════════════════════════════════════════════════
+function renderProfile() {
+  const p = STATE.profile;
+  const el = document.getElementById('profile-content');
+  const beltLabels = { white:'Blanco', blue:'Azul', purple:'Morado', brown:'Marrón' };
+  const sexLabels = { M:'Masculino', F:'Femenino', O:'Otro' };
+
+  if (!p.name) {
+    el.innerHTML = `<div class="empty-state">
+      <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <div class="empty-title">Sin perfil configurado</div>
+      <div class="empty-desc">Añade tu información para personalizar el progreso y los benchmarks.</div>
+      <button class="empty-cta" onclick="openModal('edit-profile')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Crear perfil
+      </button>
+    </div>`;
+    return;
+  }
+
+  const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+
+  el.innerHTML = `
+    <div class="profile-hero">
+      <div class="profile-avatar">${initials}</div>
+      <div>
+        <div class="profile-name">${p.name}</div>
+        <div class="profile-since">${p.gym || '—'} · desde ${fmtDate(p.start) || '—'}</div>
+        <div class="belt-badge-hero"><div class="belt-visual"></div><div class="belt-text">Cinturón ${beltLabels[p.belt] || p.belt} · 0 rayas</div></div>
+      </div>
+    </div>
+    <div class="profile-data-grid">
+      <div class="pd-card"><div class="pd-label">Peso</div><div class="pd-value">${p.weight || '—'}<span class="pd-unit">${p.weight ? 'kg' : ''}</span></div></div>
+      <div class="pd-card"><div class="pd-label">Altura</div><div class="pd-value">${p.height || '—'}<span class="pd-unit">${p.height ? 'cm' : ''}</span></div></div>
+      <div class="pd-card"><div class="pd-label">Sexo</div><div class="pd-value" style="font-size:16px;padding-top:6px">${sexLabels[p.sex] || '—'}</div></div>
+    </div>
+    <div class="profile-table">
+      <div class="profile-row"><div class="pr-label">Nombre</div><div class="pr-right"><div class="pr-value">${p.name}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
+      <div class="profile-row"><div class="pr-label">Academia</div><div class="pr-right"><div class="pr-value">${p.gym || '—'}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
+      <div class="profile-row"><div class="pr-label">Google Calendar</div><div class="pr-right"><div class="pr-value" style="color:var(--muted2)">No conectado</div><div class="pr-edit">Próximamente</div></div></div>
+      <div class="profile-row"><div class="pr-label">Bot de Telegram</div><div class="pr-right"><div class="pr-value" style="color:var(--muted2)">No conectado</div><div class="pr-edit">Próximamente</div></div></div>
+      <div class="profile-row"><div class="pr-label">Benchmark por raya</div><div class="pr-right"><div class="pr-value">45h por raya</div></div></div>
+    </div>
+    <div style="margin-top:16px;padding:16px 0;border-top:1px solid var(--border)">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:12px;font-weight:500">Copia de seguridad</div>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:14px;line-height:1.6">Antes de actualizar la app, exporta tus datos. Para restaurarlos en una versión nueva, usa importar.</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" style="flex:none;padding:10px 18px;font-size:13px" onclick="exportData()">
+          ↓ Exportar datos
+        </button>
+        <label style="flex:none;padding:10px 18px;font-size:13px;font-weight:600;border:1px solid var(--border2);border-radius:var(--r2);color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">
+          ↑ Importar datos
+          <input type="file" accept=".json" style="display:none" onchange="importData(this)">
+        </label>
+        <button class="btn-danger" onclick="confirmReset()">Borrar todo</button>
+      </div>
+    </div>`;
+}
+
+function openEditProfile() {
+  const p = STATE.profile;
+  document.getElementById('profile-name').value = p.name || '';
+  document.getElementById('profile-gym').value = p.gym || '';
+  document.getElementById('profile-belt').value = p.belt || 'white';
+  document.getElementById('profile-start').value = p.start || '';
+  document.getElementById('profile-weight').value = p.weight || '';
+  document.getElementById('profile-height').value = p.height || '';
+  document.getElementById('profile-sex').value = p.sex || '';
+  openModal('edit-profile');
+}
+
+function saveProfile() {
+  STATE.profile = {
+    name: document.getElementById('profile-name').value.trim(),
+    gym: document.getElementById('profile-gym').value.trim(),
+    belt: document.getElementById('profile-belt').value,
+    start: document.getElementById('profile-start').value,
+    weight: document.getElementById('profile-weight').value,
+    height: document.getElementById('profile-height').value,
+    sex: document.getElementById('profile-sex').value,
+  };
+  saveState();
+  closeModal('edit-profile');
+  renderProfile();
+  renderProgreso();
+  updateSidebar();
+}
+
+function updateSidebar() {
+  const p = STATE.profile;
+  const ava = document.getElementById('sidebar-avatar');
+  const nameEl = document.getElementById('sidebar-name');
+  const beltEl = document.getElementById('sidebar-belt');
+  const beltLabels = { white:'Blanco', blue:'Azul', purple:'Morado', brown:'Marrón' };
+
+  if (p.name) {
+    const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    ava.className = 'avatar';
+    ava.innerHTML = initials;
+    nameEl.textContent = p.name;
+    beltEl.textContent = `${beltLabels[p.belt] || 'Blanco'} · ${p.gym || 'Sin academia'}`;
+  } else {
+    ava.className = 'avatar empty';
+    ava.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
+    nameEl.textContent = 'Configurar perfil';
+    beltEl.textContent = 'Toca para empezar';
+  }
+}
+
+function confirmReset() {
+  if (confirm('¿Seguro que quieres borrar todos los datos? Esta acción no se puede deshacer.')) {
+    localStorage.removeItem('bjj_journey_v1');
+    location.reload();
+  }
+}
+
+// ═══════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════
+document.getElementById('tech-filters').addEventListener('click', e => {
+  const btn = e.target.closest('.filter-pill');
+  if (!btn) return;
+  document.querySelectorAll('#tech-filters .filter-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderEnc(btn.dataset.filter);
+  closeDetail();
+});
+
+function switchView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  ['snav','mnav'].forEach(p => {
+    document.querySelectorAll(`[id^="${p}-"]`).forEach(n => n.classList.remove('active'));
+    const el = document.getElementById(`${p}-${id}`);
+    if (el) el.classList.add('active');
+  });
+  document.getElementById('view-' + id).classList.add('active');
+  closeDetail();
+  if (id === 'tecnicas') renderEnc(currentFilter);
+  if (id === 'sesiones') renderSessions();
+  if (id === 'perfil') { renderProfile(); openEditProfileIfEmpty(); }
+  if (id === 'progreso') renderProgreso();
+  document.getElementById('main-content').scrollTop = 0;
+}
+
+function openEditProfileIfEmpty() {
+  if (!STATE.profile.name) setTimeout(() => openModal('edit-profile'), 300);
+}
+
+function openModal(name) {
+  document.getElementById('modal-' + name).classList.add('open');
+  if (name === 'add-session') {
+    document.getElementById('session-date').value = todayStr();
+  }
+  if (name === 'edit-profile') {
+    const p = STATE.profile;
+    document.getElementById('profile-name').value = p.name || '';
+    document.getElementById('profile-gym').value = p.gym || '';
+    document.getElementById('profile-belt').value = p.belt || 'white';
+    document.getElementById('profile-start').value = p.start || '';
+    document.getElementById('profile-weight').value = p.weight || '';
+    document.getElementById('profile-height').value = p.height || '';
+    document.getElementById('profile-sex').value = p.sex || '';
+  }
+}
+function closeModal(name) { document.getElementById('modal-' + name).classList.remove('open'); }
+function selType(btn) { document.querySelectorAll('.type-pill').forEach(p => p.classList.remove('sel')); btn.classList.add('sel'); }
+
+// ═══════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════════════════════
+function exportData() {
+  const data = {
+    version: 'bjj_journey_v1',
+    exported_at: new Date().toISOString(),
+    data: STATE
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const date = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `bjj-journey-backup-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importData(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      const imported = parsed.data || parsed;
+      if (!imported.profile || !imported.sessions || !imported.techniques) {
+        alert('El archivo no parece un backup válido de BJJ Journey.');
+        return;
+      }
+      if (confirm(`¿Importar datos de ${parsed.exported_at ? new Date(parsed.exported_at).toLocaleDateString('es-ES') : 'backup'}? Esto reemplazará los datos actuales.`)) {
+        STATE = imported;
+        // Ensure all technique nodes have state
+        GRAPH.nodes.forEach(n => {
+          if (!STATE.techniques[n.id]) {
+            STATE.techniques[n.id] = { seen: false, status: 'new', notes: '', sessions: [] };
+          }
+        });
+        if (STATE.onboarding_dismissed === undefined) STATE.onboarding_dismissed = false;
+        saveState();
+        updateSidebar();
+        renderProgreso();
+        renderEnc(currentFilter);
+        renderSessions();
+        renderProfile();
+        alert('✓ Datos importados correctamente.');
+      }
+    } catch(err) {
+      alert('Error al leer el archivo. Asegúrate de que es un backup de BJJ Journey.');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+// ═══ INIT ═══
+updateSidebar();
+renderProgreso();
+renderEnc('all');
+</script>
+</body>
+</html>
