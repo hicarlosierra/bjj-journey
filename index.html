@@ -1608,7 +1608,18 @@ function compressImage(file, maxSize, callback) {
 // ═══════════════════════════════════════════════════════
 const GCAL_CLIENT_ID = '129790894790-9kcg5ifm2q4cv57dmstand05pd1atr3m.apps.googleusercontent.com';
 const GCAL_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
-const BJJ_KEYWORDS = ['bjj', 'gi', 'no gi', 'nogi', 'sparring', 'openmat', 'open mat', 'kalmma', 'jiu'];
+const BJJ_KEYWORDS = ['bjj', 'kalmma', 'jiu-jitsu', 'jiujitsu', 'grappling'];
+const BJJ_SECONDARY = ['no gi', 'nogi', 'sparring', 'openmat', 'open mat'];
+
+// Filter BJJ events - must contain a primary keyword OR secondary keyword with 'gi' standalone
+function isBjjEvent(title) {
+  const t = title.toLowerCase();
+  if (BJJ_KEYWORDS.some(k => t.includes(k))) return true;
+  if (BJJ_SECONDARY.some(k => t.includes(k))) return true;
+  // 'gi' only as standalone word, not inside other words
+  if (/\bgi\b/.test(t)) return true;
+  return false;
+}
 
 function connectGoogleCalendar() {
   const params = new URLSearchParams({
@@ -1685,10 +1696,7 @@ async function syncGoogleCalendar() {
     const items = data.items || [];
 
     // Filter BJJ events
-    const bjjEvents = items.filter(ev => {
-      const title = (ev.summary || '').toLowerCase();
-      return BJJ_KEYWORDS.some(k => title.includes(k));
-    });
+    const bjjEvents = items.filter(ev => isBjjEvent(ev.summary || ''));
 
     // Convert to sessions format
     const gcalSessions = bjjEvents.map(ev => {
