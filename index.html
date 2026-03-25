@@ -688,7 +688,10 @@ function loadState() {
     profile: { name:'', gym:'', belt:'white', start:'', weight:'', height:'', sex:'' },
     sessions: [],
     techniques: {},
-    onboarding_dismissed: false
+    onboarding_dismissed: false,
+    gcal_token: null,
+    gcal_token_expiry: null,
+    gcal_last_sync: null
   };
 }
 
@@ -1326,22 +1329,33 @@ function renderProfile() {
       <div class="profile-row" style="background:rgba(235,94,40,.04)"><div class="pr-label" style="font-weight:500;color:var(--cream)">Horas totales</div><div class="pr-right"><div class="pr-value" style="color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700">${Math.round((STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60 + (p.prior_hours||0))*10)/10}h</div></div></div>
     </div>
 
-    <!-- Integraciones pendientes -->
+    <!-- Integraciones -->
     <div style="margin-top:16px;margin-bottom:16px">
-      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:10px;font-weight:500">Próximas integraciones</div>
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:10px;font-weight:500">Integraciones</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div style="background:var(--bg2);border:1px dashed var(--border3);border-radius:var(--r);padding:16px;opacity:.6">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-            <span style="font-size:13px;font-weight:500">Google Calendar</span>
+        <div style="background:var(--bg2);border:1px solid ${STATE.gcal_token ? 'rgba(76,175,138,.35)' : 'var(--border3)'};border-radius:var(--r);padding:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${STATE.gcal_token ? 'var(--green)' : 'var(--muted2)'}" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <span style="font-size:13px;font-weight:500">Google Calendar</span>
+            </div>
+            ${STATE.gcal_token ? '<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(76,175,138,.15);color:var(--green);font-weight:600">✓ Conectado</span>' : ''}
           </div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Suma automáticamente las horas de tus eventos de BJJ. Sin input manual.</div>
-          <div style="margin-top:10px;font-size:11px;padding:3px 10px;border-radius:99px;background:var(--bg3);color:var(--muted2);display:inline-block">Fase 3 · Próximamente</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:10px">
+            ${STATE.gcal_token ? `Última sincronización: ${STATE.gcal_last_sync ? new Date(STATE.gcal_last_sync).toLocaleDateString('es-ES') : 'Nunca'}` : 'Suma automáticamente las horas de tus eventos de BJJ desde Google Calendar.'}
+          </div>
+          ${STATE.gcal_token
+            ? `<div style="display:flex;gap:8px">
+                <button onclick="syncGoogleCalendar()" style="flex:1;padding:7px;background:var(--green);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">↻ Sincronizar</button>
+                <button onclick="disconnectGcal()" style="padding:7px 10px;background:none;border:1px solid var(--border2);border-radius:var(--r2);font-size:11px;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">Desconectar</button>
+               </div>`
+            : `<button onclick="connectGoogleCalendar()" style="width:100%;padding:8px;background:var(--orange);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">Conectar Google Calendar</button>`
+          }
         </div>
         <div style="background:var(--bg2);border:1px dashed var(--border3);border-radius:var(--r);padding:16px;opacity:.6">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <span style="font-size:13px;font-weight:500">Bot de Telegram</span>
+            <span style="font-size:13px;font-weight:500">Bot de WhatsApp</span>
           </div>
           <div style="font-size:11px;color:var(--muted2);line-height:1.5">Registra sesiones desde el vestuario en lenguaje natural. La IA lo estructura.</div>
           <div style="margin-top:10px;font-size:11px;padding:3px 10px;border-radius:99px;background:var(--bg3);color:var(--muted2);display:inline-block">Fase 2 · Próximamente</div>
@@ -1589,7 +1603,150 @@ function compressImage(file, maxSize, callback) {
   reader.readAsDataURL(file);
 }
 
+// ═══════════════════════════════════════════════════════
+// GOOGLE CALENDAR INTEGRATION
+// ═══════════════════════════════════════════════════════
+const GCAL_CLIENT_ID = '129790894790-9kcg5ifm2q4cv57dmstand05pd1atr3m.apps.googleusercontent.com';
+const GCAL_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+const BJJ_KEYWORDS = ['bjj', 'gi', 'no gi', 'nogi', 'sparring', 'openmat', 'open mat', 'kalmma', 'jiu'];
+
+function connectGoogleCalendar() {
+  const params = new URLSearchParams({
+    client_id: GCAL_CLIENT_ID,
+    redirect_uri: 'https://hicarlosierra.github.io/bjj-journey/',
+    response_type: 'token',
+    scope: GCAL_SCOPE,
+    prompt: 'consent',
+    state: 'gcal_auth'
+  });
+  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+}
+
+function handleGcalCallback() {
+  // Called on page load — check if we're returning from OAuth
+  const hash = window.location.hash;
+  if (!hash.includes('access_token')) return;
+  
+  const params = new URLSearchParams(hash.slice(1));
+  const token = params.get('access_token');
+  const expiresIn = parseInt(params.get('expires_in') || '3600');
+  
+  if (token) {
+    STATE.gcal_token = token;
+    STATE.gcal_token_expiry = Date.now() + (expiresIn * 1000);
+    saveState();
+    // Clean URL
+    window.history.replaceState({}, '', window.location.pathname);
+    // Auto sync
+    syncGoogleCalendar();
+    switchView('perfil');
+  }
+}
+
+async function syncGoogleCalendar() {
+  const token = STATE.gcal_token;
+  if (!token) return;
+
+  // Check expiry
+  if (STATE.gcal_token_expiry && Date.now() > STATE.gcal_token_expiry) {
+    STATE.gcal_token = null;
+    saveState();
+    renderProfile();
+    alert('La sesión de Google Calendar ha expirado. Vuelve a conectar.');
+    return;
+  }
+
+  try {
+    // Get events from last 2 years to now + 1 month
+    const timeMin = new Date();
+    timeMin.setFullYear(timeMin.getFullYear() - 2);
+    const timeMax = new Date();
+    timeMax.setMonth(timeMax.getMonth() + 1);
+
+    const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?` +
+      `timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}` +
+      `&maxResults=1000&singleEvents=true&orderBy=startTime`;
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        STATE.gcal_token = null;
+        saveState();
+        renderProfile();
+        alert('Sesión expirada. Reconecta Google Calendar.');
+      }
+      return;
+    }
+
+    const data = await res.json();
+    const items = data.items || [];
+
+    // Filter BJJ events
+    const bjjEvents = items.filter(ev => {
+      const title = (ev.summary || '').toLowerCase();
+      return BJJ_KEYWORDS.some(k => title.includes(k));
+    });
+
+    // Convert to sessions format
+    const gcalSessions = bjjEvents.map(ev => {
+      const start = new Date(ev.start.dateTime || ev.start.date);
+      const end = new Date(ev.end.dateTime || ev.end.date);
+      const durationMin = Math.round((end - start) / 60000);
+      const title = (ev.summary || '').toLowerCase();
+      
+      let type = 'Gi';
+      if (title.includes('no gi') || title.includes('nogi')) type = 'NoGi';
+      else if (title.includes('open mat') || title.includes('openmat')) type = 'Open mat';
+      else if (title.includes('sparring')) type = 'Open mat';
+
+      return {
+        id: ev.id,
+        date: start.toISOString().slice(0, 10),
+        type,
+        duration: durationMin,
+        notes: ev.summary || '',
+        from_gcal: true
+      };
+    });
+
+    // Merge: keep manual sessions, replace gcal ones
+    const manualSessions = STATE.sessions.filter(s => !s.from_gcal);
+    STATE.sessions = [...manualSessions, ...gcalSessions];
+    STATE.gcal_last_sync = new Date().toISOString();
+    STATE.gcal_event_count = gcalSessions.length;
+    saveState();
+
+    renderProgreso();
+    renderSessions();
+    updateSidebar();
+    renderProfile();
+
+    alert(`✓ Sincronizado — ${gcalSessions.length} sesiones de BJJ importadas desde Google Calendar.`);
+
+  } catch(err) {
+    console.error('GCal sync error:', err);
+    alert('Error al sincronizar. Comprueba tu conexión e inténtalo de nuevo.');
+  }
+}
+
+function disconnectGcal() {
+  if (!confirm('¿Desconectar Google Calendar? Se eliminarán las sesiones importadas automáticamente.')) return;
+  STATE.gcal_token = null;
+  STATE.gcal_token_expiry = null;
+  STATE.gcal_last_sync = null;
+  STATE.sessions = STATE.sessions.filter(s => !s.from_gcal);
+  saveState();
+  renderProfile();
+  renderProgreso();
+  renderSessions();
+  updateSidebar();
+}
+
 // ═══ INIT ═══
+handleGcalCallback();
 updateSidebar();
 renderProgreso();
 renderEnc('all');
