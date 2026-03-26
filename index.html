@@ -34,9 +34,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .nav-divider{height:1px;background:var(--border);margin:8px 10px}
 .sidebar-user{padding:16px 14px 0;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;cursor:pointer}
 .sidebar-user:hover .user-name{color:var(--orange)}
-.avatar{width:36px;height:36px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:var(--cream);flex-shrink:0}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:15px;color:var(--cream);flex-shrink:0;overflow:hidden}
 .avatar.empty{background:var(--bg3);border:1.5px dashed var(--border3)}
-.user-name{font-size:13px;font-weight:500;transition:color .15s}
+.avatar-photo{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.user-name{font-size:13px;font-weight:500;transition:color .15s;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .user-belt{font-size:11px;color:var(--muted2);margin-top:1px}
 
 /* MAIN */
@@ -49,19 +50,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .page-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;margin-bottom:4px}
 .page-sub{font-size:13px;color:var(--muted2);margin-bottom:28px}
 
-/* ONBOARDING BANNER */
+/* ONBOARDING */
 .onboarding-banner{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--orange);border-radius:var(--r);padding:20px 24px;margin-bottom:24px}
-.ob-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:10px}
-.ob-steps{display:flex;flex-direction:column;gap:8px}
-.ob-step{display:flex;align-items:flex-start;gap:12px;padding:8px 0;border-bottom:1px solid var(--border)}
+.ob-title{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.ob-steps{display:flex;flex-direction:column;gap:0}
+.ob-step{display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
 .ob-step:last-child{border-bottom:none}
-.ob-num{width:22px;height:22px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px}
+.ob-num{width:24px;height:24px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px;color:var(--cream)}
 .ob-step.done .ob-num{background:var(--green)}
-.ob-step-body{}
-.ob-step-title{font-size:14px;font-weight:500;color:var(--cream);margin-bottom:2px}
+.ob-step-title{font-size:14px;font-weight:500;margin-bottom:2px}
 .ob-step.done .ob-step-title{color:var(--muted2);text-decoration:line-through}
 .ob-step-desc{font-size:12px;color:var(--muted2);line-height:1.5}
-.ob-step-action{font-size:12px;color:var(--orange);cursor:pointer;font-weight:500;margin-top:4px;display:inline-block}
+.ob-step-action{font-size:12px;color:var(--orange);cursor:pointer;font-weight:500;margin-top:5px;display:inline-block}
 .ob-dismiss{font-size:12px;color:var(--muted2);cursor:pointer;margin-top:14px;display:inline-block}
 .ob-dismiss:hover{color:var(--cream)}
 
@@ -88,19 +88,29 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 
 /* STATS */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
-@media(min-width:1200px){.stat-grid{grid-template-columns:repeat(4,1fr);gap:16px}}
-@media(min-width:1400px){.two-col{grid-template-columns:1.2fr 1fr}}
+@media(min-width:1200px){.stat-grid{gap:16px}}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
 .stat-card.accent{border-color:rgba(235,94,40,.25)}
 .stat-card.accent::after{content:'';position:absolute;bottom:0;right:0;width:80px;height:80px;background:radial-gradient(circle at 100% 100%,rgba(235,94,40,.1),transparent 70%)}
 .stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:8px}
 .stat-value{font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;line-height:1}
 .stat-value.orange{color:var(--orange)}
-.stat-value.empty{color:var(--muted);font-size:32px}
 .stat-sub{font-size:11px;color:var(--muted2);margin-top:5px}
+.stat-trend{font-size:11px;color:var(--green);margin-top:5px;font-weight:500}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+@media(min-width:1400px){.two-col{grid-template-columns:1.2fr 1fr}}
+.col-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:12px;font-weight:500}
+.bar-list{display:flex;flex-direction:column;gap:10px}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-label{font-size:12px;color:var(--muted2);width:120px;flex-shrink:0}
+.bar-track{flex:1;height:5px;background:var(--bg4);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px}
+.bar-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;width:28px;text-align:right}
 
 /* COACH TIP */
-.coach-tip{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--orange);border-radius:var(--r);padding:18px 20px;display:flex;gap:16px;align-items:flex-start}
+.coach-tip{background:var(--bg2);border:1px solid var(--border2);border-left:3px solid var(--orange);border-radius:var(--r);padding:18px 20px;display:flex;gap:16px;align-items:flex-start;margin-top:20px}
 .coach-avatar{width:40px;height:40px;border-radius:50%;background:var(--bg3);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:18px}
 .coach-label{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--orange);margin-bottom:5px;font-weight:600}
 .coach-text{font-size:13px;color:var(--cream);line-height:1.6}
@@ -178,48 +188,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .enc-card:not(.seen):not(.seen-practicing):not(.seen-flowing):not(.seen-auto)::after{content:'';position:absolute;inset:0;border-radius:var(--r);background:repeating-linear-gradient(-45deg,transparent,transparent 8px,rgba(255,252,242,.015) 8px,rgba(255,252,242,.015) 9px);pointer-events:none}
 
 /* SESSIONS */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-.col-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted2);margin-bottom:12px;font-weight:500}
 .add-btn{display:flex;align-items:center;gap:8px;background:var(--orange);border:none;border-radius:var(--r2);padding:10px 18px;font-size:14px;font-weight:500;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s;margin-bottom:20px}
 .add-btn:hover{opacity:.88}
 .sessions-grid{display:flex;flex-direction:column;gap:12px}
-.session-full{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;cursor:pointer;transition:border-color .12s}
+.session-full{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;transition:border-color .12s}
 .session-full:hover{border-color:var(--border2)}
 .sf-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px}
 .sf-left{display:flex;align-items:center;gap:10px}
 .sf-title{font-size:15px;font-weight:500}
 .sf-dur{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--orange)}
-.sf-date{font-size:12px;color:var(--muted2);margin-bottom:8px}
-.sf-note{font-size:13px;color:var(--muted2);line-height:1.6;margin-bottom:10px}
-.sf-tags{display:flex;gap:6px;flex-wrap:wrap}
-.sf-tag{font-size:11px;padding:3px 10px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)}
-.sf-tag.hl{border-color:rgba(235,94,40,.3);color:var(--orange)}
+.sf-date{font-size:12px;color:var(--muted2);margin-bottom:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sf-note{font-size:13px;color:var(--muted2);line-height:1.6}
 .type-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .dot-gi{background:var(--purple)}.dot-nogi{background:var(--green)}.dot-open{background:var(--orange)}.dot-gym{background:var(--amber)}
-.bar-list{display:flex;flex-direction:column;gap:10px}
-.bar-row{display:flex;align-items:center;gap:10px}
-.bar-label{font-size:12px;color:var(--muted2);width:120px;flex-shrink:0}
-.bar-track{flex:1;height:5px;background:var(--bg4);border-radius:99px;overflow:hidden}
-.bar-fill{height:100%;border-radius:99px}
-.bar-val{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;width:28px;text-align:right}
 
-/* COACH PAGE */
-.coach-page-hero{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:28px;display:flex;align-items:center;gap:20px;margin-bottom:20px}
-.coach-page-ava{width:68px;height:68px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
-.coach-page-name{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;margin-bottom:4px}
-.coach-page-sub{font-size:13px;color:var(--muted2);margin-bottom:12px}
-.coming-badge{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:99px;padding:4px 12px;font-size:12px;color:var(--muted2)}
-.coming-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
-.coach-features{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.cf{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;opacity:.55}
-.cf-icon{font-size:22px;margin-bottom:10px}
-.cf-title{font-size:14px;font-weight:500;margin-bottom:4px}
-.cf-sub{font-size:12px;color:var(--muted2);line-height:1.5}
+/* FEELING */
+.feeling-btns{display:flex;gap:8px}
+.feeling-btn{font-size:22px;background:var(--bg3);border:2px solid var(--border2);border-radius:var(--r2);padding:8px 12px;cursor:pointer;transition:all .15s;line-height:1;opacity:.45;font-family:inherit}
+.feeling-btn:hover{opacity:.75;border-color:var(--border3)}
+.feeling-btn.sel{opacity:1;border-color:var(--orange);background:rgba(235,94,40,.1)}
+.feeling-emoji{font-size:13px}
+
+/* AVATAR UPLOAD */
+.profile-avatar-wrap{position:relative;cursor:pointer;flex-shrink:0}
+.profile-avatar-wrap:hover .profile-avatar-overlay{opacity:1}
+.profile-avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-size:12px;color:#fff;font-weight:500;text-align:center;line-height:1.3}
 
 /* PROFILE */
 .profile-hero{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:28px;display:flex;align-items:center;gap:24px;margin-bottom:20px}
-.profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;color:var(--cream);flex-shrink:0;border:3px solid rgba(235,94,40,.35)}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:var(--orange);display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:30px;color:var(--cream);border:3px solid rgba(235,94,40,.35);overflow:hidden}
 .profile-name{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:800;line-height:1;margin-bottom:4px}
 .profile-since{font-size:13px;color:var(--muted2);margin-bottom:10px}
 .belt-badge-hero{display:inline-flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:6px;padding:5px 12px}
@@ -282,10 +279,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .dp-session-item span{color:var(--cream);font-weight:500}
 .dp-empty{font-size:12px;color:var(--muted2);font-style:italic}
 
+/* COACH */
+.coach-page-hero{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:28px;display:flex;align-items:center;gap:20px;margin-bottom:20px}
+.coach-page-ava{width:68px;height:68px;border-radius:50%;background:var(--bg3);border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:28px;flex-shrink:0}
+.coach-page-name{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;margin-bottom:4px}
+.coach-page-sub{font-size:13px;color:var(--muted2);margin-bottom:12px}
+.coming-badge{display:inline-flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border2);border-radius:99px;padding:4px 12px;font-size:12px;color:var(--muted2)}
+.coming-dot{width:6px;height:6px;border-radius:50%;background:var(--orange);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.coach-features{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cf{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;opacity:.55}
+.cf-icon{font-size:22px;margin-bottom:10px}
+.cf-title{font-size:14px;font-weight:500;margin-bottom:4px}
+.cf-sub{font-size:12px;color:var(--muted2);line-height:1.5}
+
 /* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;backdrop-filter:blur(6px);align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:28px 30px;width:480px;max-width:92vw;animation:fadeUp .2s ease both}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:28px 30px;width:480px;max-width:92vw;animation:fadeUp .2s ease both;max-height:90vh;overflow-y:auto}
 .modal-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;margin-bottom:22px}
 .input-group{margin-bottom:16px}
 .input-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:6px;display:block}
@@ -299,17 +310,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .btn-primary{flex:1;padding:13px;background:var(--orange);border:none;border-radius:var(--r2);font-size:14px;font-weight:600;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer}
 .btn-primary:hover{opacity:.88}
 .btn-secondary{padding:13px 20px;background:none;border:1px solid var(--border2);border-radius:var(--r2);font-size:14px;color:var(--muted2);font-family:'DM Sans',sans-serif;cursor:pointer}
-.avatar-photo{width:100%;height:100%;border-radius:50%;object-fit:cover}
-.avatar-upload{position:relative;cursor:pointer;flex-shrink:0}
-.avatar-upload:hover .avatar-overlay{opacity:1}
-.avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-size:11px;color:#fff;font-weight:500}
-.profile-avatar-wrap{position:relative;cursor:pointer;flex-shrink:0}
-.profile-avatar-wrap:hover .profile-avatar-overlay{opacity:1}
-.profile-avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s;font-size:12px;color:#fff;font-weight:500;text-align:center;line-height:1.3}
-.feeling-btn{font-size:22px;background:var(--bg3);border:2px solid var(--border2);border-radius:var(--r2);padding:8px 12px;cursor:pointer;transition:all .15s;line-height:1;opacity:.45;font-family:inherit}
-.feeling-btn:hover{opacity:.75;border-color:var(--border3)}
-.feeling-btn.sel{opacity:1;border-color:var(--orange);background:rgba(235,94,40,.1)}
-.feeling-emoji{font-size:13px}
 .btn-danger{padding:13px 20px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:14px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer}
 
 /* MOBILE */
@@ -330,42 +330,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .mobile-nav-item.active{color:var(--orange)}
 .mobile-nav-item svg{width:20px;height:20px;margin-bottom:3px}
 .mobile-nav-item span{font-size:10px;letter-spacing:.05em;font-weight:500}
-/* LOGIN SCREEN */
-.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:0}
-.login-box{width:380px;max-width:92vw}
-.login-logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:36px;letter-spacing:.04em;margin-bottom:8px}
-.login-logo span{color:var(--orange)}
-.login-sub{font-size:13px;color:var(--muted2);margin-bottom:32px}
-.login-tabs{display:flex;gap:0;margin-bottom:24px;background:var(--bg2);border-radius:var(--r2);padding:3px}
-.login-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;border-radius:6px;color:var(--muted2);transition:all .15s;border:none;background:none;font-family:'DM Sans',sans-serif}
-.login-tab.active{background:var(--bg4);color:var(--cream)}
-.login-error{font-size:12px;color:#E05050;margin-bottom:12px;min-height:16px}
-.login-forgot{font-size:12px;color:var(--orange);cursor:pointer;text-align:right;margin-top:-8px;margin-bottom:12px}
 </style>
 </head>
 <body>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
-<!-- LOGIN SCREEN -->
-<div class="login-screen" id="login-screen">
-  <div class="login-box">
-    <div class="login-logo">BJJ<span>.</span></div>
-    <div class="login-sub">Tu journey en el tatami</div>
-    <div class="login-tabs">
-      <button class="login-tab active" onclick="switchLoginTab('login')">Entrar</button>
-      <button class="login-tab" onclick="switchLoginTab('register')">Crear cuenta</button>
-    </div>
-    <div class="login-error" id="login-error"></div>
-    <div class="input-group"><label class="input-label">Email</label><input class="input-field" type="email" id="login-email" placeholder="tu@email.com" autocomplete="email"></div>
-    <div class="input-group"><label class="input-label">Contraseña</label><input class="input-field" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
-    <div class="login-forgot" id="login-forgot-row" onclick="doForgotPassword()">¿Olvidaste tu contraseña?</div>
-    <div class="input-group" id="register-name-group" style="display:none"><label class="input-label">Tu nombre</label><input class="input-field" type="text" id="login-name" placeholder="Carlos"></div>
-    <button class="btn-primary" style="width:100%;margin-top:4px" id="login-btn" onclick="doLogin()">Entrar</button>
-    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--muted2)">Tus datos son privados — cada usuario ve solo los suyos</div>
-  </div>
-</div>
-
-<div class="app-shell" id="app-shell" style="display:none">
+<div class="app-shell">
 
 <aside class="sidebar">
   <div class="sidebar-logo">BJJ<span>.</span></div>
@@ -396,13 +364,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
       <div class="user-name" id="sidebar-name">Configurar perfil</div>
       <div class="user-belt" id="sidebar-belt">Toca para empezar</div>
     </div>
-    <div onclick="event.stopPropagation();doLogout()" title="Cerrar sesión" style="padding:4px;cursor:pointer;color:var(--muted2);flex-shrink:0">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-    </div>
-  </div>
-      <div class="user-name" id="sidebar-name">Configurar perfil</div>
-      <div class="user-belt" id="sidebar-belt">Toca para empezar</div>
-    </div>
   </div>
 </aside>
 
@@ -415,26 +376,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
     <div id="onboarding-banner"></div>
     <div id="progress-hero-wrap"></div>
     <div class="stat-grid">
-      <div class="stat-card accent">
-        <div class="stat-label">Horas este mes</div>
-        <div class="stat-value orange" id="stat-hours">0</div>
-        <div class="stat-sub" id="stat-hours-sub">sin sesiones aún</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Sesiones totales</div>
-        <div class="stat-value" id="stat-sessions">0</div>
-        <div class="stat-sub" id="stat-sessions-sub">empieza a entrenar</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Técnicas vistas</div>
-        <div class="stat-value" id="stat-tecnicas">0</div>
-        <div class="stat-sub" id="stat-tecnicas-sub">de esenciales blanco</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Días activos</div>
-        <div class="stat-value" id="stat-streak">0</div>
-        <div class="stat-sub">este mes</div>
-      </div>
+      <div class="stat-card accent"><div class="stat-label">Horas este mes</div><div class="stat-value orange" id="stat-hours">0</div><div class="stat-sub" id="stat-hours-sub">sin sesiones aún</div></div>
+      <div class="stat-card"><div class="stat-label">Sesiones totales</div><div class="stat-value" id="stat-sessions">0</div><div class="stat-sub" id="stat-sessions-sub">empieza a entrenar</div></div>
+      <div class="stat-card"><div class="stat-label">Técnicas vistas</div><div class="stat-value" id="stat-tecnicas">0</div><div class="stat-sub" id="stat-tecnicas-sub">de esenciales blanco</div></div>
+      <div class="stat-card"><div class="stat-label">Días activos</div><div class="stat-value" id="stat-streak">0</div><div class="stat-sub">este mes</div></div>
     </div>
     <div id="recent-sessions-wrap"></div>
   </div>
@@ -478,20 +423,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
   <!-- COACH -->
   <div class="view" id="view-coach">
     <div class="page-title">Coach</div>
-    <div class="page-sub">Tu asistente personal de BJJ — próximamente vía Telegram</div>
+    <div class="page-sub">Tu asistente personal de BJJ — próximamente vía WhatsApp</div>
     <div class="coach-page-hero">
       <div class="coach-page-ava">🥋</div>
       <div>
         <div class="coach-page-name">Tu coach IA</div>
-        <div class="coach-page-sub">Analiza tu progreso y te da consejos basados en tus sesiones y técnicas</div>
+        <div class="coach-page-sub">Registra sesiones en lenguaje natural y analiza tu progreso con IA</div>
         <div class="coming-badge"><div class="coming-dot"></div>En desarrollo · Fase 2</div>
       </div>
     </div>
     <div class="coach-features">
-      <div class="cf"><div class="cf-icon">💬</div><div class="cf-title">Bot de Telegram</div><div class="cf-sub">Registra sesiones en lenguaje natural desde el vestuario.</div></div>
-      <div class="cf"><div class="cf-icon">🔗</div><div class="cf-title">Análisis de cadenas</div><div class="cf-sub">Detecta qué técnicas abren nuevas cadenas que aún no explotas.</div></div>
+      <div class="cf"><div class="cf-icon">💬</div><div class="cf-title">Bot de WhatsApp</div><div class="cf-sub">Registra sesiones desde el vestuario en lenguaje natural. La IA lo estructura automáticamente.</div></div>
+      <div class="cf"><div class="cf-icon">🔗</div><div class="cf-title">Análisis de cadenas</div><div class="cf-sub">Detecta qué técnicas que ya dominas abren nuevas cadenas que aún no explotas.</div></div>
       <div class="cf"><div class="cf-icon">🎯</div><div class="cf-title">Tips personalizados</div><div class="cf-sub">Si llevas tiempo sin trabajar una posición, el coach te lo recuerda.</div></div>
-      <div class="cf"><div class="cf-icon">📊</div><div class="cf-title">Resumen semanal</div><div class="cf-sub">Cada domingo: horas, técnicas y recomendaciones.</div></div>
+      <div class="cf"><div class="cf-icon">📊</div><div class="cf-title">Resumen semanal</div><div class="cf-sub">Cada domingo: horas, técnicas y recomendaciones basadas en tu grafo personal.</div></div>
     </div>
   </div>
 
@@ -522,16 +467,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 <div class="modal-overlay" id="modal-add-session" onclick="closeModal('add-session')">
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-title">Nueva sesión</div>
-
-    <!-- Fecha + Duración en línea -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="input-group"><label class="input-label">Fecha</label><input class="input-field" type="date" id="session-date"></div>
       <div class="input-group"><label class="input-label">Duración (min)</label><input class="input-field" type="number" id="session-duration" placeholder="90" inputmode="numeric" min="1"></div>
     </div>
-
-    <!-- Tipo -->
     <div class="input-group"><label class="input-label">Tipo</label>
-      <div class="type-pills">
+      <div class="type-pills" id="type-pills-main">
         <button class="type-pill sel" onclick="selType(this)">Gi</button>
         <button class="type-pill" onclick="selType(this)">NoGi</button>
         <button class="type-pill" onclick="selType(this)">Open mat</button>
@@ -539,8 +480,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
         <button class="type-pill" onclick="selType(this)">Competición</button>
       </div>
     </div>
-
-    <!-- Feeling -->
     <div class="input-group">
       <label class="input-label">Feeling</label>
       <div class="feeling-btns" id="feeling-btns">
@@ -552,8 +491,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
       </div>
       <div id="feeling-label" style="font-size:12px;color:var(--muted2);margin-top:6px;min-height:16px"></div>
     </div>
-
-    <!-- Posición del día -->
     <div class="input-group"><label class="input-label">Posición trabajada</label>
       <div class="type-pills" id="position-pills" style="flex-wrap:wrap">
         <button class="type-pill" onclick="selPos(this)">De pie</button>
@@ -566,12 +503,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
         <button class="type-pill" onclick="selPos(this)">General / Sparring</button>
       </div>
     </div>
-
-    <!-- Notas opcionales -->
     <div class="input-group"><label class="input-label">Notas <span style="color:var(--muted2);font-size:10px;margin-left:4px">opcional</span></label>
       <textarea class="input-field" id="session-notes" rows="2" placeholder="Algo que destacar..."></textarea>
     </div>
-
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('add-session')">Cancelar</button>
       <button class="btn-primary" onclick="saveSession()">Guardar sesión</button>
@@ -586,7 +520,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
     <div class="input-group"><label class="input-label">Nombre</label><input class="input-field" type="text" id="profile-name" placeholder="Tu nombre"></div>
     <div class="input-group"><label class="input-label">Academia</label><input class="input-field" type="text" id="profile-gym" placeholder="Nombre de tu academia"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div class="input-group"><label class="input-label">Cinturón actual</label>
+      <div class="input-group"><label class="input-label">Cinturón</label>
         <select class="input-field" id="profile-belt">
           <option value="white">Blanco</option>
           <option value="blue">Azul</option>
@@ -594,19 +528,19 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
           <option value="brown">Marrón</option>
         </select>
       </div>
-      <div class="input-group"><label class="input-label">Grado (rayas)</label>
+      <div class="input-group"><label class="input-label">Grado</label>
         <select class="input-field" id="profile-stripe">
-          <option value="0">0 rayas</option>
-          <option value="1">1 raya</option>
-          <option value="2">2 rayas</option>
-          <option value="3">3 rayas</option>
-          <option value="4">4 rayas</option>
+          <option value="0">0 grados</option>
+          <option value="1">1er grado</option>
+          <option value="2">2º grado</option>
+          <option value="3">3er grado</option>
+          <option value="4">4º grado</option>
         </select>
       </div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="input-group"><label class="input-label">Fecha de inicio</label><input class="input-field" type="date" id="profile-start"></div>
-      <div class="input-group"><label class="input-label">Horas previas acumuladas</label><input class="input-field" type="number" id="profile-prior-hours" placeholder="0" min="0" inputmode="numeric"></div>
+      <div class="input-group"><label class="input-label">Horas previas</label><input class="input-field" type="number" id="profile-prior-hours" placeholder="0" min="0" inputmode="numeric"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
       <div class="input-group"><label class="input-label">Peso (kg)</label><input class="input-field" type="number" id="profile-weight" placeholder="78"></div>
@@ -620,13 +554,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
         </select>
       </div>
     </div>
-    <div class="modal-actions"><button class="btn-secondary" onclick="closeModal('edit-profile')">Cancelar</button><button class="btn-primary" onclick="saveProfile()">Guardar</button></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('edit-profile')">Cancelar</button>
+      <button class="btn-primary" onclick="saveProfile()">Guardar</button>
+    </div>
   </div>
 </div>
 
 <script>
 // ═══════════════════════════════════════════════════════
-// GRAPH DATA (John's JSON)
+// GRAPH DATA
 // ═══════════════════════════════════════════════════════
 const GRAPH = {
   nodes: [
@@ -704,7 +641,7 @@ const GRAPH = {
   paths:[
     {id:'p1',label:'Closed Guard Submission Cycle',sequence:['tech_triangle_choke','tech_straight_armbar','tech_omoplata'],notes:'Classic closed-guard dilemma chain.'},
     {id:'p2',label:'Closed Guard Sweep Cycle',sequence:['tech_scissor_sweep','tech_hip_bump_sweep','tech_flower_sweep','tech_pendulum_sweep'],notes:'Core closed-guard sweeping options.'},
-    {id:'p3',label:'Butterfly to Back',sequence:['tech_arm_drag','tech_rear_naked_choke'],notes:'Common butterfly progression to dominant finish.'},
+    {id:'p3',label:'Butterfly to Back',sequence:['tech_arm_drag','tech_rear_naked_choke'],notes:'Common butterfly progression.'},
     {id:'p4',label:'Mount Finishing System',sequence:['tech_arm_triangle_choke','tech_straight_armbar','tech_triangle_choke'],notes:'Core mount submission trio.'},
     {id:'p5',label:'Front Headlock System',sequence:['tech_guillotine_choke','tech_anaconda_choke','tech_darce_choke'],notes:'Main front-headlock attack family.'},
     {id:'p6',label:'Escape to Reguard',sequence:['tech_elbow_knee_escape','tech_bridge_and_roll_escape'],notes:'Typical defensive progression from mount back to guard.'},
@@ -721,405 +658,177 @@ const POSITION_MAP = [
 ];
 
 // ═══════════════════════════════════════════════════════
-// SUPABASE
+// STATE — localStorage
 // ═══════════════════════════════════════════════════════
-const SUPABASE_URL = 'https://uanglczkvvsjoqctqmlh.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbmdsY3prdnZzam9xY3RxbWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTExMDcsImV4cCI6MjA5MDA4NzEwN30.PYA5TyodU_nbrXFHKTnqUXJX5QkxMf5u2zppwDC4W8M';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-let currentUser = null;
-
-// ═══════════════════════════════════════════════════════
-// AUTH
-// ═══════════════════════════════════════════════════════
-let loginMode = 'login';
-
-function switchLoginTab(mode) {
-  loginMode = mode;
-  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&mode==='login')||(i===1&&mode==='register')));
-  document.getElementById('login-btn').textContent = mode === 'login' ? 'Entrar' : 'Crear cuenta';
-  document.getElementById('login-forgot-row').style.display = mode === 'login' ? 'block' : 'none';
-  document.getElementById('register-name-group').style.display = mode === 'register' ? 'block' : 'none';
-  document.getElementById('login-error').textContent = '';
-}
-
-async function doLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const btn = document.getElementById('login-btn');
-  const errEl = document.getElementById('login-error');
-  errEl.textContent = '';
-  errEl.style.color = '#E05050';
-
-  if (!email || !password) { errEl.textContent = 'Introduce email y contraseña.'; return; }
-  btn.textContent = '...';
-  btn.disabled = true;
-
+function loadState() {
   try {
-    const timeout = new Promise((_,reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado. Comprueba tu conexión.')), 30000));
-
-    if (loginMode === 'register') {
-      const name = document.getElementById('login-name').value.trim();
-      const { data, error } = await Promise.race([
-        sb.auth.signUp({ email, password }),
-        timeout
-      ]);
-      if (error) throw error;
-      if (data?.user) {
-        await sb.from('profiles').upsert({ id: data.user.id, name: name || email.split('@')[0] });
-        errEl.style.color = 'var(--green)';
-        errEl.textContent = '✓ Cuenta creada. Revisa tu email para confirmar.';
-      }
-    } else {
-      const { error } = await Promise.race([
-        sb.auth.signInWithPassword({ email, password }),
-        timeout
-      ]);
-      if (error) throw error;
-    }
-  } catch(err) {
-    errEl.textContent = err.message === 'Invalid login credentials'
-      ? 'Email o contraseña incorrectos.'
-      : err.message;
-  }
-
-  btn.textContent = loginMode === 'login' ? 'Entrar' : 'Crear cuenta';
-  btn.disabled = false;
-}
-
-async function doForgotPassword() {
-  const email = document.getElementById('login-email').value.trim();
-  if (!email) { document.getElementById('login-error').textContent = 'Introduce tu email primero.'; return; }
-  await sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://hicarlosierra.github.io/bjj-journey/' });
-  document.getElementById('login-error').style.color = 'var(--green)';
-  document.getElementById('login-error').textContent = '✓ Te hemos enviado un email para recuperar tu contraseña.';
-}
-
-function showApp() {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-shell').style.display = 'flex';
-}
-
-function showLogin() {
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('app-shell').style.display = 'none';
-}
-
-async function doLogout() {
-  await sb.auth.signOut();
-  STATE = getEmptyState();
-  showLogin();
-}
-
-// ═══════════════════════════════════════════════════════
-// SUPABASE DATA SYNC
-// ═══════════════════════════════════════════════════════
-async function loadFromSupabase(userId) {
-  // Load profile — upsert if not exists
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
-  if (profile) {
-    STATE.profile = {
-      name: profile.name || '',
-      gym: profile.gym || '',
-      belt: profile.belt || 'white',
-      stripe: String(profile.stripe || 0),
-      start: profile.start_date || '',
-      prior_hours: profile.prior_hours || 0,
-      weight: profile.weight || '',
-      height: profile.height || '',
-      sex: profile.sex || '',
-      photo: profile.photo || null
-    };
-  } else {
-    // Create empty profile for new user
-    await sb.from('profiles').insert({ id: userId });
-  }
-
-  // Load sessions
-  const { data: sessions } = await sb.from('sessions').select('*').eq('user_id', userId).order('date', { ascending: false });
-  if (sessions) {
-    STATE.sessions = sessions.map(s => ({
-      id: s.id,
-      date: s.date,
-      type: s.type || 'Gi',
-      duration: s.duration || 60,
-      feeling: s.feeling,
-      position: s.position,
-      notes: s.notes || '',
-      from_gcal: s.from_gcal || false,
-      gcal_event_id: s.gcal_event_id
-    }));
-  }
-
-  // Load techniques
-  const { data: techs } = await sb.from('techniques').select('*').eq('user_id', userId);
-  if (techs) {
-    techs.forEach(t => {
-      STATE.techniques[t.technique_id] = { seen: t.seen, status: t.status, notes: t.notes || '', sessions: [] };
-    });
-  }
-}
-
-async function saveProfileToSupabase() {
-  if (!currentUser) return;
-  const p = STATE.profile;
-  await sb.from('profiles').upsert({
-    id: currentUser.id,
-    name: p.name, gym: p.gym, belt: p.belt,
-    stripe: parseInt(p.stripe) || 0,
-    start_date: p.start || null,
-    prior_hours: p.prior_hours || 0,
-    weight: p.weight ? parseFloat(p.weight) : null,
-    height: p.height ? parseFloat(p.height) : null,
-    sex: p.sex, photo: p.photo
-  });
-}
-
-async function saveSessionToSupabase(session) {
-  if (!currentUser) return;
-  const { data } = await sb.from('sessions').upsert({
-    id: session.id || undefined,
-    user_id: currentUser.id,
-    date: session.date, type: session.type,
-    duration: session.duration, feeling: session.feeling,
-    position: session.position, notes: session.notes,
-    from_gcal: session.from_gcal || false,
-    gcal_event_id: session.gcal_event_id
-  }).select().single();
-  if (data) session.id = data.id;
-}
-
-async function deleteSessionFromSupabase(sessionId) {
-  if (!currentUser || !sessionId) return;
-  await sb.from('sessions').delete().eq('id', sessionId);
-}
-
-async function saveTechniqueToSupabase(techId) {
-  if (!currentUser) return;
-  const t = STATE.techniques[techId];
-  await sb.from('techniques').upsert({
-    user_id: currentUser.id,
-    technique_id: techId,
-    seen: t.seen, status: t.status, notes: t.notes
-  });
-}
-
-// ═══════════════════════════════════════════════════════
-// STATE (localStorage as cache + Supabase as source of truth)
-// ═══════════════════════════════════════════════════════
-function getEmptyState() {
+    const raw = localStorage.getItem('bjj_journey_v1');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
   return {
-    profile: { name:'', gym:'', belt:'white', stripe:'0', start:'', prior_hours:0, weight:'', height:'', sex:'', photo:null },
+    profile: {name:'',gym:'',belt:'white',stripe:'0',start:'',prior_hours:0,weight:'',height:'',sex:'',photo:null},
     sessions: [],
     techniques: {},
     onboarding_dismissed: false,
-    gcal_token: null, gcal_token_expiry: null, gcal_last_sync: null
+    gcal_token: null,
+    gcal_token_expiry: null,
+    gcal_last_sync: null
   };
 }
-
-let STATE = getEmptyState();
 
 function saveState() {
   try { localStorage.setItem('bjj_journey_v1', JSON.stringify(STATE)); } catch(e) {}
 }
 
-// Init technique state for any missing nodes
-function initTechniqueState() {
-  GRAPH.nodes.forEach(n => {
-    if (!STATE.techniques[n.id]) {
-      STATE.techniques[n.id] = { seen: false, status: 'new', notes: '', sessions: [] };
-    }
-  });
-}
+let STATE = loadState();
+
+GRAPH.nodes.forEach(n => {
+  if (!STATE.techniques[n.id]) STATE.techniques[n.id] = {seen:false,status:'new',notes:'',sessions:[]};
+});
 
 // ═══════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════
-function getNode(id) { return GRAPH.nodes.find(n => n.id === id); }
-function seenClass(id) {
-  const st = STATE.techniques[id];
-  if (!st?.seen) return '';
-  const s = st.status;
-  if (s === 'auto') return 'seen-auto';
-  if (s === 'flowing') return 'seen-flowing';
-  if (s === 'practicing') return 'seen-practicing';
+function getNode(id){return GRAPH.nodes.find(n=>n.id===id)}
+function seenClass(id){
+  const st=STATE.techniques[id];
+  if(!st?.seen) return '';
+  const s=st.status;
+  if(s==='auto') return 'seen-auto';
+  if(s==='flowing') return 'seen-flowing';
+  if(s==='practicing') return 'seen-practicing';
   return 'seen';
 }
-function modeBadge(formats) {
-  const gi = formats.includes('gi'), nogi = formats.includes('no-gi');
-  if (gi && nogi) return '<span class="badge b-both">Gi / NoGi</span>';
-  if (gi) return '<span class="badge b-gi">Gi</span>';
+function modeBadge(formats){
+  const gi=formats.includes('gi'),nogi=formats.includes('no-gi');
+  if(gi&&nogi) return '<span class="badge b-both">Gi / NoGi</span>';
+  if(gi) return '<span class="badge b-gi">Gi</span>';
   return '<span class="badge b-nogi">NoGi</span>';
 }
-function beltPill(bl) {
-  const cls = bl==='white'?'belt-white':bl==='blue'?'belt-blue':'belt-purple';
-  const lbl = bl==='white'?'blanco':bl==='blue'?'azul':'morado';
+function beltPill(bl){
+  const cls=bl==='white'?'belt-white':bl==='blue'?'belt-blue':'belt-purple';
+  const lbl=bl==='white'?'blanco':bl==='blue'?'azul':'morado';
   return `<span class="belt-pill ${cls}">${lbl}</span>`;
 }
-function checkSvg() {
-  return `<svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,6 5,9 10,3"/></svg>`;
+function checkSvg(){return `<svg viewBox="0 0 12 12" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,6 5,9 10,3"/></svg>`}
+function fmtDate(dateStr){
+  if(!dateStr) return '';
+  const d=new Date(dateStr+'T00:00:00');
+  return d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'});
 }
-function fmtDate(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr + 'T00:00:00');
-  return d.toLocaleDateString('es-ES', { day:'numeric', month:'short', year:'numeric' });
-}
-function todayStr() {
-  return new Date().toISOString().slice(0,10);
-}
-function thisMonthSessions() {
-  const now = new Date();
-  return STATE.sessions.filter(s => {
-    const d = new Date(s.date + 'T00:00:00');
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+function todayStr(){return new Date().toISOString().slice(0,10)}
+function thisMonthSessions(){
+  const now=new Date();
+  return STATE.sessions.filter(s=>{
+    const d=new Date(s.date+'T00:00:00');
+    return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
   });
 }
 
 // ═══════════════════════════════════════════════════════
 // ONBOARDING
 // ═══════════════════════════════════════════════════════
-function renderOnboarding() {
-  const el = document.getElementById('onboarding-banner');
-  if (!el) return;
-  if (STATE.onboarding_dismissed) { el.innerHTML = ''; return; }
+function renderOnboarding(){
+  const el=document.getElementById('onboarding-banner');
+  if(!el) return;
+  if(STATE.onboarding_dismissed){el.innerHTML='';return;}
 
-  const hasProfile = STATE.profile.name.trim() !== '';
-  const hasSessions = STATE.sessions.length > 0;
-  const hasTecnicas = Object.values(STATE.techniques).some(t => t.seen);
+  const hasProfile=STATE.profile.name.trim()!=='';
+  const hasSessions=STATE.sessions.length>0;
+  const hasTecnicas=Object.values(STATE.techniques).some(t=>t.seen);
 
-  const steps = [
-    {
-      title: 'Configura tu perfil',
-      desc: 'Añade tu nombre, academia, cinturón y fecha de inicio.',
-      done: hasProfile,
-      action: "openModal('edit-profile')",
-      actionLabel: 'Ir al perfil →'
-    },
-    {
-      title: 'Registra tu primera sesión',
-      desc: 'Anota el entreno de hoy — tipo, duración y notas rápidas.',
-      done: hasSessions,
-      action: "openModal('add-session')",
-      actionLabel: 'Añadir sesión →'
-    },
-    {
-      title: 'Marca tus primeras técnicas',
-      desc: 'Ve a Técnicas y marca con ○ las que ya has visto en clase.',
-      done: hasTecnicas,
-      action: "switchView('tecnicas')",
-      actionLabel: 'Ver técnicas →'
-    },
+  const steps=[
+    {title:'Configura tu perfil',desc:'Añade tu nombre, academia, cinturón y fecha de inicio.',done:hasProfile,action:"openModal('edit-profile')",label:'Ir al perfil →'},
+    {title:'Registra tu primera sesión',desc:'Anota el entreno de hoy — tipo, duración y feeling.',done:hasSessions,action:"openModal('add-session')",label:'Añadir sesión →'},
+    {title:'Marca tus primeras técnicas',desc:'Ve a Técnicas y toca el ○ en las que ya has visto en clase.',done:hasTecnicas,action:"switchView('tecnicas')",label:'Ver técnicas →'},
   ];
 
-  const allDone = steps.every(s => s.done);
-  if (allDone) {
-    STATE.onboarding_dismissed = true;
-    saveState();
-    el.innerHTML = '';
-    return;
-  }
+  if(steps.every(s=>s.done)){STATE.onboarding_dismissed=true;saveState();el.innerHTML='';return;}
 
-  el.innerHTML = `<div class="onboarding-banner">
+  el.innerHTML=`<div class="onboarding-banner">
     <div class="ob-title">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
       Primeros pasos
     </div>
     <div class="ob-steps">
-      ${steps.map((s, i) => `
-        <div class="ob-step${s.done ? ' done' : ''}">
-          <div class="ob-num">${s.done ? '✓' : i+1}</div>
-          <div class="ob-step-body">
+      ${steps.map((s,i)=>`
+        <div class="ob-step${s.done?' done':''}">
+          <div class="ob-num">${s.done?'✓':i+1}</div>
+          <div>
             <div class="ob-step-title">${s.title}</div>
             <div class="ob-step-desc">${s.desc}</div>
-            ${!s.done ? `<span class="ob-step-action" onclick="${s.action}">${s.actionLabel}</span>` : ''}
+            ${!s.done?`<span class="ob-step-action" onclick="${s.action}">${s.label}</span>`:''}
           </div>
-        </div>
-      `).join('')}
+        </div>`).join('')}
     </div>
     <span class="ob-dismiss" onclick="dismissOnboarding()">Cerrar guía</span>
   </div>`;
 }
 
-function dismissOnboarding() {
-  STATE.onboarding_dismissed = true;
-  saveState();
-  renderOnboarding();
-}
+function dismissOnboarding(){STATE.onboarding_dismissed=true;saveState();renderOnboarding();}
 
 // ═══════════════════════════════════════════════════════
-// PROGRESO VIEW
+// PROGRESO
 // ═══════════════════════════════════════════════════════
-function renderProgreso() {
-  const p = STATE.profile;
-  const name = p.name || 'tu BJJ journey';
+function renderProgreso(){
+  const p=STATE.profile;
+  document.getElementById('progreso-title').textContent=p.name?`Hola, ${p.name.split(' ')[0]}`:'Progreso';
+  document.getElementById('progreso-sub').textContent=p.gym?`${p.gym} · ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}`:'Tu camino en el BJJ';
 
-  // Title
-  document.getElementById('progreso-title').textContent = p.name ? `Hola, ${p.name.split(' ')[0]}` : 'Progreso';
-  document.getElementById('progreso-sub').textContent = p.gym ? `${p.gym} · ${new Date().toLocaleDateString('es-ES',{day:'numeric',month:'long',year:'numeric'})}` : 'Tu camino en el BJJ';
+  const monthS=thisMonthSessions();
+  const monthMin=monthS.reduce((sum,s)=>sum+(parseInt(s.duration)||0),0);
+  const monthH=Math.round(monthMin/60*10)/10;
+  const wbNodes=GRAPH.nodes.filter(n=>n.white_belt_priority);
+  const seenWB=wbNodes.filter(n=>STATE.techniques[n.id]?.seen).length;
+  const uniqueDays=new Set(monthS.map(s=>s.date)).size;
 
-  // Stats
-  const monthSessions = thisMonthSessions();
-  const totalMinutes = monthSessions.reduce((sum, s) => sum + (parseInt(s.duration) || 0), 0);
-  const totalHours = Math.round(totalMinutes / 60 * 10) / 10;
-  const wbNodes = GRAPH.nodes.filter(n => n.white_belt_priority);
-  const seenWB = wbNodes.filter(n => STATE.techniques[n.id]?.seen).length;
-
-  document.getElementById('stat-hours').textContent = totalHours || '0';
-  document.getElementById('stat-hours-sub').textContent = monthSessions.length > 0 ? `${monthSessions.length} sesiones este mes` : 'sin sesiones aún';
-  document.getElementById('stat-sessions').textContent = STATE.sessions.length;
-  document.getElementById('stat-sessions-sub').textContent = STATE.sessions.length > 0 ? `desde el inicio` : 'empieza a entrenar';
-  document.getElementById('stat-tecnicas').textContent = seenWB;
-  document.getElementById('stat-tecnicas-sub').textContent = `de ${wbNodes.length} esenciales blanco`;
-
-  // Streak (unique days this month)
-  const uniqueDays = new Set(monthSessions.map(s => s.date)).size;
-  document.getElementById('stat-streak').textContent = uniqueDays;
+  document.getElementById('stat-hours').textContent=monthH||'0';
+  document.getElementById('stat-hours-sub').textContent=monthS.length>0?`${monthS.length} sesiones este mes`:'sin sesiones aún';
+  document.getElementById('stat-sessions').textContent=STATE.sessions.length;
+  document.getElementById('stat-sessions-sub').textContent=STATE.sessions.length>0?'desde el inicio':'empieza a entrenar';
+  document.getElementById('stat-tecnicas').textContent=seenWB;
+  document.getElementById('stat-tecnicas-sub').textContent=`de ${wbNodes.length} esenciales blanco`;
+  document.getElementById('stat-streak').textContent=uniqueDays;
 
   // Progress hero
-  const heroWrap = document.getElementById('progress-hero-wrap');
-  if (p.start) {
-    const allSessions = STATE.sessions;
-    const totalAllMinutes = allSessions.reduce((sum, s) => sum + (parseInt(s.duration) || 0), 0);
-    const sessionHours = Math.round(totalAllMinutes / 60 * 10) / 10;
-    const totalAllHours = Math.round((sessionHours + (p.prior_hours || 0)) * 10) / 10;
-    const target = 250;
-    const pct = Math.min(Math.round(totalAllHours / target * 100), 100);
-    const weeksTraining = Math.max(1, Math.round((new Date() - new Date(p.start)) / (1000*60*60*24*7)));
-    const hrsPerWeek = totalAllHours / weeksTraining;
-    const hrsRemaining = Math.max(0, target - totalAllHours);
-    const monthsLeft = hrsPerWeek > 0 ? Math.round(hrsRemaining / hrsPerWeek / 4.3) : null;
-    const beltLabels2 = { white:'blanco', blue:'azul', purple:'morado', brown:'marrón' };
-    const beltName = beltLabels2[p.belt] || p.belt;
-    const milestonePct = [0, 18, 36, 56, 80, 100];
-    const milestoneLabels = ['Blanco', '1er grado', '2º grado', '3er grado', '4º grado', 'Azul'];
-    const milestoneH = ['0h', '~45h', '~90h', '~140h', '~200h', '~250h'];
-    const subText = pct >= 100
-      ? '¡Objetivo alcanzado! Habla con tu profe'
-      : monthsLeft !== null && monthsLeft > 0
-        ? `A este ritmo, en aproximadamente ${monthsLeft} ${monthsLeft === 1 ? 'mes' : 'meses'} llegas al azul`
-        : `Llevas el ${pct}% del camino`;
+  const heroWrap=document.getElementById('progress-hero-wrap');
+  if(p.start){
+    const allMin=STATE.sessions.reduce((sum,s)=>sum+(parseInt(s.duration)||0),0);
+    const sessionH=Math.round(allMin/60*10)/10;
+    const totalH=Math.round((sessionH+(p.prior_hours||0))*10)/10;
+    const target=250;
+    const pct=Math.min(Math.round(totalH/target*100),100);
+    const weeks=Math.max(1,Math.round((new Date()-new Date(p.start))/(1000*60*60*24*7)));
+    const hpw=totalH/weeks;
+    const remaining=Math.max(0,target-totalH);
+    const months=hpw>0?Math.round(remaining/hpw/4.3):null;
+    const beltMap={white:'blanco',blue:'azul',purple:'morado',brown:'marrón'};
+    const beltName=beltMap[p.belt]||p.belt;
+    const milestonePct=[0,18,36,56,80,100];
+    const milestoneLabels=['Blanco','1er grado','2º grado','3er grado','4º grado','Azul'];
+    const milestoneH=['0h','~45h','~90h','~140h','~200h','~250h'];
+    const subText=pct>=100?'¡Objetivo alcanzado! Habla con tu profe':months&&months>0?`A este ritmo, en aproximadamente ${months} ${months===1?'mes':'meses'} llegas al azul`:`Llevas el ${pct}% del camino`;
 
-    heroWrap.innerHTML = `<div class="progress-hero" style="--prog:${pct}%">
+    heroWrap.innerHTML=`<div class="progress-hero" style="--prog:${pct}%">
       <div class="ph-row">
         <div>
-          <div class="ph-label">Camino al cinturón ${beltName === 'blanco' ? 'azul' : 'siguiente'}</div>
-          <div class="ph-title"><span>${totalAllHours}h</span> de ${target}h estimadas</div>
+          <div class="ph-label">Camino al cinturón ${beltName==='blanco'?'azul':'siguiente'}</div>
+          <div class="ph-title"><span>${totalH}h</span> de ${target}h estimadas</div>
           <div class="ph-sub">${subText}</div>
         </div>
         <div class="ph-pct">${pct}%</div>
       </div>
       <div class="ph-bar-wrap"><div class="ph-bar-fill" style="width:${pct}%"></div></div>
       <div class="ph-milestones">
-        ${milestoneLabels.map((l, i) => `
-          <div class="ph-mile${milestonePct[i] <= pct ? ' done' : i > 0 && milestonePct[i-1] <= pct ? ' next' : ''}">
+        ${milestoneLabels.map((l,i)=>`
+          <div class="ph-mile${milestonePct[i]<=pct?' done':i>0&&milestonePct[i-1]<=pct?' next':''}">
             <div class="ph-mile-dot"></div>
             <div class="ph-mile-label">${l}<br><span class="ph-mile-h">${milestoneH[i]}</span></div>
-          </div>
-        `).join('')}
+          </div>`).join('')}
       </div>
     </div>`;
   } else {
-    heroWrap.innerHTML = `<div style="background:var(--bg2);border:1px dashed var(--border3);border-radius:var(--r);padding:24px 28px;margin-bottom:20px;text-align:center">
+    heroWrap.innerHTML=`<div style="background:var(--bg2);border:1px dashed var(--border3);border-radius:var(--r);padding:24px 28px;margin-bottom:20px;text-align:center">
       <div style="font-size:13px;color:var(--muted2);margin-bottom:10px">Configura tu perfil para ver tu barra de progreso</div>
       <button class="empty-cta" onclick="openModal('edit-profile')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
@@ -1129,11 +838,11 @@ function renderProgreso() {
   }
 
   // Recent sessions
-  const recentWrap = document.getElementById('recent-sessions-wrap');
-  const typeColors = { Gi:'var(--purple)', NoGi:'var(--green)', 'Open mat':'var(--orange)', Gym:'var(--amber)', 'Competición':'#E05050' };
+  const recentWrap=document.getElementById('recent-sessions-wrap');
+  const typeColors={Gi:'var(--purple)',NoGi:'var(--green)','Open mat':'var(--orange)',Gym:'var(--amber)','Competición':'#E05050'};
 
-  if (STATE.sessions.length === 0) {
-    recentWrap.innerHTML = `<div class="empty-state">
+  if(STATE.sessions.length===0){
+    recentWrap.innerHTML=`<div class="empty-state">
       <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
       <div class="empty-title">Sin sesiones todavía</div>
       <div class="empty-desc">Registra tu primer entreno para empezar a ver tu progreso.</div>
@@ -1143,41 +852,35 @@ function renderProgreso() {
       </button>
     </div>`;
   } else {
-    const recent = [...STATE.sessions].sort((a,b) => b.date.localeCompare(a.date)).slice(0,4);
+    const recent=[...STATE.sessions].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,4);
+    const monthSess=thisMonthSessions();
+    const typeHours={};
+    monthSess.forEach(s=>{typeHours[s.type]=(typeHours[s.type]||0)+(parseInt(s.duration)||0);});
+    const maxH=Math.max(...Object.values(typeHours),1);
+    const typeOrder=['Gi','NoGi','Open mat','Gym','Competición'];
+    const barsHtml=typeOrder.filter(t=>typeHours[t]).map(t=>{
+      const h=Math.round(typeHours[t]/60*10)/10;
+      const pct=Math.round(typeHours[t]/maxH*100);
+      return `<div class="bar-row"><div class="bar-label">${t}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${typeColors[t]}"></div></div><div class="bar-val">${h}h</div></div>`;
+    }).join('')||'<div style="font-size:12px;color:var(--muted2)">Sin sesiones este mes</div>';
 
-    // Hours by type this month
-    const monthS = thisMonthSessions();
-    const typeOrder = ['Gi','NoGi','Open mat','Gym','Competición'];
-    const typeHours = {};
-    monthS.forEach(s => { typeHours[s.type] = (typeHours[s.type]||0) + (parseInt(s.duration)||0); });
-    const maxTypeH = Math.max(...Object.values(typeHours), 1);
-    const barsHtml = typeOrder.filter(t => typeHours[t]).map(t => {
-      const h = Math.round(typeHours[t]/60*10)/10;
-      const pct = Math.round(typeHours[t]/maxTypeH*100);
-      return `<div class="bar-row">
-        <div class="bar-label">${t}</div>
-        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${typeColors[t]}"></div></div>
-        <div class="bar-val">${h}h</div>
-      </div>`;
-    }).join('') || '<div style="font-size:12px;color:var(--muted2)">Sin sesiones este mes</div>';
-
-    recentWrap.innerHTML = `<div class="two-col">
+    recentWrap.innerHTML=`<div class="two-col">
       <div>
         <div class="col-title">Últimas sesiones</div>
         <div style="display:flex;flex-direction:column;gap:8px">
-          ${recent.map(s => {
-            const feelingHtml = s.feeling ? `<span style="font-size:14px" title="${FEELINGS[s.feeling]||''}">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>` : '';
-            return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:flex-start;gap:12px">
+          ${recent.map(s=>{
+            const feelHtml=s.feeling?`<span style="font-size:14px">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>`:'';
+            return `<div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;cursor:pointer" onclick="switchView('sesiones')">
               <div style="width:8px;height:8px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'};margin-top:5px;flex-shrink:0"></div>
               <div style="flex:1;min-width:0">
                 <div style="font-size:14px;font-weight:500;display:flex;align-items:center;gap:8px">${s.type}${s.position?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${s.position}</span>`:''}</div>
-                <div style="font-size:11px;color:var(--muted2);margin-top:2px;display:flex;align-items:center;gap:8px">${fmtDate(s.date)}${feelingHtml}</div>
-                ${s.notes?`<div style="font-size:11px;color:var(--muted2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.notes}</div>`:''}
+                <div style="font-size:11px;color:var(--muted2);margin-top:2px;display:flex;align-items:center;gap:8px">${fmtDate(s.date)}${feelHtml}</div>
+                ${s.notes&&!s.from_gcal?`<div style="font-size:11px;color:var(--muted2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.notes}</div>`:''}
               </div>
               <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;flex-shrink:0">${Math.round((parseInt(s.duration)||0)/60*10)/10}h</div>
             </div>`;
           }).join('')}
-          ${STATE.sessions.length > 4 ? `<div style="text-align:center;padding:6px 0"><span style="font-size:12px;color:var(--orange);cursor:pointer" onclick="switchView('sesiones')">Ver todas →</span></div>` : ''}
+          ${STATE.sessions.length>4?`<div style="text-align:center;padding:6px 0"><span style="font-size:12px;color:var(--orange);cursor:pointer" onclick="switchView('sesiones')">Ver todas →</span></div>`:''}
         </div>
       </div>
       <div>
@@ -1191,239 +894,185 @@ function renderProgreso() {
 }
 
 // ═══════════════════════════════════════════════════════
-// SESSIONS VIEW
+// SESSIONS
 // ═══════════════════════════════════════════════════════
-function renderSessions() {
-  const el = document.getElementById('sessions-list');
-  const sub = document.getElementById('sesiones-sub');
-  const totalMinutes = STATE.sessions.reduce((sum,s) => sum + (parseInt(s.duration)||0), 0);
-  const totalHours = Math.round(totalMinutes/60*10)/10;
-  sub.textContent = `${STATE.sessions.length} sesiones · ${totalHours}h en total`;
+function renderSessions(){
+  const el=document.getElementById('sessions-list');
+  const sub=document.getElementById('sesiones-sub');
+  const totalMin=STATE.sessions.reduce((sum,s)=>sum+(parseInt(s.duration)||0),0);
+  const totalH=Math.round(totalMin/60*10)/10;
+  sub.textContent=`${STATE.sessions.length} sesiones · ${totalH}h en total`;
 
-  if (STATE.sessions.length === 0) {
-    el.innerHTML = `<div class="empty-state">
+  if(STATE.sessions.length===0){
+    el.innerHTML=`<div class="empty-state">
       <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
       <div class="empty-title">Sin sesiones todavía</div>
-      <div class="empty-desc">Cada entreno que registres quedará aquí. Pulsa el botón naranja para añadir el primero.</div>
+      <div class="empty-desc">Pulsa el botón naranja para añadir tu primer entreno.</div>
     </div>`;
     return;
   }
 
-  const sorted = [...STATE.sessions].sort((a,b) => b.date.localeCompare(a.date));
-  // Build a map from sorted index to real STATE.sessions index
-  const sortedToReal = sorted.map(s => STATE.sessions.indexOf(s));
-  const typeColors = { Gi:'var(--purple)', NoGi:'var(--green)', 'Open mat':'var(--orange)', Gym:'var(--amber)', 'Competición':'#E05050' };
+  const sorted=[...STATE.sessions].sort((a,b)=>b.date.localeCompare(a.date));
+  const sortedToReal=sorted.map(s=>STATE.sessions.indexOf(s));
+  const typeColors={Gi:'var(--purple)',NoGi:'var(--green)','Open mat':'var(--orange)',Gym:'var(--amber)','Competición':'#E05050'};
 
-  el.innerHTML = `<div class="sessions-grid">
-    ${sorted.map((s, sortedIdx) => {
-      const realIdx = sortedToReal[sortedIdx];
-      const feelingHtml = s.feeling ? `<span style="font-size:18px" title="${FEELINGS[s.feeling]||''}">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>` : '';
-      const posHtml = s.position ? `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${s.position}</span>` : '';
-      const gcalBadge = s.from_gcal ? `<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:rgba(76,175,138,.12);color:var(--green);border:1px solid rgba(76,175,138,.25)">📅 Calendar</span>` : '';
-      return `
-      <div class="session-full" onclick="openSessionDetail(${realIdx})" style="cursor:pointer">
+  el.innerHTML=`<div class="sessions-grid">
+    ${sorted.map((s,si)=>{
+      const realIdx=sortedToReal[si];
+      const feelHtml=s.feeling?`<span style="font-size:18px">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>`:'';
+      const posHtml=s.position?`<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${s.position}</span>`:'';
+      const gcalBadge=s.from_gcal?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:rgba(76,175,138,.12);color:var(--green);border:1px solid rgba(76,175,138,.25)">📅 Calendar</span>`:'';
+      return `<div class="session-full" onclick="openSessionDetail(${realIdx})" style="cursor:pointer">
         <div class="sf-header">
           <div class="sf-left">
             <div class="type-dot" style="background:${typeColors[s.type]||'var(--muted2)'}"></div>
             <div class="sf-title">${s.type}</div>
           </div>
           <div style="display:flex;align-items:center;gap:10px">
-            ${feelingHtml}
+            ${feelHtml}
             <div class="sf-dur">${Math.round((parseInt(s.duration)||0)/60*10)/10}h</div>
             <span style="font-size:11px;color:var(--muted2);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r2)" onclick="event.stopPropagation();deleteSession(${realIdx})">✕</span>
           </div>
         </div>
-        <div class="sf-date" style="display:flex;align-items:center;gap:8px">
-          ${fmtDate(s.date)}
-          ${posHtml}
-          ${gcalBadge}
-        </div>
-        ${s.notes ? `<div class="sf-note">${s.notes}</div>` : `<div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">Toca para añadir detalles →</div>`}
-      </div>`
+        <div class="sf-date">${fmtDate(s.date)}${posHtml}${gcalBadge}</div>
+        ${s.notes?`<div class="sf-note">${s.notes}</div>`:`<div style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic">Toca para añadir detalles →</div>`}
+      </div>`;
     }).join('')}
   </div>`;
 }
 
-// ═══════════════════════════════════════════════════════
-// SESSION DETAIL PANEL
-// ═══════════════════════════════════════════════════════
-function openSessionDetail(idx) {
-  const s = STATE.sessions[idx];
-  if (!s) { console.warn('Session not found at index', idx); return; }
+let currentStar=0, currentPos='';
+const FEELINGS={5:'🔥 En llamas',4:'💪 Fuerte',3:'😐 Normal',2:'😴 Cansado',1:'🤕 Roto'};
 
-  const typeColors = { Gi:'var(--purple)', NoGi:'var(--green)', 'Open mat':'var(--orange)', Gym:'var(--amber)', 'Competición':'#E05050' };
-  const types = ['Gi','NoGi','Open mat','Gym','Competición'];
-  const positions = ['De pie','Guardia cerrada','Guardia abierta','Half guard','Side control','Montada','Espalda','General / Sparring'];
-  const feelingEmojis = ['🤕','😴','😐','💪','🔥'];
-  const feelingLabels = ['Roto','Cansado','Normal','Fuerte','En llamas'];
-
-  const typePills = types.map(t =>
-    `<button class="type-pill${s.type===t?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'type','${t}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">${t}</button>`
-  ).join('');
-
-  const positionPills = positions.map(p =>
-    `<button class="type-pill${s.position===p?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'position','${p}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">${p}</button>`
-  ).join('');
-
-  const feelingBtns = feelingEmojis.map((e, i) =>
-    `<button class="feeling-btn${s.feeling===(i+1)?' sel':''}" onclick="updateSessionField(${idx},'feeling',${i+1});document.querySelectorAll('#sdp-feelings .feeling-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${e}</button>`
-  ).join('');
-
-  const panel = document.getElementById('detail-panel');
-  const content = document.getElementById('detail-content');
-
-  content.innerHTML = `
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      <div style="width:10px;height:10px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'}"></div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;line-height:1">${fmtDate(s.date)}</div>
-    </div>
-    <div style="font-size:12px;color:var(--muted2);margin-bottom:18px">${s.from_gcal ? '📅 Importado de Google Calendar' : 'Sesión manual'}</div>
-
-    <div class="dp-section">Tipo</div>
-    <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${typePills}</div>
-
-    <div class="dp-section">Duración</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-      <input type="number" id="sdp-duration" value="${s.duration || ''}" min="1" inputmode="numeric"
-        style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 10px;font-size:14px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
-        oninput="updateSessionField(${idx},'duration',parseInt(this.value)||0);document.getElementById('sdp-dur-label').textContent=Math.round((parseInt(this.value)||0)/60*10)/10+'h'"
-        onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
-      <span id="sdp-dur-label" style="font-size:13px;color:var(--muted2)">${Math.round((s.duration||0)/60*10)/10}h</span>
-    </div>
-
-    <div class="dp-section">Feeling</div>
-    <div class="feeling-btns" id="sdp-feelings">${feelingBtns}</div>
-
-    <div class="dp-section">Posición trabajada</div>
-    <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${positionPills}</div>
-
-    <div class="dp-section">Notas</div>
-    <textarea class="dp-notes-field" placeholder="Qué trabajaste, qué salió bien, qué mejorar..."
-      oninput="updateSessionField(${idx},'notes',this.value)">${s.notes || ''}</textarea>
-
-    <div style="margin-top:18px">
-      <button onclick="deleteSession(${idx});closeDetail()" style="width:100%;padding:10px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:13px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer">
-        Eliminar sesión
-      </button>
-    </div>
-  `;
-
-  panel.classList.add('open');
-}
-
-function updateSessionField(idx, field, value) {
-  if (!STATE.sessions[idx]) return;
-  STATE.sessions[idx][field] = value;
-  saveState();
-  saveSessionToSupabase(STATE.sessions[idx]);
-  renderSessions();
-  if (field === 'duration') { renderProgreso(); updateSidebar(); }
-}
-let currentPos = '';
-
-const FEELINGS = { 5:'🔥 En llamas', 4:'💪 Fuerte', 3:'😐 Normal', 2:'😴 Cansado', 1:'🤕 Roto' };
-
-function setFeeling(btn) {
-  currentStar = parseInt(btn.dataset.v);
-  document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('sel'));
+function setFeeling(btn){
+  currentStar=parseInt(btn.dataset.v);
+  document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');
-  document.getElementById('feeling-label').textContent = btn.dataset.label;
+  document.getElementById('feeling-label').textContent=btn.dataset.label;
 }
 
-function selPos(btn) {
-  document.querySelectorAll('#position-pills .type-pill').forEach(p => p.classList.remove('sel'));
+function selPos(btn){
+  document.querySelectorAll('#position-pills .type-pill').forEach(p=>p.classList.remove('sel'));
   btn.classList.add('sel');
-  currentPos = btn.textContent;
+  currentPos=btn.textContent;
 }
 
-function saveSession() {
-  const date = document.getElementById('session-date').value || todayStr();
-  const type = document.querySelector('.type-pill.sel:not(#position-pills .type-pill)')?.textContent || 'Gi';
-  const duration = document.getElementById('session-duration').value;
-  const notes = document.getElementById('session-notes').value.trim();
+function saveSession(){
+  const date=document.getElementById('session-date').value||todayStr();
+  const type=document.querySelector('#type-pills-main .type-pill.sel')?.textContent||'Gi';
+  const duration=document.getElementById('session-duration').value;
+  const notes=document.getElementById('session-notes').value.trim();
+  if(!duration||parseInt(duration)<1){document.getElementById('session-duration').focus();return;}
 
-  if (!duration || parseInt(duration) < 1) {
-    document.getElementById('session-duration').focus();
-    return;
-  }
-
-  const newSession = {
-    date,
-    type,
-    duration: parseInt(duration),
-    feeling: currentStar || null,
-    position: currentPos || null,
-    notes
-  };
-  STATE.sessions.push(newSession);
+  STATE.sessions.push({date,type,duration:parseInt(duration),feeling:currentStar||null,position:currentPos||null,notes});
   saveState();
-  saveSessionToSupabase(newSession);
   closeModal('add-session');
   renderSessions();
   renderProgreso();
   updateSidebar();
 
-  // Reset form
-  currentStar = 0;
-  currentPos = '';
-  document.getElementById('session-duration').value = '';
-  document.getElementById('session-notes').value = '';
-  document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('sel'));
-  if(document.getElementById('feeling-label')) document.getElementById('feeling-label').textContent = '';
-  document.querySelectorAll('#position-pills .type-pill').forEach(p => p.classList.remove('sel'));
+  currentStar=0;currentPos='';
+  document.getElementById('session-duration').value='';
+  document.getElementById('session-notes').value='';
+  document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
+  if(document.getElementById('feeling-label')) document.getElementById('feeling-label').textContent='';
+  document.querySelectorAll('#position-pills .type-pill').forEach(p=>p.classList.remove('sel'));
 }
 
-function deleteSession(idx) {
-  const session = STATE.sessions[idx];
-  if (session?.id) deleteSessionFromSupabase(session.id);
-  STATE.sessions.splice(idx, 1);
+function deleteSession(idx){
+  STATE.sessions.splice(idx,1);
   saveState();
   renderSessions();
   renderProgreso();
   updateSidebar();
 }
 
+// SESSION DETAIL PANEL
+function openSessionDetail(idx){
+  const s=STATE.sessions[idx];
+  if(!s) return;
+  const typeColors={Gi:'var(--purple)',NoGi:'var(--green)','Open mat':'var(--orange)',Gym:'var(--amber)','Competición':'#E05050'};
+  const types=['Gi','NoGi','Open mat','Gym','Competición'];
+  const positions=['De pie','Guardia cerrada','Guardia abierta','Half guard','Side control','Montada','Espalda','General / Sparring'];
+  const feelingEmojis=['🤕','😴','😐','💪','🔥'];
+  const feelingLabels=['Roto','Cansado','Normal','Fuerte','En llamas'];
+
+  const typePills=types.map(t=>`<button class="type-pill${s.type===t?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'type','${t}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">${t}</button>`).join('');
+  const positionPills=positions.map(p=>`<button class="type-pill${s.position===p?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'position','${p}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${p}</button>`).join('');
+  const feelingBtns=feelingEmojis.map((e,i)=>`<button class="feeling-btn${s.feeling===(i+1)?' sel':''}" onclick="updateSessionField(${idx},'feeling',${i+1});document.querySelectorAll('#sdp-feelings .feeling-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${e}</button>`).join('');
+
+  document.getElementById('detail-content').innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <div style="width:10px;height:10px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'}"></div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;line-height:1">${fmtDate(s.date)}</div>
+    </div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:18px">${s.from_gcal?'📅 Importado de Google Calendar':'Sesión manual'}</div>
+    <div class="dp-section">Tipo</div>
+    <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${typePills}</div>
+    <div class="dp-section">Duración</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <input type="number" id="sdp-duration" value="${s.duration||''}" min="1" inputmode="numeric"
+        style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 10px;font-size:14px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+        oninput="updateSessionField(${idx},'duration',parseInt(this.value)||0);document.getElementById('sdp-dur-label').textContent=Math.round((parseInt(this.value)||0)/60*10)/10+'h'"
+        onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
+      <span id="sdp-dur-label" style="font-size:13px;color:var(--muted2)">${Math.round((s.duration||0)/60*10)/10}h</span>
+    </div>
+    <div class="dp-section">Feeling</div>
+    <div class="feeling-btns" id="sdp-feelings">${feelingBtns}</div>
+    <div class="dp-section">Posición trabajada</div>
+    <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${positionPills}</div>
+    <div class="dp-section">Notas</div>
+    <textarea class="dp-notes-field" placeholder="Qué trabajaste, qué salió bien, qué mejorar..." oninput="updateSessionField(${idx},'notes',this.value)">${s.notes||''}</textarea>
+    <div style="margin-top:18px">
+      <button onclick="deleteSession(${idx});closeDetail()" style="width:100%;padding:10px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:13px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer">Eliminar sesión</button>
+    </div>`;
+
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function updateSessionField(idx,field,value){
+  if(!STATE.sessions[idx]) return;
+  STATE.sessions[idx][field]=value;
+  saveState();
+  renderSessions();
+  if(field==='duration'){renderProgreso();updateSidebar();}
+}
+
 // ═══════════════════════════════════════════════════════
 // ENCYCLOPEDIA
 // ═══════════════════════════════════════════════════════
-let currentFilter = 'all';
-let activeDetailId = null;
+let currentFilter='all', activeDetailId=null;
 
-function renderEnc(filter) {
-  currentFilter = filter;
-  const container = document.getElementById('enc-container');
-  const total = GRAPH.nodes.length;
-  const totalSeen = GRAPH.nodes.filter(n => STATE.techniques[n.id]?.seen).length;
-  const wb = GRAPH.nodes.filter(n => n.white_belt_priority);
-  const wbSeen = wb.filter(n => STATE.techniques[n.id]?.seen).length;
+function renderEnc(filter){
+  currentFilter=filter;
+  const container=document.getElementById('enc-container');
+  const total=GRAPH.nodes.length;
+  const totalSeen=GRAPH.nodes.filter(n=>STATE.techniques[n.id]?.seen).length;
+  const wb=GRAPH.nodes.filter(n=>n.white_belt_priority);
+  const wbSeen=wb.filter(n=>STATE.techniques[n.id]?.seen).length;
 
-  let html = `<div class="enc-topbar">
-    <div class="enc-stats">
-      <span class="enc-stat">Total: <strong>${totalSeen}/${total} vistas</strong></span>
-      <span class="enc-stat hi">Esenciales blanco: <strong>${wbSeen}/${wb.length}</strong></span>
-    </div>
-  </div>`;
+  let html=`<div class="enc-topbar"><div class="enc-stats">
+    <span class="enc-stat">Total: <strong>${totalSeen}/${total} vistas</strong></span>
+    <span class="enc-stat hi">Esenciales blanco: <strong>${wbSeen}/${wb.length}</strong></span>
+  </div></div>`;
 
-  POSITION_MAP.forEach(pos => {
-    let nodes = GRAPH.nodes.filter(n => pos.families.includes(n.family));
-    if (filter === 'priority') nodes = nodes.filter(n => n.white_belt_priority);
-    else if (filter === 'seen') nodes = nodes.filter(n => STATE.techniques[n.id]?.seen);
-    else if (filter === 'unseen') nodes = nodes.filter(n => !STATE.techniques[n.id]?.seen);
-    else if (filter === 'gi') nodes = nodes.filter(n => n.formats.includes('gi'));
-    else if (filter === 'nogi') nodes = nodes.filter(n => n.formats.includes('no-gi'));
-    else if (filter === 'advanced') nodes = nodes.filter(n => n.belt_level !== 'white' || !n.white_belt_priority);
-    if (!nodes.length) return;
+  POSITION_MAP.forEach(pos=>{
+    let nodes=GRAPH.nodes.filter(n=>pos.families.includes(n.family));
+    if(filter==='priority') nodes=nodes.filter(n=>n.white_belt_priority);
+    else if(filter==='seen') nodes=nodes.filter(n=>STATE.techniques[n.id]?.seen);
+    else if(filter==='unseen') nodes=nodes.filter(n=>!STATE.techniques[n.id]?.seen);
+    else if(filter==='gi') nodes=nodes.filter(n=>n.formats.includes('gi'));
+    else if(filter==='nogi') nodes=nodes.filter(n=>n.formats.includes('no-gi'));
+    else if(filter==='advanced') nodes=nodes.filter(n=>n.belt_level!=='white'||!n.white_belt_priority);
+    if(!nodes.length) return;
 
-    const seenInPos = nodes.filter(n => STATE.techniques[n.id]?.seen).length;
-    const pct = nodes.length ? Math.round(seenInPos / nodes.length * 100) : 0;
+    const seenInPos=nodes.filter(n=>STATE.techniques[n.id]?.seen).length;
+    const pct=nodes.length?Math.round(seenInPos/nodes.length*100):0;
 
-    html += `<div class="position-block">
+    html+=`<div class="position-block">
       <div class="pos-header">
         <div class="pos-accent" style="background:${pos.color}"></div>
-        <div class="pos-info">
-          <div class="pos-name">${pos.name}</div>
-          <div class="pos-desc">${pos.desc}</div>
-        </div>
+        <div class="pos-info"><div class="pos-name">${pos.name}</div><div class="pos-desc">${pos.desc}</div></div>
         <div class="pos-progress">
           <div class="pos-prog-bar"><div class="pos-prog-fill" style="width:${pct}%"></div></div>
           <div class="pos-count">${seenInPos}/${nodes.length} vistas</div>
@@ -1431,168 +1080,126 @@ function renderEnc(filter) {
       </div>
       <div class="tech-grid">`;
 
-    nodes.forEach(n => {
-      const sc = seenClass(n.id);
-      const seen = STATE.techniques[n.id]?.seen;
-      html += `<div class="enc-card${sc ? ' ' + sc : ''}" id="card-${n.id}" onclick="openDetail('${n.id}')">
+    nodes.forEach(n=>{
+      const sc=seenClass(n.id);
+      const seen=STATE.techniques[n.id]?.seen;
+      html+=`<div class="enc-card${sc?' '+sc:''}" id="card-${n.id}" onclick="openDetail('${n.id}')">
         <div class="enc-card-top">
           ${beltPill(n.belt_level)}
-          <div class="status-ring" onclick="event.stopPropagation();toggleSeen('${n.id}')" title="${seen ? 'Marcar como no vista' : 'Marcar como vista en clase'}">
-            ${seen ? checkSvg() : ''}
+          <div class="status-ring" onclick="event.stopPropagation();toggleSeen('${n.id}')" title="${seen?'Marcar como no vista':'Marcar como vista en clase'}">
+            ${seen?checkSvg():''}
           </div>
         </div>
         <div class="enc-card-type">${n.subtype}</div>
         <div class="enc-card-name">${n.name}</div>
-        <div class="enc-card-desc">${n.desc.slice(0,90)}${n.desc.length > 90 ? '…' : ''}</div>
+        <div class="enc-card-desc">${n.desc.slice(0,90)}${n.desc.length>90?'…':''}</div>
         <div class="enc-card-footer">
           ${modeBadge(n.formats)}
-          ${n.white_belt_priority ? '<span class="badge b-priority">esencial</span>' : ''}
-          ${n.tier === 'advanced_core' ? '<span class="badge b-adv">avanzado</span>' : ''}
+          ${n.white_belt_priority?'<span class="badge b-priority">esencial</span>':''}
+          ${n.tier==='advanced_core'?'<span class="badge b-adv">avanzado</span>':''}
         </div>
       </div>`;
     });
-
-    html += `</div></div>`;
+    html+=`</div></div>`;
   });
-
-  container.innerHTML = html;
+  container.innerHTML=html;
 }
 
-function toggleSeen(id) {
-  const st = STATE.techniques[id];
-  st.seen = !st.seen;
-  if (!st.seen) st.status = 'new';
+function toggleSeen(id){
+  const st=STATE.techniques[id];
+  st.seen=!st.seen;
+  if(!st.seen) st.status='new';
   saveState();
-  saveTechniqueToSupabase(id);
-  if (card) {
-    const sc = seenClass(id);
-    card.className = 'enc-card' + (sc ? ' ' + sc : '');
-    const ring = card.querySelector('.status-ring');
-    if (ring) ring.innerHTML = st.seen ? checkSvg() : '';
+  const card=document.getElementById('card-'+id);
+  if(card){
+    const sc=seenClass(id);
+    card.className='enc-card'+(sc?' '+sc:'');
+    const ring=card.querySelector('.status-ring');
+    if(ring) ring.innerHTML=st.seen?checkSvg():'';
   }
-
-  // Update topbar stats
-  const total = GRAPH.nodes.length;
-  const totalSeen = GRAPH.nodes.filter(n => STATE.techniques[n.id]?.seen).length;
-  const wb = GRAPH.nodes.filter(n => n.white_belt_priority);
-  const wbSeen = wb.filter(n => STATE.techniques[n.id]?.seen).length;
-  const tb = document.querySelector('.enc-topbar');
-  if (tb) tb.innerHTML = `<div class="enc-stats">
+  // Update enc stats
+  const total=GRAPH.nodes.length;
+  const totalSeen=GRAPH.nodes.filter(n=>STATE.techniques[n.id]?.seen).length;
+  const wb=GRAPH.nodes.filter(n=>n.white_belt_priority);
+  const wbSeen=wb.filter(n=>STATE.techniques[n.id]?.seen).length;
+  const tb=document.querySelector('.enc-topbar');
+  if(tb) tb.innerHTML=`<div class="enc-stats">
     <span class="enc-stat">Total: <strong>${totalSeen}/${total} vistas</strong></span>
     <span class="enc-stat hi">Esenciales blanco: <strong>${wbSeen}/${wb.length}</strong></span>
   </div>`;
-
-  if (activeDetailId === id) openDetail(id);
+  if(activeDetailId===id) openDetail(id);
   renderProgreso();
 }
 
-function openDetail(id) {
-  activeDetailId = id;
-  const n = getNode(id);
-  if (!n) return;
-  const st = STATE.techniques[id];
-
-  const chains = (GRAPH.chains[id] || []).map(cid => {
-    const cn = getNode(cid);
-    return cn ? `<span class="dp-chain-tag" onclick="openDetail('${cid}')">${cn.name}</span>` : '';
-  }).join('');
-
-  const relPaths = GRAPH.paths.filter(p => p.sequence.includes(id));
-  const pathsHtml = relPaths.length ? relPaths.map(p => {
-    const seq = p.sequence.map(sid => {
-      const sn = getNode(sid);
-      return sn ? `<span${sid === id ? ' style="color:var(--cream);font-weight:500"' : ''}>${sn.name}</span>` : sid;
-    }).join(' → ');
+function openDetail(id){
+  activeDetailId=id;
+  const n=getNode(id);
+  if(!n) return;
+  const st=STATE.techniques[id];
+  const chains=(GRAPH.chains[id]||[]).map(cid=>{const cn=getNode(cid);return cn?`<span class="dp-chain-tag" onclick="openDetail('${cid}')">${cn.name}</span>`:''}).join('');
+  const relPaths=GRAPH.paths.filter(p=>p.sequence.includes(id));
+  const pathsHtml=relPaths.length?relPaths.map(p=>{
+    const seq=p.sequence.map(sid=>{const sn=getNode(sid);return sn?`<span${sid===id?' style="color:var(--cream);font-weight:500"':''}>${sn.name}</span>`:sid}).join(' → ');
     return `<div class="dp-path"><div class="dp-path-label">${p.label}</div><div class="dp-path-seq">${seq}</div></div>`;
-  }).join('') : '<div class="dp-empty">Sin common paths definidos.</div>';
+  }).join(''):'<div class="dp-empty">Sin common paths definidos.</div>';
+  const statusOpts=[{s:'new',label:'Vista · nueva',dot:'var(--muted2)'},{s:'practicing',label:'Practicando',dot:'var(--amber)'},{s:'flowing',label:'Fluyendo',dot:'var(--green)'},{s:'auto',label:'Automática',dot:'var(--orange)'}];
 
-  const statusOpts = [
-    {s:'new',label:'Vista · nueva',dot:'var(--muted2)'},
-    {s:'practicing',label:'Practicando',dot:'var(--amber)'},
-    {s:'flowing',label:'Fluyendo',dot:'var(--green)'},
-    {s:'auto',label:'Automática',dot:'var(--orange)'},
-  ];
-
-  document.getElementById('detail-content').innerHTML = `
+  document.getElementById('detail-content').innerHTML=`
     <div class="dp-belt-row">${beltPill(n.belt_level)}</div>
     <div class="dp-name">${n.name}</div>
     <div class="dp-type">${n.subtype} · ${n.family.replace('_',' ')}</div>
-    <div class="dp-badges">${modeBadge(n.formats)}${n.white_belt_priority ? '<span class="badge b-priority">esencial blanco</span>' : ''}${n.tier === 'advanced_core' ? '<span class="badge b-adv">nivel avanzado</span>' : ''}</div>
-
-    <button class="dp-seen-toggle ${st.seen ? 'seen-active' : 'unseen'}" onclick="toggleSeen('${id}');setTimeout(()=>openDetail('${id}'),50)">
+    <div class="dp-badges">${modeBadge(n.formats)}${n.white_belt_priority?'<span class="badge b-priority">esencial blanco</span>':''}${n.tier==='advanced_core'?'<span class="badge b-adv">nivel avanzado</span>':''}</div>
+    <button class="dp-seen-toggle ${st.seen?'seen-active':'unseen'}" onclick="toggleSeen('${id}');setTimeout(()=>openDetail('${id}'),50)">
       ${st.seen
-        ? `<svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,6 5,9 10,3"/></svg> Vista en clase`
-        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Marcar como vista en clase`}
+        ?`<svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,6 5,9 10,3"/></svg> Vista en clase`
+        :`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg> Marcar como vista en clase`}
     </button>
-
-    <div class="dp-status-group${st.seen ? ' visible' : ''}">
+    <div class="dp-status-group${st.seen?' visible':''}">
       <div class="dp-status-label">Nivel de dominio</div>
       <div class="dp-status-btns">
-        ${statusOpts.map(o => `
-          <button class="dp-status-btn${st.status === o.s ? ' active-' + o.s : ''}" data-s="${o.s}" onclick="setStatus('${id}',this)">
-            <span class="dp-s-dot" style="background:${o.dot}"></span>${o.label}
-          </button>
-        `).join('')}
+        ${statusOpts.map(o=>`<button class="dp-status-btn${st.status===o.s?' active-'+o.s:''}" data-s="${o.s}" onclick="setStatus('${id}',this)"><span class="dp-s-dot" style="background:${o.dot}"></span>${o.label}</button>`).join('')}
       </div>
     </div>
-
     <div class="dp-section">Descripción</div>
     <div class="dp-desc-text">${n.desc}</div>
-
     <div class="dp-section">Notas personales</div>
-    <textarea class="dp-notes-field" placeholder="Escribe tus notas, detalles, errores clave..." oninput="saveNotes('${id}',this.value)">${st.notes || ''}</textarea>
-
+    <textarea class="dp-notes-field" placeholder="Escribe tus notas, detalles, errores clave..." oninput="saveNotes('${id}',this.value)">${st.notes||''}</textarea>
     <div class="dp-section">Cadenas directas</div>
-    ${chains ? `<div class="dp-chains">${chains}</div>` : '<div class="dp-empty">Sin cadenas definidas.</div>'}
-
+    ${chains?`<div class="dp-chains">${chains}</div>`:'<div class="dp-empty">Sin cadenas definidas.</div>'}
     <div class="dp-section">Common paths</div>
     <div class="dp-paths">${pathsHtml}</div>
-
     <div class="dp-section">Sesiones donde la trabajé</div>
-    <div class="dp-sessions">${(st.sessions || []).length
-      ? st.sessions.map(s => `<div class="dp-session-item">→ <span>${s}</span></div>`).join('')
-      : '<div class="dp-empty">Sin sesiones registradas aún.</div>'}</div>
+    <div class="dp-sessions">${(st.sessions||[]).length?(st.sessions||[]).map(s=>`<div class="dp-session-item">→ <span>${s}</span></div>`).join(''):'<div class="dp-empty">Sin sesiones registradas aún.</div>'}</div>
   `;
   document.getElementById('detail-panel').classList.add('open');
 }
 
-function setStatus(id, btn) {
-  STATE.techniques[id].status = btn.dataset.s;
+function setStatus(id,btn){
+  STATE.techniques[id].status=btn.dataset.s;
   saveState();
-  document.querySelectorAll('.dp-status-btn').forEach(b => b.className = 'dp-status-btn');
-  btn.classList.add('active-' + btn.dataset.s);
-  const card = document.getElementById('card-' + id);
-  if (card) {
-    const sc = seenClass(id);
-    card.className = 'enc-card' + (sc ? ' ' + sc : '');
-  }
+  document.querySelectorAll('.dp-status-btn').forEach(b=>b.className='dp-status-btn');
+  btn.classList.add('active-'+btn.dataset.s);
+  const card=document.getElementById('card-'+id);
+  if(card){const sc=seenClass(id);card.className='enc-card'+(sc?' '+sc:'');}
 }
 
-function saveNotes(id, val) {
-  STATE.techniques[id].notes = val;
-  saveState();
-  saveTechniqueToSupabase(id);
-}
-
-function closeDetail() {
-  document.getElementById('detail-panel').classList.remove('open');
-  activeDetailId = null;
-}
+function saveNotes(id,val){STATE.techniques[id].notes=val;saveState();}
+function closeDetail(){document.getElementById('detail-panel').classList.remove('open');activeDetailId=null;}
 
 // ═══════════════════════════════════════════════════════
-// PROFILE VIEW
+// PROFILE
 // ═══════════════════════════════════════════════════════
-function renderProfile() {
-  const p = STATE.profile;
-  const el = document.getElementById('profile-content');
-  const beltLabels = { white:'Blanco', blue:'Azul', purple:'Morado', brown:'Marrón' };
-  const sexLabels = { M:'Masculino', F:'Femenino', O:'Otro' };
+function renderProfile(){
+  const p=STATE.profile;
+  const el=document.getElementById('profile-content');
+  const beltLabels={white:'Blanco',blue:'Azul',purple:'Morado',brown:'Marrón'};
+  const sexLabels={M:'Masculino',F:'Femenino',O:'Otro'};
 
-  if (!p.name) {
-    el.innerHTML = `<div class="empty-state">
+  if(!p.name){
+    el.innerHTML=`<div class="empty-state">
       <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
       <div class="empty-title">Sin perfil configurado</div>
-      <div class="empty-desc">Añade tu información para personalizar el progreso y los benchmarks.</div>
+      <div class="empty-desc">Añade tu información para personalizar el progreso.</div>
       <button class="empty-cta" onclick="openModal('edit-profile')">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
         Crear perfil
@@ -1601,61 +1208,54 @@ function renderProfile() {
     return;
   }
 
-  const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-  const avatarHtml = p.photo
-    ? `<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()">
-        <div class="profile-avatar" style="padding:0;overflow:hidden"><img src="${p.photo}" class="avatar-photo"></div>
-        <div class="profile-avatar-overlay">Cambiar<br>foto</div>
-       </div>`
-    : `<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()">
-        <div class="profile-avatar">${initials}</div>
-        <div class="profile-avatar-overlay">Añadir<br>foto</div>
-       </div>`;
+  const initials=p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const avatarHtml=p.photo
+    ?`<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()"><div class="profile-avatar" style="padding:0"><img src="${p.photo}" class="avatar-photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div><div class="profile-avatar-overlay">Cambiar foto</div></div>`
+    :`<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()"><div class="profile-avatar">${initials}</div><div class="profile-avatar-overlay">Añadir foto</div></div>`;
 
-  el.innerHTML = `
+  const totalH=Math.round((STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60+(p.prior_hours||0))*10)/10;
+  const sessionH=Math.round(STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60*10)/10;
+  const gradeLabel=p.stripe&&p.stripe!=='0'?`${p.stripe==='1'?'1er':''+p.stripe+'º'} grado`:'0 grados';
+
+  el.innerHTML=`
     <div class="profile-hero">
       ${avatarHtml}
       <div>
         <div class="profile-name">${p.name}</div>
-        <div class="profile-since">${p.gym || '—'} · desde ${fmtDate(p.start) || '—'}</div>
-        <div class="belt-badge-hero"><div class="belt-visual"></div><div class="belt-text">Cinturón ${beltLabels[p.belt] || p.belt} · ${p.stripe || '0'} ${p.stripe === '1' ? 'grado' : 'grados'}</div></div>
+        <div class="profile-since">${p.gym||'—'} · desde ${fmtDate(p.start)||'—'}</div>
+        <div class="belt-badge-hero"><div class="belt-visual"></div><div class="belt-text">Cinturón ${beltLabels[p.belt]||p.belt} · ${gradeLabel}</div></div>
       </div>
     </div>
     <div class="profile-data-grid">
-      <div class="pd-card"><div class="pd-label">Peso</div><div class="pd-value">${p.weight || '—'}<span class="pd-unit">${p.weight ? 'kg' : ''}</span></div></div>
-      <div class="pd-card"><div class="pd-label">Altura</div><div class="pd-value">${p.height || '—'}<span class="pd-unit">${p.height ? 'cm' : ''}</span></div></div>
-      <div class="pd-card"><div class="pd-label">Sexo</div><div class="pd-value" style="font-size:16px;padding-top:6px">${sexLabels[p.sex] || '—'}</div></div>
+      <div class="pd-card"><div class="pd-label">Peso</div><div class="pd-value">${p.weight||'—'}<span class="pd-unit">${p.weight?'kg':''}</span></div></div>
+      <div class="pd-card"><div class="pd-label">Altura</div><div class="pd-value">${p.height||'—'}<span class="pd-unit">${p.height?'cm':''}</span></div></div>
+      <div class="pd-card"><div class="pd-label">Sexo</div><div class="pd-value" style="font-size:16px;padding-top:6px">${sexLabels[p.sex]||'—'}</div></div>
     </div>
     <div class="profile-table">
       <div class="profile-row"><div class="pr-label">Nombre</div><div class="pr-right"><div class="pr-value">${p.name}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
-      <div class="profile-row"><div class="pr-label">Academia</div><div class="pr-right"><div class="pr-value">${p.gym || '—'}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
-      <div class="profile-row"><div class="pr-label">Cinturón</div><div class="pr-right"><div class="pr-value">${beltLabels[p.belt] || p.belt} · ${p.stripe || '0'} ${p.stripe === '1' ? 'grado' : 'grados'}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
-      <div class="profile-row"><div class="pr-label">Horas en sesiones</div><div class="pr-right"><div class="pr-value">${Math.round(STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60*10)/10}h registradas en la app</div></div></div>
-      <div class="profile-row"><div class="pr-label">Horas previas</div><div class="pr-right"><div class="pr-value">${p.prior_hours || 0}h antes de usar la app</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
-      <div class="profile-row" style="background:rgba(235,94,40,.04)"><div class="pr-label" style="font-weight:500;color:var(--cream)">Horas totales</div><div class="pr-right"><div class="pr-value" style="color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700">${Math.round((STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60 + (p.prior_hours||0))*10)/10}h</div></div></div>
+      <div class="profile-row"><div class="pr-label">Academia</div><div class="pr-right"><div class="pr-value">${p.gym||'—'}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
+      <div class="profile-row"><div class="pr-label">Cinturón</div><div class="pr-right"><div class="pr-value">${beltLabels[p.belt]||p.belt} · ${gradeLabel}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
+      <div class="profile-row"><div class="pr-label">Horas en sesiones</div><div class="pr-right"><div class="pr-value">${sessionH}h registradas</div></div></div>
+      <div class="profile-row"><div class="pr-label">Horas previas</div><div class="pr-right"><div class="pr-value">${p.prior_hours||0}h antes de la app</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
+      <div class="profile-row" style="background:rgba(235,94,40,.04)"><div class="pr-label" style="font-weight:500;color:var(--cream)">Horas totales</div><div class="pr-right"><div class="pr-value" style="color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700">${totalH}h</div></div></div>
     </div>
 
     <!-- Integraciones -->
     <div style="margin-top:16px;margin-bottom:16px">
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:10px;font-weight:500">Integraciones</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div style="background:var(--bg2);border:1px solid ${STATE.gcal_token ? 'rgba(76,175,138,.35)' : 'var(--border3)'};border-radius:var(--r);padding:16px">
+        <div style="background:var(--bg2);border:1px solid ${STATE.gcal_token?'rgba(76,175,138,.35)':'var(--border3)'};border-radius:var(--r);padding:16px">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
             <div style="display:flex;align-items:center;gap:8px">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${STATE.gcal_token ? 'var(--green)' : 'var(--muted2)'}" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${STATE.gcal_token?'var(--green)':'var(--muted2)'}" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
               <span style="font-size:13px;font-weight:500">Google Calendar</span>
             </div>
-            ${STATE.gcal_token ? '<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(76,175,138,.15);color:var(--green);font-weight:600">✓ Conectado</span>' : ''}
+            ${STATE.gcal_token?'<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(76,175,138,.15);color:var(--green);font-weight:600">✓ Conectado</span>':''}
           </div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:10px">
-            ${STATE.gcal_token ? `Última sincronización: ${STATE.gcal_last_sync ? new Date(STATE.gcal_last_sync).toLocaleDateString('es-ES') : 'Nunca'}` : 'Suma automáticamente las horas de tus eventos de BJJ desde Google Calendar.'}
-          </div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:10px">${STATE.gcal_token?`Última sync: ${STATE.gcal_last_sync?new Date(STATE.gcal_last_sync).toLocaleDateString('es-ES'):'Nunca'}`:'Suma automáticamente las horas de tus eventos de BJJ.'}</div>
           ${STATE.gcal_token
-            ? `<div style="display:flex;gap:8px">
-                <button onclick="syncGoogleCalendar()" style="flex:1;padding:7px;background:var(--green);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">↻ Sincronizar</button>
-                <button onclick="disconnectGcal()" style="padding:7px 10px;background:none;border:1px solid var(--border2);border-radius:var(--r2);font-size:11px;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">Desconectar</button>
-               </div>`
-            : `<button onclick="connectGoogleCalendar()" style="width:100%;padding:8px;background:var(--orange);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">Conectar Google Calendar</button>`
+            ?`<div style="display:flex;gap:8px"><button onclick="syncGoogleCalendar()" style="flex:1;padding:7px;background:var(--green);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">↻ Sincronizar</button><button onclick="disconnectGcal()" style="padding:7px 10px;background:none;border:1px solid var(--border2);border-radius:var(--r2);font-size:11px;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">Desconectar</button></div>`
+            :`<button onclick="connectGoogleCalendar()" style="width:100%;padding:8px;background:var(--orange);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">Conectar Google Calendar</button>`
           }
         </div>
         <div style="background:var(--bg2);border:1px dashed var(--border3);border-radius:var(--r);padding:16px;opacity:.6">
@@ -1663,430 +1263,305 @@ function renderProfile() {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
             <span style="font-size:13px;font-weight:500">Bot de WhatsApp</span>
           </div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Registra sesiones desde el vestuario en lenguaje natural. La IA lo estructura.</div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Registra sesiones desde el vestuario en lenguaje natural.</div>
           <div style="margin-top:10px;font-size:11px;padding:3px 10px;border-radius:99px;background:var(--bg3);color:var(--muted2);display:inline-block">Fase 2 · Próximamente</div>
         </div>
       </div>
     </div>
-    <div style="margin-top:16px;padding:16px 0;border-top:1px solid var(--border)">
+
+    <!-- Backup -->
+    <div style="padding:16px 0;border-top:1px solid var(--border)">
       <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:12px;font-weight:500">Copia de seguridad</div>
-      <div style="font-size:12px;color:var(--muted2);margin-bottom:14px;line-height:1.6">Antes de actualizar la app, exporta tus datos. Para restaurarlos en una versión nueva, usa importar.</div>
+      <div style="font-size:12px;color:var(--muted2);margin-bottom:14px;line-height:1.6">Exporta tus datos antes de actualizar la app. Importa para restaurarlos.</div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn-primary" style="flex:none;padding:10px 18px;font-size:13px" onclick="exportData()">
-          ↓ Exportar datos
-        </button>
-        <label style="flex:none;padding:10px 18px;font-size:13px;font-weight:600;border:1px solid var(--border2);border-radius:var(--r2);color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">
-          ↑ Importar datos
-          <input type="file" accept=".json" style="display:none" onchange="importData(this)">
-        </label>
+        <button class="btn-primary" style="flex:none;padding:10px 18px;font-size:13px" onclick="exportData()">↓ Exportar datos</button>
+        <label style="flex:none;padding:10px 18px;font-size:13px;font-weight:600;border:1px solid var(--border2);border-radius:var(--r2);color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">↑ Importar datos<input type="file" accept=".json" style="display:none" onchange="importData(this)"></label>
         <button class="btn-danger" onclick="confirmReset()">Borrar todo</button>
       </div>
     </div>`;
 }
 
-function openEditProfile() {
-  const p = STATE.profile;
-  document.getElementById('profile-name').value = p.name || '';
-  document.getElementById('profile-gym').value = p.gym || '';
-  document.getElementById('profile-belt').value = p.belt || 'white';
-  document.getElementById('profile-stripe').value = p.stripe || '0';
-  document.getElementById('profile-start').value = p.start || '';
-  document.getElementById('profile-prior-hours').value = p.prior_hours || '';
-  document.getElementById('profile-weight').value = p.weight || '';
-  document.getElementById('profile-height').value = p.height || '';
-  document.getElementById('profile-sex').value = p.sex || '';
+function openEditProfile(){
+  const p=STATE.profile;
+  document.getElementById('profile-name').value=p.name||'';
+  document.getElementById('profile-gym').value=p.gym||'';
+  document.getElementById('profile-belt').value=p.belt||'white';
+  document.getElementById('profile-stripe').value=p.stripe||'0';
+  document.getElementById('profile-start').value=p.start||'';
+  document.getElementById('profile-prior-hours').value=p.prior_hours||'';
+  document.getElementById('profile-weight').value=p.weight||'';
+  document.getElementById('profile-height').value=p.height||'';
+  document.getElementById('profile-sex').value=p.sex||'';
   openModal('edit-profile');
 }
 
-function saveProfile() {
-  STATE.profile = {
-    name: document.getElementById('profile-name').value.trim(),
-    gym: document.getElementById('profile-gym').value.trim(),
-    belt: document.getElementById('profile-belt').value,
-    stripe: document.getElementById('profile-stripe').value,
-    start: document.getElementById('profile-start').value,
-    prior_hours: parseFloat(document.getElementById('profile-prior-hours').value) || 0,
-    weight: document.getElementById('profile-weight').value,
-    height: document.getElementById('profile-height').value,
-    sex: document.getElementById('profile-sex').value,
-    photo: STATE.profile.photo
+function saveProfile(){
+  STATE.profile={
+    name:document.getElementById('profile-name').value.trim(),
+    gym:document.getElementById('profile-gym').value.trim(),
+    belt:document.getElementById('profile-belt').value,
+    stripe:document.getElementById('profile-stripe').value,
+    start:document.getElementById('profile-start').value,
+    prior_hours:parseFloat(document.getElementById('profile-prior-hours').value)||0,
+    weight:document.getElementById('profile-weight').value,
+    height:document.getElementById('profile-height').value,
+    sex:document.getElementById('profile-sex').value,
+    photo:STATE.profile.photo
   };
   saveState();
-  saveProfileToSupabase();
   closeModal('edit-profile');
   renderProfile();
   renderProgreso();
   updateSidebar();
 }
 
-function updateSidebar() {
-  const p = STATE.profile;
-  const ava = document.getElementById('sidebar-avatar');
-  const nameEl = document.getElementById('sidebar-name');
-  const beltEl = document.getElementById('sidebar-belt');
-  const beltLabels = { white:'Blanco', blue:'Azul', purple:'Morado', brown:'Marrón' };
-
-  if (p.name) {
-    const initials = p.name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    ava.className = 'avatar';
-    ava.style.padding = '0';
-    ava.style.overflow = 'hidden';
-    ava.innerHTML = p.photo
-      ? `<img src="${p.photo}" class="avatar-photo">`
-      : initials;
-    nameEl.textContent = p.name;
-    const totalMinutes = STATE.sessions.reduce((sum,s) => sum + (parseInt(s.duration)||0), 0);
-    const totalHours = Math.round(((totalMinutes / 60) + (p.prior_hours || 0)) * 10) / 10;
-    const stripeLabel = p.stripe && p.stripe !== '0' ? ` · ${p.stripe}º grado` : '';
-    beltEl.textContent = `${beltLabels[p.belt] || 'Blanco'}${stripeLabel} · ${totalHours}h totales`;
+function updateSidebar(){
+  const p=STATE.profile;
+  const ava=document.getElementById('sidebar-avatar');
+  const nameEl=document.getElementById('sidebar-name');
+  const beltEl=document.getElementById('sidebar-belt');
+  const beltLabels={white:'Blanco',blue:'Azul',purple:'Morado',brown:'Marrón'};
+  if(p.name){
+    const initials=p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    ava.className='avatar';
+    ava.style.padding='0';
+    ava.innerHTML=p.photo?`<img src="${p.photo}" class="avatar-photo">`:initials;
+    nameEl.textContent=p.name;
+    const totalMin=STATE.sessions.reduce((sum,s)=>sum+(parseInt(s.duration)||0),0);
+    const totalH=Math.round(((totalMin/60)+(p.prior_hours||0))*10)/10;
+    const stripeLabel=p.stripe&&p.stripe!=='0'?` · ${p.stripe==='1'?'1er':''+p.stripe+'º'} grado`:'';
+    beltEl.textContent=`${beltLabels[p.belt]||'Blanco'}${stripeLabel} · ${totalH}h totales`;
   } else {
-    ava.className = 'avatar empty';
-    ava.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
-    nameEl.textContent = 'Configurar perfil';
-    beltEl.textContent = 'Toca para empezar';
+    ava.className='avatar empty';
+    ava.style.padding='';
+    ava.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
+    nameEl.textContent='Configurar perfil';
+    beltEl.textContent='Toca para empezar';
   }
 }
 
-function confirmReset() {
-  if (confirm('¿Seguro que quieres borrar todos los datos? Esta acción no se puede deshacer.')) {
-    localStorage.removeItem('bjj_journey_v1');
-    location.reload();
+// ═══════════════════════════════════════════════════════
+// PHOTO UPLOAD
+// ═══════════════════════════════════════════════════════
+function uploadPhoto(input){
+  const file=input.files[0];
+  if(!file) return;
+  compressImage(file,200,(base64)=>{
+    STATE.profile.photo=base64;
+    saveState();
+    updateSidebar();
+    renderProfile();
+  });
+  input.value='';
+}
+
+function compressImage(file,maxSize,callback){
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      const scale=Math.min(maxSize/img.width,maxSize/img.height,1);
+      canvas.width=img.width*scale;
+      canvas.height=img.height*scale;
+      const ctx=canvas.getContext('2d');
+      ctx.drawImage(img,0,0,canvas.width,canvas.height);
+      callback(canvas.toDataURL('image/jpeg',0.8));
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════════════════════
+// GOOGLE CALENDAR
+// ═══════════════════════════════════════════════════════
+const GCAL_CLIENT_ID='129790894790-9kcg5ifm2q4cv57dmstand05pd1atr3m.apps.googleusercontent.com';
+const GCAL_SCOPE='https://www.googleapis.com/auth/calendar.readonly';
+const BJJ_KEYWORDS=['bjj','kalmma','jiu-jitsu','jiujitsu','grappling'];
+const BJJ_SECONDARY=['no gi','nogi','sparring','openmat','open mat'];
+
+function isBjjEvent(title){
+  const t=title.toLowerCase();
+  if(BJJ_KEYWORDS.some(k=>t.includes(k))) return true;
+  if(BJJ_SECONDARY.some(k=>t.includes(k))) return true;
+  if(/\bgi\b/.test(t)) return true;
+  return false;
+}
+
+function connectGoogleCalendar(){
+  const params=new URLSearchParams({
+    client_id:GCAL_CLIENT_ID,
+    redirect_uri:'https://hicarlosierra.github.io/bjj-journey/',
+    response_type:'token',
+    scope:GCAL_SCOPE,
+    prompt:'consent',
+    state:'gcal_auth'
+  });
+  window.location.href=`https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+}
+
+function handleGcalCallback(){
+  const hash=window.location.hash;
+  if(!hash.includes('access_token')) return;
+  const params=new URLSearchParams(hash.slice(1));
+  const token=params.get('access_token');
+  const expiresIn=parseInt(params.get('expires_in')||'3600');
+  if(token){
+    STATE.gcal_token=token;
+    STATE.gcal_token_expiry=Date.now()+(expiresIn*1000);
+    saveState();
+    window.history.replaceState({},'',window.location.pathname);
+    syncGoogleCalendar();
+    switchView('perfil');
+  }
+}
+
+async function syncGoogleCalendar(){
+  const token=STATE.gcal_token;
+  if(!token) return;
+  if(STATE.gcal_token_expiry&&Date.now()>STATE.gcal_token_expiry){
+    STATE.gcal_token=null;saveState();renderProfile();
+    alert('La sesión de Google Calendar ha expirado. Vuelve a conectar.');return;
+  }
+  try {
+    const timeMin=new Date();timeMin.setFullYear(timeMin.getFullYear()-2);
+    const timeMax=new Date();timeMax.setMonth(timeMax.getMonth()+1);
+    const url=`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}&maxResults=1000&singleEvents=true&orderBy=startTime`;
+    const res=await fetch(url,{headers:{Authorization:`Bearer ${token}`}});
+    if(!res.ok){
+      if(res.status===401){STATE.gcal_token=null;saveState();renderProfile();alert('Sesión expirada. Reconecta Google Calendar.');}
+      return;
+    }
+    const data=await res.json();
+    const bjjEvents=(data.items||[]).filter(ev=>isBjjEvent(ev.summary||''));
+    const gcalSessions=bjjEvents.map(ev=>{
+      const start=new Date(ev.start.dateTime||ev.start.date);
+      const end=new Date(ev.end.dateTime||ev.end.date);
+      const durationMin=Math.round((end-start)/60000);
+      const title=(ev.summary||'').toLowerCase();
+      let type='Gi';
+      if(title.includes('no gi')||title.includes('nogi')) type='NoGi';
+      else if(title.includes('open mat')||title.includes('openmat')||title.includes('sparring')) type='Open mat';
+      return {id:ev.id,date:start.toISOString().slice(0,10),type,duration:durationMin,notes:ev.summary||'',from_gcal:true};
+    });
+    const manualSessions=STATE.sessions.filter(s=>!s.from_gcal);
+    STATE.sessions=[...manualSessions,...gcalSessions];
+    STATE.gcal_last_sync=new Date().toISOString();
+    saveState();
+    renderProgreso();renderSessions();updateSidebar();renderProfile();
+    alert(`✓ Sincronizado — ${gcalSessions.length} sesiones de BJJ importadas.`);
+  } catch(err){
+    alert('Error al sincronizar. Comprueba tu conexión.');
+  }
+}
+
+function disconnectGcal(){
+  if(!confirm('¿Desconectar Google Calendar? Se eliminarán las sesiones importadas.')) return;
+  STATE.gcal_token=null;STATE.gcal_token_expiry=null;STATE.gcal_last_sync=null;
+  STATE.sessions=STATE.sessions.filter(s=>!s.from_gcal);
+  saveState();renderProfile();renderProgreso();renderSessions();updateSidebar();
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT / IMPORT
+// ═══════════════════════════════════════════════════════
+function exportData(){
+  const blob=new Blob([JSON.stringify({version:'bjj_journey_v1',exported_at:new Date().toISOString(),data:STATE},null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`bjj-journey-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+function importData(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=(e)=>{
+    try {
+      const parsed=JSON.parse(e.target.result);
+      const imported=parsed.data||parsed;
+      if(!imported.profile||!imported.sessions||!imported.techniques){alert('Archivo no válido.');return;}
+      if(confirm(`¿Importar datos de ${parsed.exported_at?new Date(parsed.exported_at).toLocaleDateString('es-ES'):'backup'}? Esto reemplazará los datos actuales.`)){
+        STATE=imported;
+        GRAPH.nodes.forEach(n=>{if(!STATE.techniques[n.id]) STATE.techniques[n.id]={seen:false,status:'new',notes:'',sessions:[]};});
+        if(STATE.onboarding_dismissed===undefined) STATE.onboarding_dismissed=false;
+        if(!STATE.gcal_token) STATE.gcal_token=null;
+        saveState();updateSidebar();renderProgreso();renderEnc(currentFilter);renderSessions();renderProfile();
+        alert('✓ Datos importados correctamente.');
+      }
+    } catch(err){alert('Error al leer el archivo.');}
+    input.value='';
+  };
+  reader.readAsText(file);
+}
+
+function confirmReset(){
+  if(confirm('¿Seguro que quieres borrar todos los datos? Esta acción no se puede deshacer.')){
+    localStorage.removeItem('bjj_journey_v1');location.reload();
   }
 }
 
 // ═══════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════
-document.getElementById('tech-filters').addEventListener('click', e => {
-  const btn = e.target.closest('.filter-pill');
-  if (!btn) return;
-  document.querySelectorAll('#tech-filters .filter-pill').forEach(b => b.classList.remove('active'));
+document.getElementById('tech-filters').addEventListener('click',e=>{
+  const btn=e.target.closest('.filter-pill');
+  if(!btn) return;
+  document.querySelectorAll('#tech-filters .filter-pill').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   renderEnc(btn.dataset.filter);
   closeDetail();
 });
 
-function switchView(id) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  ['snav','mnav'].forEach(p => {
-    document.querySelectorAll(`[id^="${p}-"]`).forEach(n => n.classList.remove('active'));
-    const el = document.getElementById(`${p}-${id}`);
-    if (el) el.classList.add('active');
+function switchView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  ['snav','mnav'].forEach(p=>{
+    document.querySelectorAll(`[id^="${p}-"]`).forEach(n=>n.classList.remove('active'));
+    const el=document.getElementById(`${p}-${id}`);
+    if(el) el.classList.add('active');
   });
-  document.getElementById('view-' + id).classList.add('active');
+  document.getElementById('view-'+id).classList.add('active');
   closeDetail();
-  if (id === 'tecnicas') renderEnc(currentFilter);
-  if (id === 'sesiones') renderSessions();
-  if (id === 'perfil') { renderProfile(); openEditProfileIfEmpty(); }
-  if (id === 'progreso') renderProgreso();
-  document.getElementById('main-content').scrollTop = 0;
+  if(id==='tecnicas') renderEnc(currentFilter);
+  if(id==='sesiones') renderSessions();
+  if(id==='perfil'){renderProfile();if(!STATE.profile.name) setTimeout(()=>openModal('edit-profile'),300);}
+  if(id==='progreso') renderProgreso();
+  document.getElementById('main-content').scrollTop=0;
 }
 
-function openEditProfileIfEmpty() {
-  if (!STATE.profile.name) setTimeout(() => openModal('edit-profile'), 300);
-}
-
-function openModal(name) {
-  document.getElementById('modal-' + name).classList.add('open');
-  if (name === 'add-session') {
-    document.getElementById('session-date').value = todayStr();
-    // Reset type to Gi
-    const typePills = document.querySelectorAll('#modal-add-session .type-pills:first-of-type .type-pill');
-    typePills.forEach((p,i) => p.classList.toggle('sel', i===0));
-    // Reset stars and position
-    currentStar = 0;
-    currentPos = '';
-    document.querySelectorAll('.feeling-btn').forEach(b => b.classList.remove('sel'));
-    if(document.getElementById('feeling-label')) document.getElementById('feeling-label').textContent = '';
-    document.querySelectorAll('#position-pills .type-pill').forEach(p => p.classList.remove('sel'));
-    document.getElementById('session-duration').value = '';
-    document.getElementById('session-notes').value = '';
+function openModal(name){
+  document.getElementById('modal-'+name).classList.add('open');
+  if(name==='add-session'){
+    document.getElementById('session-date').value=todayStr();
+    document.getElementById('session-duration').value='';
+    document.getElementById('session-notes').value='';
+    document.getElementById('type-pills-main').querySelectorAll('.type-pill').forEach((p,i)=>p.classList.toggle('sel',i===0));
+    currentStar=0;currentPos='';
+    document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
+    if(document.getElementById('feeling-label')) document.getElementById('feeling-label').textContent='';
+    document.querySelectorAll('#position-pills .type-pill').forEach(p=>p.classList.remove('sel'));
   }
-  if (name === 'edit-profile') {
-    const p = STATE.profile;
-    document.getElementById('profile-name').value = p.name || '';
-    document.getElementById('profile-gym').value = p.gym || '';
-    document.getElementById('profile-belt').value = p.belt || 'white';
-    document.getElementById('profile-stripe').value = p.stripe || '0';
-    document.getElementById('profile-start').value = p.start || '';
-    document.getElementById('profile-prior-hours').value = p.prior_hours || '';
-    document.getElementById('profile-weight').value = p.weight || '';
-    document.getElementById('profile-height').value = p.height || '';
-    document.getElementById('profile-sex').value = p.sex || '';
+  if(name==='edit-profile'){
+    const p=STATE.profile;
+    document.getElementById('profile-name').value=p.name||'';
+    document.getElementById('profile-gym').value=p.gym||'';
+    document.getElementById('profile-belt').value=p.belt||'white';
+    document.getElementById('profile-stripe').value=p.stripe||'0';
+    document.getElementById('profile-start').value=p.start||'';
+    document.getElementById('profile-prior-hours').value=p.prior_hours||'';
+    document.getElementById('profile-weight').value=p.weight||'';
+    document.getElementById('profile-height').value=p.height||'';
+    document.getElementById('profile-sex').value=p.sex||'';
   }
 }
-function closeModal(name) { document.getElementById('modal-' + name).classList.remove('open'); }
-function selType(btn) {
-  // Only deselect type pills, not position pills
-  btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p => p.classList.remove('sel'));
-  btn.classList.add('sel');
-}
-
-// ═══════════════════════════════════════════════════════
-// EXPORT / IMPORT
-// ═══════════════════════════════════════════════════════
-function exportData() {
-  const data = {
-    version: 'bjj_journey_v1',
-    exported_at: new Date().toISOString(),
-    data: STATE
-  };
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  const date = new Date().toISOString().slice(0,10);
-  a.href = url;
-  a.download = `bjj-journey-backup-${date}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function importData(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    try {
-      const parsed = JSON.parse(e.target.result);
-      const imported = parsed.data || parsed;
-      if (!imported.profile || !imported.sessions || !imported.techniques) {
-        alert('El archivo no parece un backup válido de BJJ Journey.');
-        return;
-      }
-      if (confirm(`¿Importar datos de ${parsed.exported_at ? new Date(parsed.exported_at).toLocaleDateString('es-ES') : 'backup'}? Esto reemplazará los datos actuales.`)) {
-        STATE = imported;
-        // Ensure all technique nodes have state
-        GRAPH.nodes.forEach(n => {
-          if (!STATE.techniques[n.id]) {
-            STATE.techniques[n.id] = { seen: false, status: 'new', notes: '', sessions: [] };
-          }
-        });
-        if (STATE.onboarding_dismissed === undefined) STATE.onboarding_dismissed = false;
-        saveState();
-        updateSidebar();
-        renderProgreso();
-        renderEnc(currentFilter);
-        renderSessions();
-        renderProfile();
-        alert('✓ Datos importados correctamente.');
-      }
-    } catch(err) {
-      alert('Error al leer el archivo. Asegúrate de que es un backup de BJJ Journey.');
-    }
-    input.value = '';
-  };
-  reader.readAsText(file);
-}
-
-// ═══════════════════════════════════════════════════════
-// PHOTO UPLOAD
-// ═══════════════════════════════════════════════════════
-function uploadPhoto(input) {
-  const file = input.files[0];
-  if (!file) return;
-  compressImage(file, 200, (base64) => {
-    STATE.profile.photo = base64;
-    saveState();
-    saveProfileToSupabase();
-    updateSidebar();
-    renderProfile();
-  });
-  input.value = '';
-}
-
-function compressImage(file, maxSize, callback) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      callback(canvas.toDataURL('image/jpeg', 0.8));
-    };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-// ═══════════════════════════════════════════════════════
-// GOOGLE CALENDAR INTEGRATION
-// ═══════════════════════════════════════════════════════
-const GCAL_CLIENT_ID = '129790894790-9kcg5ifm2q4cv57dmstand05pd1atr3m.apps.googleusercontent.com';
-const GCAL_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
-const BJJ_KEYWORDS = ['bjj', 'kalmma', 'jiu-jitsu', 'jiujitsu', 'grappling'];
-const BJJ_SECONDARY = ['no gi', 'nogi', 'sparring', 'openmat', 'open mat'];
-
-// Filter BJJ events - must contain a primary keyword OR secondary keyword with 'gi' standalone
-function isBjjEvent(title) {
-  const t = title.toLowerCase();
-  if (BJJ_KEYWORDS.some(k => t.includes(k))) return true;
-  if (BJJ_SECONDARY.some(k => t.includes(k))) return true;
-  // 'gi' only as standalone word, not inside other words
-  if (/\bgi\b/.test(t)) return true;
-  return false;
-}
-
-function connectGoogleCalendar() {
-  const params = new URLSearchParams({
-    client_id: GCAL_CLIENT_ID,
-    redirect_uri: 'https://hicarlosierra.github.io/bjj-journey/',
-    response_type: 'token',
-    scope: GCAL_SCOPE,
-    prompt: 'consent',
-    state: 'gcal_auth'
-  });
-  window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
-}
-
-function handleGcalCallback() {
-  // Called on page load — check if we're returning from OAuth
-  const hash = window.location.hash;
-  if (!hash.includes('access_token')) return;
-  
-  const params = new URLSearchParams(hash.slice(1));
-  const token = params.get('access_token');
-  const expiresIn = parseInt(params.get('expires_in') || '3600');
-  
-  if (token) {
-    STATE.gcal_token = token;
-    STATE.gcal_token_expiry = Date.now() + (expiresIn * 1000);
-    saveState();
-    // Clean URL
-    window.history.replaceState({}, '', window.location.pathname);
-    // Auto sync
-    syncGoogleCalendar();
-    switchView('perfil');
-  }
-}
-
-async function syncGoogleCalendar() {
-  const token = STATE.gcal_token;
-  if (!token) return;
-
-  // Check expiry
-  if (STATE.gcal_token_expiry && Date.now() > STATE.gcal_token_expiry) {
-    STATE.gcal_token = null;
-    saveState();
-    renderProfile();
-    alert('La sesión de Google Calendar ha expirado. Vuelve a conectar.');
-    return;
-  }
-
-  try {
-    // Get events from last 2 years to now + 1 month
-    const timeMin = new Date();
-    timeMin.setFullYear(timeMin.getFullYear() - 2);
-    const timeMax = new Date();
-    timeMax.setMonth(timeMax.getMonth() + 1);
-
-    const url = `https://www.googleapis.com/calendar/v3/calendars/primary/events?` +
-      `timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}` +
-      `&maxResults=1000&singleEvents=true&orderBy=startTime`;
-
-    const res = await fetch(url, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        STATE.gcal_token = null;
-        saveState();
-        renderProfile();
-        alert('Sesión expirada. Reconecta Google Calendar.');
-      }
-      return;
-    }
-
-    const data = await res.json();
-    const items = data.items || [];
-
-    // Filter BJJ events
-    const bjjEvents = items.filter(ev => isBjjEvent(ev.summary || ''));
-
-    // Convert to sessions format
-    const gcalSessions = bjjEvents.map(ev => {
-      const start = new Date(ev.start.dateTime || ev.start.date);
-      const end = new Date(ev.end.dateTime || ev.end.date);
-      const durationMin = Math.round((end - start) / 60000);
-      const title = (ev.summary || '').toLowerCase();
-      
-      let type = 'Gi';
-      if (title.includes('no gi') || title.includes('nogi')) type = 'NoGi';
-      else if (title.includes('open mat') || title.includes('openmat')) type = 'Open mat';
-      else if (title.includes('sparring')) type = 'Open mat';
-
-      return {
-        id: ev.id,
-        date: start.toISOString().slice(0, 10),
-        type,
-        duration: durationMin,
-        notes: ev.summary || '',
-        from_gcal: true
-      };
-    });
-
-    // Merge: keep manual sessions, replace gcal ones
-    const manualSessions = STATE.sessions.filter(s => !s.from_gcal);
-    STATE.sessions = [...manualSessions, ...gcalSessions];
-    STATE.gcal_last_sync = new Date().toISOString();
-    STATE.gcal_event_count = gcalSessions.length;
-    saveState();
-
-    renderProgreso();
-    renderSessions();
-    updateSidebar();
-    renderProfile();
-
-    alert(`✓ Sincronizado — ${gcalSessions.length} sesiones de BJJ importadas desde Google Calendar.`);
-
-  } catch(err) {
-    console.error('GCal sync error:', err);
-    alert('Error al sincronizar. Comprueba tu conexión e inténtalo de nuevo.');
-  }
-}
-
-function disconnectGcal() {
-  if (!confirm('¿Desconectar Google Calendar? Se eliminarán las sesiones importadas automáticamente.')) return;
-  STATE.gcal_token = null;
-  STATE.gcal_token_expiry = null;
-  STATE.gcal_last_sync = null;
-  STATE.sessions = STATE.sessions.filter(s => !s.from_gcal);
-  saveState();
-  renderProfile();
-  renderProgreso();
-  renderSessions();
-  updateSidebar();
-}
+function closeModal(name){document.getElementById('modal-'+name).classList.remove('open');}
+function selType(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));btn.classList.add('sel');}
 
 // ═══ INIT ═══
-sb.auth.onAuthStateChange(async (event, session) => {
-  if (session?.user) {
-    currentUser = session.user;
-    STATE = getEmptyState();
-    try {
-      await loadFromSupabase(currentUser.id);
-    } catch(e) {
-      console.warn('Error loading from Supabase, using empty state', e);
-    }
-    initTechniqueState();
-    handleGcalCallback();
-    showApp();
-    updateSidebar();
-    // Small delay to ensure DOM is ready
-    setTimeout(() => {
-      renderProgreso();
-      renderEnc('all');
-      renderSessions();
-    }, 100);
-  } else {
-    currentUser = null;
-    showLogin();
-  }
-});
+handleGcalCallback();
+updateSidebar();
 renderProgreso();
 renderEnc('all');
 </script>
