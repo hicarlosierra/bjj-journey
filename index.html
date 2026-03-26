@@ -344,7 +344,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 </style>
 </head>
 <body>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 <!-- LOGIN SCREEN -->
 <div class="login-screen" id="login-screen">
@@ -756,7 +756,7 @@ async function doLogin() {
   btn.disabled = true;
 
   try {
-    const timeout = new Promise((_,reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado. Comprueba tu conexión.')), 10000));
+    const timeout = new Promise((_,reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado. Comprueba tu conexión.')), 30000));
 
     if (loginMode === 'register') {
       const name = document.getElementById('login-name').value.trim();
