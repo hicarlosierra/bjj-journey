@@ -330,10 +330,42 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .mobile-nav-item.active{color:var(--orange)}
 .mobile-nav-item svg{width:20px;height:20px;margin-bottom:3px}
 .mobile-nav-item span{font-size:10px;letter-spacing:.05em;font-weight:500}
+/* LOGIN SCREEN */
+.login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column;gap:0}
+.login-box{width:380px;max-width:92vw}
+.login-logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:36px;letter-spacing:.04em;margin-bottom:8px}
+.login-logo span{color:var(--orange)}
+.login-sub{font-size:13px;color:var(--muted2);margin-bottom:32px}
+.login-tabs{display:flex;gap:0;margin-bottom:24px;background:var(--bg2);border-radius:var(--r2);padding:3px}
+.login-tab{flex:1;padding:8px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;border-radius:6px;color:var(--muted2);transition:all .15s;border:none;background:none;font-family:'DM Sans',sans-serif}
+.login-tab.active{background:var(--bg4);color:var(--cream)}
+.login-error{font-size:12px;color:#E05050;margin-bottom:12px;min-height:16px}
+.login-forgot{font-size:12px;color:var(--orange);cursor:pointer;text-align:right;margin-top:-8px;margin-bottom:12px}
 </style>
 </head>
 <body>
-<div class="app-shell">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">BJJ<span>.</span></div>
+    <div class="login-sub">Tu journey en el tatami</div>
+    <div class="login-tabs">
+      <button class="login-tab active" onclick="switchLoginTab('login')">Entrar</button>
+      <button class="login-tab" onclick="switchLoginTab('register')">Crear cuenta</button>
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="input-group"><label class="input-label">Email</label><input class="input-field" type="email" id="login-email" placeholder="tu@email.com" autocomplete="email"></div>
+    <div class="input-group"><label class="input-label">Contraseña</label><input class="input-field" type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-forgot" id="login-forgot-row" onclick="doForgotPassword()">¿Olvidaste tu contraseña?</div>
+    <div class="input-group" id="register-name-group" style="display:none"><label class="input-label">Tu nombre</label><input class="input-field" type="text" id="login-name" placeholder="Carlos"></div>
+    <button class="btn-primary" style="width:100%;margin-top:4px" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div style="text-align:center;margin-top:16px;font-size:12px;color:var(--muted2)">Tus datos son privados — cada usuario ve solo los suyos</div>
+  </div>
+</div>
+
+<div class="app-shell" id="app-shell" style="display:none">
 
 <aside class="sidebar">
   <div class="sidebar-logo">BJJ<span>.</span></div>
@@ -360,7 +392,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
     </div>
     <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="uploadPhoto(this)">
-    <div>
+    <div style="flex:1;min-width:0">
+      <div class="user-name" id="sidebar-name">Configurar perfil</div>
+      <div class="user-belt" id="sidebar-belt">Toca para empezar</div>
+    </div>
+    <div onclick="event.stopPropagation();doLogout()" title="Cerrar sesión" style="padding:4px;cursor:pointer;color:var(--muted2);flex-shrink:0">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </div>
+  </div>
       <div class="user-name" id="sidebar-name">Configurar perfil</div>
       <div class="user-belt" id="sidebar-belt">Toca para empezar</div>
     </div>
@@ -682,36 +721,199 @@ const POSITION_MAP = [
 ];
 
 // ═══════════════════════════════════════════════════════
-// LOCALSTORAGE — persistent state
+// SUPABASE
 // ═══════════════════════════════════════════════════════
-function loadState() {
+const SUPABASE_URL = 'https://uanglczkvvsjoqctqmlh.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_PLTWt3XSG88JtxCW0_Gznw_iPZ-022t';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+
+// ═══════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════
+let loginMode = 'login';
+
+function switchLoginTab(mode) {
+  loginMode = mode;
+  document.querySelectorAll('.login-tab').forEach((t,i) => t.classList.toggle('active', (i===0&&mode==='login')||(i===1&&mode==='register')));
+  document.getElementById('login-btn').textContent = mode === 'login' ? 'Entrar' : 'Crear cuenta';
+  document.getElementById('login-forgot-row').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('register-name-group').style.display = mode === 'register' ? 'block' : 'none';
+  document.getElementById('login-error').textContent = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-error');
+  errEl.textContent = '';
+
+  if (!email || !password) { errEl.textContent = 'Introduce email y contraseña.'; return; }
+  btn.textContent = '...';
+  btn.disabled = true;
+
   try {
-    const raw = localStorage.getItem('bjj_journey_v1');
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
+    if (loginMode === 'register') {
+      const name = document.getElementById('login-name').value.trim();
+      const { data, error } = await sb.auth.signUp({ email, password });
+      if (error) throw error;
+      if (data.user) {
+        await sb.from('profiles').upsert({ id: data.user.id, name: name || email.split('@')[0] });
+      }
+    } else {
+      const { error } = await sb.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    }
+  } catch(err) {
+    errEl.textContent = err.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos.' : err.message;
+    btn.textContent = loginMode === 'login' ? 'Entrar' : 'Crear cuenta';
+    btn.disabled = false;
+  }
+}
+
+async function doForgotPassword() {
+  const email = document.getElementById('login-email').value.trim();
+  if (!email) { document.getElementById('login-error').textContent = 'Introduce tu email primero.'; return; }
+  await sb.auth.resetPasswordForEmail(email, { redirectTo: 'https://hicarlosierra.github.io/bjj-journey/' });
+  document.getElementById('login-error').style.color = 'var(--green)';
+  document.getElementById('login-error').textContent = '✓ Te hemos enviado un email para recuperar tu contraseña.';
+}
+
+function showApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'flex';
+}
+
+function showLogin() {
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app-shell').style.display = 'none';
+}
+
+async function doLogout() {
+  await sb.auth.signOut();
+  STATE = getEmptyState();
+  showLogin();
+}
+
+// ═══════════════════════════════════════════════════════
+// SUPABASE DATA SYNC
+// ═══════════════════════════════════════════════════════
+async function loadFromSupabase(userId) {
+  // Load profile
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', userId).single();
+  if (profile) {
+    STATE.profile = {
+      name: profile.name || '',
+      gym: profile.gym || '',
+      belt: profile.belt || 'white',
+      stripe: String(profile.stripe || 0),
+      start: profile.start_date || '',
+      prior_hours: profile.prior_hours || 0,
+      weight: profile.weight || '',
+      height: profile.height || '',
+      sex: profile.sex || '',
+      photo: profile.photo || null
+    };
+  }
+
+  // Load sessions
+  const { data: sessions } = await sb.from('sessions').select('*').eq('user_id', userId).order('date', { ascending: false });
+  if (sessions) {
+    STATE.sessions = sessions.map(s => ({
+      id: s.id,
+      date: s.date,
+      type: s.type || 'Gi',
+      duration: s.duration || 60,
+      feeling: s.feeling,
+      position: s.position,
+      notes: s.notes || '',
+      from_gcal: s.from_gcal || false,
+      gcal_event_id: s.gcal_event_id
+    }));
+  }
+
+  // Load techniques
+  const { data: techs } = await sb.from('techniques').select('*').eq('user_id', userId);
+  if (techs) {
+    techs.forEach(t => {
+      STATE.techniques[t.technique_id] = { seen: t.seen, status: t.status, notes: t.notes || '', sessions: [] };
+    });
+  }
+}
+
+async function saveProfileToSupabase() {
+  if (!currentUser) return;
+  const p = STATE.profile;
+  await sb.from('profiles').upsert({
+    id: currentUser.id,
+    name: p.name, gym: p.gym, belt: p.belt,
+    stripe: parseInt(p.stripe) || 0,
+    start_date: p.start || null,
+    prior_hours: p.prior_hours || 0,
+    weight: p.weight ? parseFloat(p.weight) : null,
+    height: p.height ? parseFloat(p.height) : null,
+    sex: p.sex, photo: p.photo
+  });
+}
+
+async function saveSessionToSupabase(session) {
+  if (!currentUser) return;
+  const { data } = await sb.from('sessions').upsert({
+    id: session.id || undefined,
+    user_id: currentUser.id,
+    date: session.date, type: session.type,
+    duration: session.duration, feeling: session.feeling,
+    position: session.position, notes: session.notes,
+    from_gcal: session.from_gcal || false,
+    gcal_event_id: session.gcal_event_id
+  }).select().single();
+  if (data) session.id = data.id;
+}
+
+async function deleteSessionFromSupabase(sessionId) {
+  if (!currentUser || !sessionId) return;
+  await sb.from('sessions').delete().eq('id', sessionId);
+}
+
+async function saveTechniqueToSupabase(techId) {
+  if (!currentUser) return;
+  const t = STATE.techniques[techId];
+  await sb.from('techniques').upsert({
+    user_id: currentUser.id,
+    technique_id: techId,
+    seen: t.seen, status: t.status, notes: t.notes
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// STATE (localStorage as cache + Supabase as source of truth)
+// ═══════════════════════════════════════════════════════
+function getEmptyState() {
   return {
-    profile: { name:'', gym:'', belt:'white', start:'', weight:'', height:'', sex:'' },
+    profile: { name:'', gym:'', belt:'white', stripe:'0', start:'', prior_hours:0, weight:'', height:'', sex:'', photo:null },
     sessions: [],
     techniques: {},
     onboarding_dismissed: false,
-    gcal_token: null,
-    gcal_token_expiry: null,
-    gcal_last_sync: null
+    gcal_token: null, gcal_token_expiry: null, gcal_last_sync: null
   };
 }
+
+let STATE = getEmptyState();
 
 function saveState() {
   try { localStorage.setItem('bjj_journey_v1', JSON.stringify(STATE)); } catch(e) {}
 }
 
-let STATE = loadState();
-
 // Init technique state for any missing nodes
-GRAPH.nodes.forEach(n => {
-  if (!STATE.techniques[n.id]) {
-    STATE.techniques[n.id] = { seen: false, status: 'new', notes: '', sessions: [] };
-  }
-});
+function initTechniqueState() {
+  GRAPH.nodes.forEach(n => {
+    if (!STATE.techniques[n.id]) {
+      STATE.techniques[n.id] = { seen: false, status: 'new', notes: '', sessions: [] };
+    }
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 // HELPERS
@@ -1096,6 +1298,7 @@ function updateSessionField(idx, field, value) {
   if (!STATE.sessions[idx]) return;
   STATE.sessions[idx][field] = value;
   saveState();
+  saveSessionToSupabase(STATE.sessions[idx]);
   renderSessions();
   if (field === 'duration') { renderProgreso(); updateSidebar(); }
 }
@@ -1127,15 +1330,17 @@ function saveSession() {
     return;
   }
 
-  STATE.sessions.push({
+  const newSession = {
     date,
     type,
     duration: parseInt(duration),
     feeling: currentStar || null,
     position: currentPos || null,
     notes
-  });
+  };
+  STATE.sessions.push(newSession);
   saveState();
+  saveSessionToSupabase(newSession);
   closeModal('add-session');
   renderSessions();
   renderProgreso();
@@ -1152,6 +1357,8 @@ function saveSession() {
 }
 
 function deleteSession(idx) {
+  const session = STATE.sessions[idx];
+  if (session?.id) deleteSessionFromSupabase(session.id);
   STATE.sessions.splice(idx, 1);
   saveState();
   renderSessions();
@@ -1239,8 +1446,7 @@ function toggleSeen(id) {
   st.seen = !st.seen;
   if (!st.seen) st.status = 'new';
   saveState();
-
-  const card = document.getElementById('card-' + id);
+  saveTechniqueToSupabase(id);
   if (card) {
     const sc = seenClass(id);
     card.className = 'enc-card' + (sc ? ' ' + sc : '');
@@ -1348,6 +1554,7 @@ function setStatus(id, btn) {
 function saveNotes(id, val) {
   STATE.techniques[id].notes = val;
   saveState();
+  saveTechniqueToSupabase(id);
 }
 
 function closeDetail() {
@@ -1485,8 +1692,10 @@ function saveProfile() {
     weight: document.getElementById('profile-weight').value,
     height: document.getElementById('profile-height').value,
     sex: document.getElementById('profile-sex').value,
+    photo: STATE.profile.photo
   };
   saveState();
+  saveProfileToSupabase();
   closeModal('edit-profile');
   renderProfile();
   renderProgreso();
@@ -1661,6 +1870,7 @@ function uploadPhoto(input) {
   compressImage(file, 200, (base64) => {
     STATE.profile.photo = base64;
     saveState();
+    saveProfileToSupabase();
     updateSidebar();
     renderProfile();
   });
@@ -1836,8 +2046,22 @@ function disconnectGcal() {
 }
 
 // ═══ INIT ═══
-handleGcalCallback();
-updateSidebar();
+sb.auth.onAuthStateChange(async (event, session) => {
+  if (session?.user) {
+    currentUser = session.user;
+    STATE = getEmptyState();
+    await loadFromSupabase(currentUser.id);
+    initTechniqueState();
+    handleGcalCallback();
+    showApp();
+    updateSidebar();
+    renderProgreso();
+    renderEnc('all');
+  } else {
+    currentUser = null;
+    showLogin();
+  }
+});
 renderProgreso();
 renderEnc('all');
 </script>
