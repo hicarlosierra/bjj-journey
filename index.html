@@ -991,12 +991,13 @@ function renderSessions() {
   }
 
   const sorted = [...STATE.sessions].sort((a,b) => b.date.localeCompare(a.date));
+  // Build a map from sorted index to real STATE.sessions index
+  const sortedToReal = sorted.map(s => STATE.sessions.indexOf(s));
   const typeColors = { Gi:'var(--purple)', NoGi:'var(--green)', 'Open mat':'var(--orange)', Gym:'var(--amber)', 'Competición':'#E05050' };
 
   el.innerHTML = `<div class="sessions-grid">
     ${sorted.map((s, sortedIdx) => {
-      // Find real index in STATE.sessions
-      const realIdx = STATE.sessions.indexOf(s);
+      const realIdx = sortedToReal[sortedIdx];
       const feelingHtml = s.feeling ? `<span style="font-size:18px" title="${FEELINGS[s.feeling]||''}">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>` : '';
       const posHtml = s.position ? `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${s.position}</span>` : '';
       const gcalBadge = s.from_gcal ? `<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:rgba(76,175,138,.12);color:var(--green);border:1px solid rgba(76,175,138,.25)">📅 Calendar</span>` : '';
@@ -1029,7 +1030,7 @@ function renderSessions() {
 // ═══════════════════════════════════════════════════════
 function openSessionDetail(idx) {
   const s = STATE.sessions[idx];
-  if (!s) return;
+  if (!s) { console.warn('Session not found at index', idx); return; }
 
   const typeColors = { Gi:'var(--purple)', NoGi:'var(--green)', 'Open mat':'var(--orange)', Gym:'var(--amber)', 'Competición':'#E05050' };
   const types = ['Gi','NoGi','Open mat','Gym','Competición'];
@@ -1038,23 +1039,24 @@ function openSessionDetail(idx) {
   const feelingLabels = ['Roto','Cansado','Normal','Fuerte','En llamas'];
 
   const typePills = types.map(t =>
-    `<button class="type-pill${s.type===t?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'type','${t}',this.closest('.type-pills'))">${t}</button>`
+    `<button class="type-pill${s.type===t?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'type','${t}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">${t}</button>`
   ).join('');
 
   const positionPills = positions.map(p =>
-    `<button class="type-pill${s.position===p?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'position','${p}',this.closest('.type-pills'))">${p}</button>`
+    `<button class="type-pill${s.position===p?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'position','${p}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">${p}</button>`
   ).join('');
 
   const feelingBtns = feelingEmojis.map((e, i) =>
-    `<button class="feeling-btn${s.feeling===(i+1)?' sel':''}" data-v="${i+1}" data-label="${feelingLabels[i]}"
-      onclick="updateSessionField(${idx},'feeling',${i+1},null);document.querySelectorAll('#session-detail-feelings .feeling-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')"
-    >${e}</button>`
+    `<button class="feeling-btn${s.feeling===(i+1)?' sel':''}" onclick="updateSessionField(${idx},'feeling',${i+1});document.querySelectorAll('#sdp-feelings .feeling-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${e}</button>`
   ).join('');
 
-  document.getElementById('detail-content').innerHTML = `
+  const panel = document.getElementById('detail-panel');
+  const content = document.getElementById('detail-content');
+
+  content.innerHTML = `
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
       <div style="width:10px;height:10px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'}"></div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800">${fmtDate(s.date)}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;line-height:1">${fmtDate(s.date)}</div>
     </div>
     <div style="font-size:12px;color:var(--muted2);margin-bottom:18px">${s.from_gcal ? '📅 Importado de Google Calendar' : 'Sesión manual'}</div>
 
@@ -1063,22 +1065,22 @@ function openSessionDetail(idx) {
 
     <div class="dp-section">Duración</div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-      <input type="number" value="${s.duration || ''}" min="1" inputmode="numeric"
+      <input type="number" id="sdp-duration" value="${s.duration || ''}" min="1" inputmode="numeric"
         style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 10px;font-size:14px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
-        oninput="updateSessionField(${idx},'duration',parseInt(this.value)||0,null);renderProgreso();updateSidebar()"
+        oninput="updateSessionField(${idx},'duration',parseInt(this.value)||0);document.getElementById('sdp-dur-label').textContent=Math.round((parseInt(this.value)||0)/60*10)/10+'h'"
         onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
-      <span style="font-size:13px;color:var(--muted2)">minutos = ${Math.round((s.duration||0)/60*10)/10}h</span>
+      <span id="sdp-dur-label" style="font-size:13px;color:var(--muted2)">${Math.round((s.duration||0)/60*10)/10}h</span>
     </div>
 
     <div class="dp-section">Feeling</div>
-    <div class="feeling-btns" id="session-detail-feelings">${feelingBtns}</div>
+    <div class="feeling-btns" id="sdp-feelings">${feelingBtns}</div>
 
     <div class="dp-section">Posición trabajada</div>
     <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${positionPills}</div>
 
     <div class="dp-section">Notas</div>
     <textarea class="dp-notes-field" placeholder="Qué trabajaste, qué salió bien, qué mejorar..."
-      oninput="updateSessionField(${idx},'notes',this.value,null)">${s.notes || ''}</textarea>
+      oninput="updateSessionField(${idx},'notes',this.value)">${s.notes || ''}</textarea>
 
     <div style="margin-top:18px">
       <button onclick="deleteSession(${idx});closeDetail()" style="width:100%;padding:10px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:13px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer">
@@ -1087,18 +1089,15 @@ function openSessionDetail(idx) {
     </div>
   `;
 
-  document.getElementById('detail-panel').classList.add('open');
+  panel.classList.add('open');
 }
 
-function updateSessionField(idx, field, value, pillsContainer) {
+function updateSessionField(idx, field, value) {
+  if (!STATE.sessions[idx]) return;
   STATE.sessions[idx][field] = value;
   saveState();
-  // Update pill selection if container provided
-  if (pillsContainer) {
-    pillsContainer.querySelectorAll('.type-pill').forEach(p => p.classList.remove('sel'));
-    event.target.classList.add('sel');
-  }
   renderSessions();
+  if (field === 'duration') { renderProgreso(); updateSidebar(); }
 }
 let currentPos = '';
 
