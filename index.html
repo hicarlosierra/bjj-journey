@@ -801,8 +801,8 @@ async function doLogout() {
 // SUPABASE DATA SYNC
 // ═══════════════════════════════════════════════════════
 async function loadFromSupabase(userId) {
-  // Load profile
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', userId).single();
+  // Load profile — upsert if not exists
+  const { data: profile } = await sb.from('profiles').select('*').eq('id', userId).maybeSingle();
   if (profile) {
     STATE.profile = {
       name: profile.name || '',
@@ -816,6 +816,9 @@ async function loadFromSupabase(userId) {
       sex: profile.sex || '',
       photo: profile.photo || null
     };
+  } else {
+    // Create empty profile for new user
+    await sb.from('profiles').insert({ id: userId });
   }
 
   // Load sessions
