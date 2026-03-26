@@ -344,7 +344,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 </style>
 </head>
 <body>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 <!-- LOGIN SCREEN -->
 <div class="login-screen" id="login-screen">
@@ -749,28 +749,42 @@ async function doLogin() {
   const btn = document.getElementById('login-btn');
   const errEl = document.getElementById('login-error');
   errEl.textContent = '';
+  errEl.style.color = '#E05050';
 
   if (!email || !password) { errEl.textContent = 'Introduce email y contraseña.'; return; }
   btn.textContent = '...';
   btn.disabled = true;
 
   try {
+    const timeout = new Promise((_,reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado. Comprueba tu conexión.')), 10000));
+
     if (loginMode === 'register') {
       const name = document.getElementById('login-name').value.trim();
-      const { data, error } = await sb.auth.signUp({ email, password });
+      const { data, error } = await Promise.race([
+        sb.auth.signUp({ email, password }),
+        timeout
+      ]);
       if (error) throw error;
-      if (data.user) {
+      if (data?.user) {
         await sb.from('profiles').upsert({ id: data.user.id, name: name || email.split('@')[0] });
+        errEl.style.color = 'var(--green)';
+        errEl.textContent = '✓ Cuenta creada. Revisa tu email para confirmar.';
       }
     } else {
-      const { error } = await sb.auth.signInWithPassword({ email, password });
+      const { error } = await Promise.race([
+        sb.auth.signInWithPassword({ email, password }),
+        timeout
+      ]);
       if (error) throw error;
     }
   } catch(err) {
-    errEl.textContent = err.message === 'Invalid login credentials' ? 'Email o contraseña incorrectos.' : err.message;
-    btn.textContent = loginMode === 'login' ? 'Entrar' : 'Crear cuenta';
-    btn.disabled = false;
+    errEl.textContent = err.message === 'Invalid login credentials'
+      ? 'Email o contraseña incorrectos.'
+      : err.message;
   }
+
+  btn.textContent = loginMode === 'login' ? 'Entrar' : 'Crear cuenta';
+  btn.disabled = false;
 }
 
 async function doForgotPassword() {
