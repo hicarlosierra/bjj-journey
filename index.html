@@ -724,7 +724,7 @@ const POSITION_MAP = [
 // SUPABASE
 // ═══════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://uanglczkvvsjoqctqmlh.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_PLTWt3XSG88JtxCW0_Gznw_iPZ-022t';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbmdsY3prdnZzam9xY3RxbWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTExMDcsImV4cCI6MjA5MDA4NzEwN30.PYA5TyodU_nbrXFHKTnqUXJX5QkxMf5u2zppwDC4W8M';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let currentUser = null;
@@ -2067,13 +2067,21 @@ sb.auth.onAuthStateChange(async (event, session) => {
   if (session?.user) {
     currentUser = session.user;
     STATE = getEmptyState();
-    await loadFromSupabase(currentUser.id);
+    try {
+      await loadFromSupabase(currentUser.id);
+    } catch(e) {
+      console.warn('Error loading from Supabase, using empty state', e);
+    }
     initTechniqueState();
     handleGcalCallback();
     showApp();
     updateSidebar();
-    renderProgreso();
-    renderEnc('all');
+    // Small delay to ensure DOM is ready
+    setTimeout(() => {
+      renderProgreso();
+      renderEnc('all');
+      renderSessions();
+    }, 100);
   } else {
     currentUser = null;
     showLogin();
