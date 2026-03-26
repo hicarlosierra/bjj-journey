@@ -15,6 +15,7 @@
   --green:#4CAF8A;--amber:#E8A838;--purple:#7B74E0;
   --r:12px;--r2:8px;--sidebar:220px;
 }
+@media(min-width:1400px){:root{--sidebar:260px}}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);overflow:hidden}
@@ -42,7 +43,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .main{flex:1;overflow-y:auto;height:100vh;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent}
 .main::-webkit-scrollbar{width:6px}
 .main::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:3px}
-.view{display:none;padding:32px 36px 48px;max-width:960px}
+.view{display:none;padding:32px 48px 48px;max-width:1400px;width:100%}
 .view.active{display:block;animation:fadeUp .2s ease both}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .page-title{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:800;margin-bottom:4px}
@@ -87,6 +88,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 
 /* STATS */
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(min-width:1200px){.stat-grid{grid-template-columns:repeat(4,1fr);gap:16px}}
+@media(min-width:1400px){.two-col{grid-template-columns:1.2fr 1fr}}
 .stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
 .stat-card.accent{border-color:rgba(235,94,40,.25)}
 .stat-card.accent::after{content:'';position:absolute;bottom:0;right:0;width:80px;height:80px;background:radial-gradient(circle at 100% 100%,rgba(235,94,40,.1),transparent 70%)}
@@ -136,6 +139,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .pos-prog-fill{height:100%;border-radius:99px;background:var(--orange)}
 .pos-count{font-size:11px;color:var(--muted2)}
 .tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(min-width:1200px){.tech-grid{grid-template-columns:repeat(4,1fr)}}
+@media(min-width:1500px){.tech-grid{grid-template-columns:repeat(5,1fr)}}
 .enc-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;cursor:pointer;transition:border-color .15s,transform .12s;position:relative;display:flex;flex-direction:column}
 .enc-card:hover{border-color:var(--border2);transform:translateY(-1px)}
 .enc-card.seen{border-color:rgba(255,252,242,.16)}
@@ -989,11 +994,14 @@ function renderSessions() {
   const typeColors = { Gi:'var(--purple)', NoGi:'var(--green)', 'Open mat':'var(--orange)', Gym:'var(--amber)', 'Competición':'#E05050' };
 
   el.innerHTML = `<div class="sessions-grid">
-    ${sorted.map((s, i) => {
+    ${sorted.map((s, sortedIdx) => {
+      // Find real index in STATE.sessions
+      const realIdx = STATE.sessions.indexOf(s);
       const feelingHtml = s.feeling ? `<span style="font-size:18px" title="${FEELINGS[s.feeling]||''}">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>` : '';
       const posHtml = s.position ? `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${s.position}</span>` : '';
+      const gcalBadge = s.from_gcal ? `<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:rgba(76,175,138,.12);color:var(--green);border:1px solid rgba(76,175,138,.25)">📅 Calendar</span>` : '';
       return `
-      <div class="session-full">
+      <div class="session-full" onclick="openSessionDetail(${realIdx})" style="cursor:pointer">
         <div class="sf-header">
           <div class="sf-left">
             <div class="type-dot" style="background:${typeColors[s.type]||'var(--muted2)'}"></div>
@@ -1002,20 +1010,96 @@ function renderSessions() {
           <div style="display:flex;align-items:center;gap:10px">
             ${feelingHtml}
             <div class="sf-dur">${Math.round((parseInt(s.duration)||0)/60*10)/10}h</div>
-            <span style="font-size:11px;color:var(--muted2);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r2)" onclick="deleteSession(${i})">✕</span>
+            <span style="font-size:11px;color:var(--muted2);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r2)" onclick="event.stopPropagation();deleteSession(${realIdx})">✕</span>
           </div>
         </div>
         <div class="sf-date" style="display:flex;align-items:center;gap:8px">
           ${fmtDate(s.date)}
           ${posHtml}
+          ${gcalBadge}
         </div>
-        ${s.notes ? `<div class="sf-note">${s.notes}</div>` : ''}
+        ${s.notes ? `<div class="sf-note">${s.notes}</div>` : `<div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic">Toca para añadir detalles →</div>`}
       </div>`
     }).join('')}
   </div>`;
 }
 
-let currentStar = 0;
+// ═══════════════════════════════════════════════════════
+// SESSION DETAIL PANEL
+// ═══════════════════════════════════════════════════════
+function openSessionDetail(idx) {
+  const s = STATE.sessions[idx];
+  if (!s) return;
+
+  const typeColors = { Gi:'var(--purple)', NoGi:'var(--green)', 'Open mat':'var(--orange)', Gym:'var(--amber)', 'Competición':'#E05050' };
+  const types = ['Gi','NoGi','Open mat','Gym','Competición'];
+  const positions = ['De pie','Guardia cerrada','Guardia abierta','Half guard','Side control','Montada','Espalda','General / Sparring'];
+  const feelingEmojis = ['🤕','😴','😐','💪','🔥'];
+  const feelingLabels = ['Roto','Cansado','Normal','Fuerte','En llamas'];
+
+  const typePills = types.map(t =>
+    `<button class="type-pill${s.type===t?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'type','${t}',this.closest('.type-pills'))">${t}</button>`
+  ).join('');
+
+  const positionPills = positions.map(p =>
+    `<button class="type-pill${s.position===p?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'position','${p}',this.closest('.type-pills'))">${p}</button>`
+  ).join('');
+
+  const feelingBtns = feelingEmojis.map((e, i) =>
+    `<button class="feeling-btn${s.feeling===(i+1)?' sel':''}" data-v="${i+1}" data-label="${feelingLabels[i]}"
+      onclick="updateSessionField(${idx},'feeling',${i+1},null);document.querySelectorAll('#session-detail-feelings .feeling-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')"
+    >${e}</button>`
+  ).join('');
+
+  document.getElementById('detail-content').innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <div style="width:10px;height:10px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'}"></div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800">${fmtDate(s.date)}</div>
+    </div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:18px">${s.from_gcal ? '📅 Importado de Google Calendar' : 'Sesión manual'}</div>
+
+    <div class="dp-section">Tipo</div>
+    <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${typePills}</div>
+
+    <div class="dp-section">Duración</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <input type="number" value="${s.duration || ''}" min="1" inputmode="numeric"
+        style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 10px;font-size:14px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+        oninput="updateSessionField(${idx},'duration',parseInt(this.value)||0,null);renderProgreso();updateSidebar()"
+        onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
+      <span style="font-size:13px;color:var(--muted2)">minutos = ${Math.round((s.duration||0)/60*10)/10}h</span>
+    </div>
+
+    <div class="dp-section">Feeling</div>
+    <div class="feeling-btns" id="session-detail-feelings">${feelingBtns}</div>
+
+    <div class="dp-section">Posición trabajada</div>
+    <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${positionPills}</div>
+
+    <div class="dp-section">Notas</div>
+    <textarea class="dp-notes-field" placeholder="Qué trabajaste, qué salió bien, qué mejorar..."
+      oninput="updateSessionField(${idx},'notes',this.value,null)">${s.notes || ''}</textarea>
+
+    <div style="margin-top:18px">
+      <button onclick="deleteSession(${idx});closeDetail()" style="width:100%;padding:10px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:13px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer">
+        Eliminar sesión
+      </button>
+    </div>
+  `;
+
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function updateSessionField(idx, field, value, pillsContainer) {
+  STATE.sessions[idx][field] = value;
+  saveState();
+  // Update pill selection if container provided
+  if (pillsContainer) {
+    pillsContainer.querySelectorAll('.type-pill').forEach(p => p.classList.remove('sel'));
+    event.target.classList.add('sel');
+  }
+  renderSessions();
+}
 let currentPos = '';
 
 const FEELINGS = { 5:'🔥 En llamas', 4:'💪 Fuerte', 3:'😐 Normal', 2:'😴 Cansado', 1:'🤕 Roto' };
@@ -1069,12 +1153,11 @@ function saveSession() {
 }
 
 function deleteSession(idx) {
-  const sorted = [...STATE.sessions].sort((a,b) => b.date.localeCompare(a.date));
-  const session = sorted[idx];
-  STATE.sessions = STATE.sessions.filter(s => s !== session);
+  STATE.sessions.splice(idx, 1);
   saveState();
   renderSessions();
   renderProgreso();
+  updateSidebar();
 }
 
 // ═══════════════════════════════════════════════════════
