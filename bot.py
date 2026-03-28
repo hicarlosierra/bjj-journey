@@ -78,6 +78,8 @@ async def parse_with_claude(message: str, today: str) -> dict:
         if "content" not in data or not data["content"]:
             raise Exception(f"Claude respuesta vacía: {str(data)[:200]}")
         raw = data["content"][0]["text"].strip()
+        # Strip markdown code blocks if present
+        raw = raw.replace("```json", "").replace("```", "").strip()
         try:
             return json.loads(raw)
         except json.JSONDecodeError:
