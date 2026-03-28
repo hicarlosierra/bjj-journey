@@ -330,10 +330,34 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .mobile-nav-item.active{color:var(--orange)}
 .mobile-nav-item svg{width:20px;height:20px;margin-bottom:3px}
 .mobile-nav-item span{font-size:10px;letter-spacing:.05em;font-weight:500}
+/* PIN SCREEN */
+.pin-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:1000;flex-direction:column}
+.pin-box{width:340px;max-width:92vw;text-align:center}
+.pin-logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:42px;letter-spacing:.04em;margin-bottom:8px}
+.pin-logo span{color:var(--orange)}
+.pin-sub{font-size:13px;color:var(--muted2);margin-bottom:36px}
+.pin-input{width:100%;background:var(--bg2);border:1.5px solid var(--border2);border-radius:var(--r);padding:16px;font-size:24px;color:var(--cream);font-family:'Barlow Condensed',sans-serif;outline:none;text-align:center;letter-spacing:.3em;margin-bottom:12px}
+.pin-input:focus{border-color:var(--orange)}
+.pin-error{font-size:13px;color:#E05050;min-height:18px;margin-bottom:12px}
+.pin-btn{width:100%;padding:14px;background:var(--orange);border:none;border-radius:var(--r);font-size:16px;font-weight:600;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s}
+.pin-btn:hover{opacity:.88}
 </style>
 </head>
 <body>
-<div class="app-shell">
+<!-- PIN SCREEN -->
+<div class="pin-screen" id="pin-screen">
+  <div class="pin-box">
+    <div class="pin-logo">BJJ<span>.</span></div>
+    <div class="pin-sub">Introduce tu contraseña para entrar</div>
+    <input class="pin-input" type="password" id="pin-input" placeholder="••••••" maxlength="20"
+      onkeydown="if(event.key==='Enter')checkPin()"
+      autocomplete="current-password">
+    <div class="pin-error" id="pin-error"></div>
+    <button class="pin-btn" onclick="checkPin()">Entrar</button>
+  </div>
+</div>
+
+<div class="app-shell" id="app-shell" style="display:none">
 
 <aside class="sidebar">
   <div class="sidebar-logo">BJJ<span>.</span></div>
@@ -1559,11 +1583,42 @@ function openModal(name){
 function closeModal(name){document.getElementById('modal-'+name).classList.remove('open');}
 function selType(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));btn.classList.add('sel');}
 
+// ═══════════════════════════════════════════════════════
+// PIN LOCK
+// ═══════════════════════════════════════════════════════
+const APP_PIN = 'kalmma'; // Cambia esto por tu contraseña
+
+function checkPin() {
+  const val = document.getElementById('pin-input').value;
+  if (val === APP_PIN) {
+    sessionStorage.setItem('bjj_unlocked', '1');
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('app-shell').style.display = 'flex';
+    initApp();
+  } else {
+    const err = document.getElementById('pin-error');
+    err.textContent = 'Contraseña incorrecta';
+    document.getElementById('pin-input').value = '';
+    document.getElementById('pin-input').focus();
+    setTimeout(() => err.textContent = '', 2000);
+  }
+}
+
+function initApp() {
+  handleGcalCallback();
+  updateSidebar();
+  renderProgreso();
+  renderEnc('all');
+}
+
 // ═══ INIT ═══
-handleGcalCallback();
-updateSidebar();
-renderProgreso();
-renderEnc('all');
+if (sessionStorage.getItem('bjj_unlocked') === '1') {
+  document.getElementById('pin-screen').style.display = 'none';
+  document.getElementById('app-shell').style.display = 'flex';
+  initApp();
+} else {
+  setTimeout(() => document.getElementById('pin-input')?.focus(), 100);
+}
 </script>
 </body>
 </html>
