@@ -70,10 +70,18 @@ async def parse_with_claude(message: str, today: str) -> dict:
         "system": SYSTEM_PROMPT,
         "messages": [{"role": "user", "content": f"Hoy es {today}. Mensaje: {message}"}]
     }
-    async with httpx.AsyncClient(timeout=15) as client:
+    async with httpx.AsyncClient(timeout=20) as client:
         r = await client.post(url, headers=headers, json=body)
-        raw = r.json()["content"][0]["text"].strip()
-        return json.loads(raw)
+        if r.status_code != 200:
+            raise Exception(f"Claude API error {r.status_code}: {r.text[:200]}")
+        data = r.json()
+        if "content" not in data or not data["content"]:
+            raise Exception(f"Claude respuesta vacía: {str(data)[:200]}")
+        raw = data["content"][0]["text"].strip()
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError:
+            raise Exception(f"Claude no devolvió JSON válido: {raw[:200]}")
 
 # ── HANDLERS ─────────────────────────────────────────────
 FEELING_EMOJI = {5: "🔥 En llamas", 4: "💪 Fuerte", 3: "😐 Normal", 2: "😴 Cansado", 1: "🤕 Roto"}
