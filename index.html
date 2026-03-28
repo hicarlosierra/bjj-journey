@@ -342,6 +342,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .pin-btn{width:100%;padding:14px;background:var(--orange);border:none;border-radius:var(--r);font-size:16px;font-weight:600;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s}
 .pin-btn:hover{opacity:.88}
 </style>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <!-- PIN SCREEN -->
@@ -711,7 +712,117 @@ GRAPH.nodes.forEach(n => {
 });
 
 // ═══════════════════════════════════════════════════════
-// HELPERS
+// SUPABASE — sync sin login
+// ═══════════════════════════════════════════════════════
+const SB_URL = 'https://uanglczkvvsjoqctqmlh.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbmdsY3prdnZzam9xY3RxbWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTExMDcsImV4cCI6MjA5MDA4NzEwN30.PYA5TyodU_nbrXFHKTnqUXJX5QkxMf5u2zppwDC4W8M';
+const sb = supabase.createClient(SB_URL, SB_KEY);
+
+// Genera un user_id único y persistente en localStorage
+function getUserId() {
+  let uid = localStorage.getItem('bjj_user_id');
+  if (!uid) {
+    uid = 'carlos_l8pxk4jqtfg'; // ID fijo para Carlos
+    localStorage.setItem('bjj_user_id', uid);
+  }
+  return uid;
+}
+const USER_ID = getUserId();
+
+// Sync: sube todo el estado a Supabase
+async function syncToSupabase() {
+  const p = STATE.profile;
+  try {
+    // Upsert profile
+    await sb.from('profiles').upsert({
+      user_id: USER_ID,
+      name: p.name, gym: p.gym, belt: p.belt, stripe: p.stripe,
+      start_date: p.start || null,
+      prior_hours: p.prior_hours || 0,
+      weight: p.weight ? parseFloat(p.weight) : null,
+      height: p.height ? parseFloat(p.height) : null,
+      sex: p.sex, photo: p.photo,
+      updated_at: new Date().toISOString()
+    });
+
+    // Upsert sessions
+    if (STATE.sessions.length > 0) {
+      const sessionRows = STATE.sessions.map(s => ({
+        id: s.id || (USER_ID + '_' + s.date + '_' + Math.random().toString(36).slice(2)),
+        user_id: USER_ID,
+        date: s.date, type: s.type,
+        duration: s.duration, feeling: s.feeling || null,
+        position: s.position || null, notes: s.notes || '',
+        from_gcal: s.from_gcal || false,
+        gcal_event_id: s.gcal_event_id || null
+      }));
+      // Assign ids back
+      sessionRows.forEach((row, i) => { if (!STATE.sessions[i].id) STATE.sessions[i].id = row.id; });
+      await sb.from('sessions').upsert(sessionRows);
+    }
+
+    // Upsert techniques (only seen ones to save space)
+    const seenTechs = Object.entries(STATE.techniques)
+      .filter(([,t]) => t.seen || t.notes)
+      .map(([tid, t]) => ({
+        user_id: USER_ID,
+        technique_id: tid,
+        seen: t.seen, status: t.status, notes: t.notes || '',
+        updated_at: new Date().toISOString()
+      }));
+    if (seenTechs.length > 0) await sb.from('techniques').upsert(seenTechs);
+
+    saveState(); // also keep localStorage
+  } catch(e) {
+    console.warn('Supabase sync error:', e.message);
+  }
+}
+
+// Load from Supabase on startup
+async function loadFromSupabase() {
+  try {
+    const { data: profile } = await sb.from('profiles').select('*').eq('user_id', USER_ID).maybeSingle();
+    if (profile) {
+      STATE.profile = {
+        name: profile.name || '', gym: profile.gym || '',
+        belt: profile.belt || 'white', stripe: profile.stripe || '0',
+        start: profile.start_date || '',
+        prior_hours: profile.prior_hours || 0,
+        weight: profile.weight || '', height: profile.height || '',
+        sex: profile.sex || '', photo: profile.photo || null
+      };
+    }
+
+    const { data: sessions } = await sb.from('sessions').select('*').eq('user_id', USER_ID).order('date', { ascending: false });
+    if (sessions && sessions.length > 0) {
+      const sbSessions = sessions.map(s => ({
+        id: s.id, date: s.date, type: s.type || 'Gi',
+        duration: s.duration || 60, feeling: s.feeling,
+        position: s.position, notes: s.notes || '',
+        from_gcal: s.from_gcal || false, gcal_event_id: s.gcal_event_id
+      }));
+      // Merge: keep local sessions that don't exist in Supabase (by date+type)
+      const sbKeys = new Set(sbSessions.map(s => s.date + '_' + s.type));
+      const localOnly = STATE.sessions.filter(s => !s.from_gcal && !sbKeys.has(s.date + '_' + s.type));
+      STATE.sessions = [...sbSessions, ...localOnly];
+    }
+
+    const { data: techs } = await sb.from('techniques').select('*').eq('user_id', USER_ID);
+    if (techs) {
+      techs.forEach(t => {
+        STATE.techniques[t.technique_id] = { seen: t.seen, status: t.status, notes: t.notes || '', sessions: [] };
+      });
+    }
+
+    saveState();
+    // Upload any local-only sessions to Supabase
+    if (STATE.sessions.some(s => !s.id)) syncToSupabase();
+    return true;
+  } catch(e) {
+    console.warn('Supabase load error:', e.message);
+    return false;
+  }
+}
 // ═══════════════════════════════════════════════════════
 function getNode(id){return GRAPH.nodes.find(n=>n.id===id)}
 function seenClass(id){
@@ -990,6 +1101,7 @@ function saveSession(){
 
   STATE.sessions.push({date,type,duration:parseInt(duration),feeling:currentStar||null,position:currentPos||null,notes});
   saveState();
+  syncToSupabase();
   closeModal('add-session');
   renderSessions();
   renderProgreso();
@@ -1004,11 +1116,11 @@ function saveSession(){
 }
 
 function deleteSession(idx){
+  const s=STATE.sessions[idx];
+  if(s?.id) sb.from('sessions').delete().eq('id',s.id).then(()=>{});
   STATE.sessions.splice(idx,1);
   saveState();
-  renderSessions();
-  renderProgreso();
-  updateSidebar();
+  renderSessions();renderProgreso();updateSidebar();
 }
 
 // SESSION DETAIL PANEL
@@ -1058,6 +1170,7 @@ function updateSessionField(idx,field,value){
   if(!STATE.sessions[idx]) return;
   STATE.sessions[idx][field]=value;
   saveState();
+  syncToSupabase();
   renderSessions();
   if(field==='duration'){renderProgreso();updateSidebar();}
 }
@@ -1134,6 +1247,7 @@ function toggleSeen(id){
   st.seen=!st.seen;
   if(!st.seen) st.status='new';
   saveState();
+  syncToSupabase();
   const card=document.getElementById('card-'+id);
   if(card){
     const sc=seenClass(id);
@@ -1207,7 +1321,7 @@ function setStatus(id,btn){
   if(card){const sc=seenClass(id);card.className='enc-card'+(sc?' '+sc:'');}
 }
 
-function saveNotes(id,val){STATE.techniques[id].notes=val;saveState();}
+function saveNotes(id,val){STATE.techniques[id].notes=val;saveState();syncToSupabase();}
 function closeDetail(){document.getElementById('detail-panel').classList.remove('open');activeDetailId=null;}
 
 // ═══════════════════════════════════════════════════════
@@ -1333,6 +1447,7 @@ function saveProfile(){
     photo:STATE.profile.photo
   };
   saveState();
+  syncToSupabase();
   closeModal('edit-profile');
   renderProfile();
   renderProgreso();
@@ -1373,6 +1488,7 @@ function uploadPhoto(input){
   compressImage(file,200,(base64)=>{
     STATE.profile.photo=base64;
     saveState();
+    syncToSupabase();
     updateSidebar();
     renderProfile();
   });
@@ -1606,9 +1722,17 @@ function checkPin() {
 
 function initApp() {
   handleGcalCallback();
-  updateSidebar();
-  renderProgreso();
-  renderEnc('all');
+  // Try to load from Supabase, then render
+  loadFromSupabase().then(() => {
+    // Re-init technique state for any missing nodes
+    GRAPH.nodes.forEach(n => {
+      if (!STATE.techniques[n.id]) STATE.techniques[n.id] = {seen:false,status:'new',notes:'',sessions:[]};
+    });
+    updateSidebar();
+    renderProgreso();
+    renderEnc('all');
+    renderSessions();
+  });
 }
 
 // ═══ INIT ═══
