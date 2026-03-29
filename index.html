@@ -765,36 +765,66 @@ TECHNIQUES.forEach(t => {
 // SUPABASE
 // ═══════════════════════════════════════════════════════
 const USER_ID = 'carlos_l8pxk4jqtfg';
+const SUPA_URL = 'https://uanglczkvvsjoqctqmlh.supabase.co/rest/v1';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbmdsY3prdnZzam9xY3RxbWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTExMDcsImV4cCI6MjA5MDA4NzEwN30.PYA5TyodU_nbrXFHKTnqUXJX5QkxMf5u2zppwDC4W8M';
+
+const SUPA_HEADERS = {
+  'apikey': SUPA_KEY,
+  'Authorization': 'Bearer ' + SUPA_KEY,
+  'Content-Type': 'application/json',
+  'Prefer': 'resolution=merge-duplicates,return=minimal'
+};
+
+async function supaUpsert(table, data) {
+  const res = await fetch(`${SUPA_URL}/${table}`, {
+    method: 'POST',
+    headers: SUPA_HEADERS,
+    body: JSON.stringify(Array.isArray(data) ? data : [data])
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    console.warn(`Supabase upsert ${table} failed:`, err);
+  }
+  return res;
+}
+
+async function supaGet(table, filters) {
+  const params = new URLSearchParams({select: '*', ...filters});
+  const res = await fetch(`${SUPA_URL}/${table}?${params}`, {
+    headers: SUPA_HEADERS
+  });
+  if (!res.ok) return [];
+  return res.json();
+}
+
+async function supaDelete(table, id) {
+  return fetch(`${SUPA_URL}/${table}?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: SUPA_HEADERS
+  });
+}
+
+// Keep sb alias for deleteSession compatibility
 const sb = {
-  _url: 'https://uanglczkvvsjoqctqmlh.supabase.co/rest/v1',
-  _headers: {
-    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbmdsY3prdnZzam9xY3RxbWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTExMDcsImV4cCI6MjA5MDA4NzEwN30.PYA5TyodU_nbrXFHKTnqUXJX5QkxMf5u2zppwDC4W8M',
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbmdsY3prdnZzam9xY3RxbWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTExMDcsImV4cCI6MjA5MDA4NzEwN30.PYA5TyodU_nbrXFHKTnqUXJX5QkxMf5u2zppwDC4W8M',
-    'Content-Type': 'application/json',
-    'Prefer': 'resolution=merge-duplicates'
-  },
   from(table) {
-    let _table=table, _filters=[], _select='*';
-    const q = {
-      select(s){ _select=s; return q; },
-      eq(col,val){ _filters.push(`${col}=eq.${val}`); return q; },
-      delete(){ return fetch(`${sb._url}/${_table}?${_filters.join('&')}`,{method:'DELETE',headers:sb._headers}); },
-      async get(){ const r=await fetch(`${sb._url}/${_table}?select=${_select}&${_filters.join('&')}`,{headers:sb._headers}); return r.json(); },
-      async upsert(data){ return fetch(`${sb._url}/${_table}`,{method:'POST',headers:sb._headers,body:JSON.stringify(data)}); }
+    let _id = null;
+    return {
+      eq(col, val) { if(col==='id') _id=val; return this; },
+      delete() { return supaDelete(table, _id); },
+      then(fn) { return Promise.resolve().then(fn); }
     };
-    return q;
   }
 };
 
 async function loadFromSupabase() {
   try {
-    const [profileRes, sessionsRes, techRes] = await Promise.all([
-      sb.from('profiles').eq('user_id', USER_ID).get(),
-      sb.from('sessions').eq('user_id', USER_ID).select('*').get(),
-      sb.from('techniques').eq('user_id', USER_ID).get()
+    const [profiles, sessions, techs] = await Promise.all([
+      supaGet('profiles', {'user_id': `eq.${USER_ID}`}),
+      supaGet('sessions', {'user_id': `eq.${USER_ID}`, 'order': 'date.desc'}),
+      supaGet('techniques', {'user_id': `eq.${USER_ID}`})
     ]);
-    if (Array.isArray(profileRes) && profileRes[0]) {
-      const p = profileRes[0];
+    if (Array.isArray(profiles) && profiles[0]) {
+      const p = profiles[0];
       STATE.profile = {
         name: p.name||'', gym: p.gym||'', belt: p.belt||'white',
         stripe: p.stripe||'0', start: p.start_date||'',
@@ -802,18 +832,18 @@ async function loadFromSupabase() {
         height: p.height||'', sex: p.sex||'', photo: p.photo||null
       };
     }
-    if (Array.isArray(sessionsRes) && sessionsRes.length) {
-      STATE.sessions = sessionsRes.map(s => ({
+    if (Array.isArray(sessions) && sessions.length) {
+      STATE.sessions = sessions.map(s => ({
         id: s.id, date: s.date, type: s.type, duration: s.duration,
         feeling: s.feeling, notes: s.notes||'', gym: s.gym||'',
         training_partners: s.training_partners||'',
-        focos: s.focos ? (typeof s.focos === 'string' ? JSON.parse(s.focos) : s.focos) : [],
+        focos: s.focos ? (typeof s.focos==='string' ? JSON.parse(s.focos) : s.focos) : [],
         from_gcal: s.from_gcal||false, gcal_event_id: s.gcal_event_id||null
       }));
     }
-    if (Array.isArray(techRes)) {
-      techRes.forEach(r => {
-        if (!STATE.techniques[r.technique_id]) STATE.techniques[r.technique_id] = {seen:false,status:'new',notes:'',sessions:[]};
+    if (Array.isArray(techs)) {
+      techs.forEach(r => {
+        if (!STATE.techniques[r.technique_id]) STATE.techniques[r.technique_id]={seen:false,status:'new',notes:'',sessions:[]};
         STATE.techniques[r.technique_id].seen = r.seen||false;
         STATE.techniques[r.technique_id].status = r.status||'new';
         STATE.techniques[r.technique_id].notes = r.notes||'';
@@ -826,26 +856,28 @@ async function loadFromSupabase() {
 async function syncToSupabase() {
   try {
     const p = STATE.profile;
-    await sb.from('profiles').upsert({
+    await supaUpsert('profiles', {
       user_id: USER_ID, name: p.name, gym: p.gym, belt: p.belt,
       stripe: p.stripe, start_date: p.start, prior_hours: p.prior_hours,
       weight: p.weight, height: p.height, sex: p.sex, photo: p.photo,
       updated_at: new Date().toISOString()
     });
-    for (const s of STATE.sessions) {
-      if (!s.id) s.id = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
-      await sb.from('sessions').upsert({
+    // Only upsert sessions that have an id
+    const sessionRows = STATE.sessions
+      .filter(s => s.id)
+      .map(s => ({
         id: s.id, user_id: USER_ID, date: s.date, type: s.type,
-        duration: s.duration, feeling: s.feeling, notes: s.notes,
-        gym: s.gym, training_partners: s.training_partners,
+        duration: s.duration, feeling: s.feeling, notes: s.notes||null,
+        gym: s.gym||null, training_partners: s.training_partners||null,
         focos: JSON.stringify(s.focos||[]),
         from_gcal: s.from_gcal||false, gcal_event_id: s.gcal_event_id||null
-      });
-    }
+      }));
+    if (sessionRows.length) await supaUpsert('sessions', sessionRows);
+
     const techEntries = Object.entries(STATE.techniques)
       .filter(([,v]) => v.seen || v.notes)
-      .map(([id,v]) => ({user_id:USER_ID, technique_id:id, seen:v.seen, status:v.status, notes:v.notes, updated_at:new Date().toISOString()}));
-    if (techEntries.length) await sb.from('techniques').upsert(techEntries);
+      .map(([id,v]) => ({user_id:USER_ID, technique_id:id, seen:v.seen, status:v.status, notes:v.notes||null, updated_at:new Date().toISOString()}));
+    if (techEntries.length) await supaUpsert('techniques', techEntries);
   } catch(e) { console.warn('Supabase sync failed:', e); }
 }
 
@@ -1600,6 +1632,48 @@ function openModal(name){
 }
 function closeModal(name){document.getElementById('modal-'+name).classList.remove('open');}
 function selType(btn){btn.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));btn.classList.add('sel');}
+
+function setFeeling(btn){
+  currentStar=parseInt(btn.dataset.v);
+  document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  const lbl=document.getElementById('feeling-label');
+  if(lbl) lbl.textContent=btn.dataset.label;
+}
+
+function saveSession(){
+  const date=document.getElementById('session-date').value||todayStr();
+  const type=document.querySelector('#type-pills-main .type-pill.sel')?.textContent||'Gi';
+  const duration=document.getElementById('session-duration').value;
+  const notes=document.getElementById('session-notes').value.trim();
+  const gym=document.getElementById('session-gym').value.trim();
+  const partners=document.getElementById('session-partners').value.trim();
+  if(!duration||parseInt(duration)<1){document.getElementById('session-duration').focus();return;}
+
+  const validFocos=currentFocos.filter(f=>f.category);
+  const id='sess_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+  STATE.sessions.push({id,date,type,duration:parseInt(duration),feeling:currentStar||null,focos:validFocos,notes,gym:gym||null,training_partners:partners||null});
+  saveState(); syncToSupabase();
+  closeModal('add-session');
+  renderCalendar(); renderProgreso(); renderWeeklySummary(); updateSidebar();
+
+  // Reset
+  currentStar=0; currentFocos=[];
+  document.getElementById('session-duration').value='';
+  document.getElementById('session-notes').value='';
+  document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
+  const lbl=document.getElementById('feeling-label');
+  if(lbl) lbl.textContent='';
+}
+
+function deleteSession(idx){
+  const s=STATE.sessions[idx];
+  if(s?.id) sb.from('sessions').eq('id',s.id).delete().then(()=>{});
+  STATE.sessions.splice(idx,1);
+  saveState();
+  closeDetail();
+  renderCalendar(); renderProgreso(); updateSidebar();
+}
 
 // ═══════════════════════════════════════════════════════
 // PIN LOCK
