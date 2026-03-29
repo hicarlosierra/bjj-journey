@@ -448,13 +448,16 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 
   <!-- SESIONES -->
   <div class="view" id="view-sesiones">
-    <div class="page-title">Sesiones</div>
-    <div class="page-sub" id="sesiones-sub">Tu historial de entrenos</div>
-    <button class="add-btn" onclick="openModal('add-session')">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Nueva sesión
-    </button>
-    <div id="session-calendar" style="margin-bottom:24px"></div>
-    <div id="sessions-list"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div>
+        <div class="page-title">Sesiones</div>
+        <div class="page-sub" id="sesiones-sub">Tu historial de entrenos</div>
+      </div>
+      <button class="add-btn" style="margin:0" onclick="openModal('add-session')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Nueva sesión
+      </button>
+    </div>
+    <div id="session-calendar"></div>
   </div>
 
   <!-- FUERA DEL TATAMI -->
@@ -537,7 +540,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
       <div class="feeling-btns" id="feeling-btns">
         <button class="feeling-btn" data-v="5" data-label="En llamas" onclick="setFeeling(this)">🔥</button>
         <button class="feeling-btn" data-v="4" data-label="Fuerte" onclick="setFeeling(this)">💪</button>
-        <button class="feeling-btn" data-v="3" data-label="Normal" onclick="setFeeling(this)">😐</button>
+        <button class="feeling-btn" data-v="3" data-label="Normal" onclick="setFeeling(this)">🙂</button>
         <button class="feeling-btn" data-v="2" data-label="Cansado" onclick="setFeeling(this)">😴</button>
         <button class="feeling-btn" data-v="1" data-label="Roto" onclick="setFeeling(this)">🤕</button>
       </div>
@@ -1131,7 +1134,7 @@ function renderSessions(){
   el.innerHTML=`<div class="sessions-grid">
     ${sorted.map((s,si)=>{
       const realIdx=sortedToReal[si];
-      const feelHtml=s.feeling?`<span style="font-size:18px">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>`:'';
+      const feelHtml=s.feeling?`<span style="font-size:18px">${['🤕','😴','🙂','💪','🔥'][s.feeling-1]}</span>`:'';
       const gcalBadge=s.from_gcal?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:rgba(76,175,138,.12);color:var(--green);border:1px solid rgba(76,175,138,.25)">📅 Calendar</span>`:'';
       const gymBadge=s.gym?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">📍 ${s.gym}</span>`:'';
       const partnersBadge=s.training_partners?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">👥 ${s.training_partners}</span>`:'';
@@ -1226,7 +1229,7 @@ function renderFocos() {
     </div>`;
   }).join('');
 }
-const FEELINGS={5:'🔥 En llamas',4:'💪 Fuerte',3:'😐 Normal',2:'😴 Cansado',1:'🤕 Roto'};
+const FEELINGS={5:'🔥 En llamas',4:'💪 Fuerte',3:'🙂 Normal',2:'😴 Cansado',1:'🤕 Roto'};
 
 function setFeeling(btn){
   currentStar=parseInt(btn.dataset.v);
@@ -1275,7 +1278,7 @@ function openSessionDetail(idx){
   if(!s) return;
   const typeColors={Gi:'var(--purple)',NoGi:'var(--green)','Open mat':'var(--orange)',Gym:'var(--amber)','Competición':'#E05050'};
   const types=['Gi','NoGi','Open mat','Gym','Competición'];
-  const feelingEmojis=['🤕','😴','😐','💪','🔥'];
+  const feelingEmojis=['🤕','😴','🙂','💪','🔥'];
 
   const typePills=types.map(t=>`<button class="type-pill${s.type===t?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'type','${t}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">${t}</button>`).join('');
   const feelingBtns=feelingEmojis.map((e,i)=>`<button class="feeling-btn${s.feeling===(i+1)?' sel':''}" onclick="updateSessionField(${idx},'feeling',${i+1});document.querySelectorAll('#sdp-feelings .feeling-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${e}</button>`).join('');
@@ -1881,7 +1884,7 @@ function switchView(id){
   document.getElementById('view-'+id).classList.add('active');
   closeDetail();
   if(id==='tecnicas') renderEnc(currentFilter);
-  if(id==='sesiones'){renderSessions();renderCalendar();}
+  if(id==='sesiones'){renderCalendar();}
   if(id==='perfil'){renderProfile();if(!STATE.profile.name) setTimeout(()=>openModal('edit-profile'),300);}
   if(id==='progreso'){renderProgreso();renderWeeklySummary();}
   document.getElementById('main-content').scrollTop=0;
@@ -1949,7 +1952,6 @@ function initApp() {
     renderProgreso();
     renderWeeklySummary();
     renderEnc(currentFilter);
-    renderSessions();
     renderCalendar();
     renderProfile();
     // Also render coach if it's the active view
@@ -1959,10 +1961,10 @@ function initApp() {
 }
 
 // ═══════════════════════════════════════════════════════
-// CALENDAR
+// CALENDAR — grid + big session cards below
 // ═══════════════════════════════════════════════════════
-let calendarMonth = new Date();
-calendarMonth.setDate(1);
+let calendarMonth = new Date(); calendarMonth.setDate(1);
+let selectedDay = todayStr();
 
 function renderCalendar() {
   const el = document.getElementById('session-calendar');
@@ -1971,98 +1973,126 @@ function renderCalendar() {
   const year = calendarMonth.getFullYear();
   const month = calendarMonth.getMonth();
   const monthName = calendarMonth.toLocaleDateString('es-ES', {month:'long', year:'numeric'});
-  const firstDay = new Date(year, month, 1).getDay();
-  const startOffset = firstDay === 0 ? 6 : firstDay - 1; // Monday first
   const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1;
   const today = todayStr();
+  const typeColors = {Gi:'var(--purple)',NoGi:'var(--green)','Open mat':'var(--orange)',Gym:'var(--amber)','Competición':'#E05050'};
+  const feelingEmojis = ['🤕','😴','🙂','💪','🔥'];
 
-  // Build session map for this month
+  // Sessions map for whole month
   const monthStr = `${year}-${String(month+1).padStart(2,'0')}`;
   const sessionsByDay = {};
   STATE.sessions.forEach(s => {
-    if (s.date && s.date.startsWith(monthStr)) {
-      const day = parseInt(s.date.slice(8));
-      if (!sessionsByDay[day]) sessionsByDay[day] = [];
-      sessionsByDay[day].push(s);
+    if (s.date?.startsWith(monthStr)) {
+      const d = parseInt(s.date.slice(8));
+      if (!sessionsByDay[d]) sessionsByDay[d] = [];
+      sessionsByDay[d].push(s);
     }
   });
 
-  const typeColors = {Gi:'var(--purple)',NoGi:'var(--green)','Open mat':'var(--orange)',Gym:'var(--amber)','Competición':'#E05050'};
-  const dayNames = ['L','M','X','J','V','S','D'];
-
-  let cells = '';
-  // Empty cells before first day
-  for (let i = 0; i < startOffset; i++) {
-    cells += `<div></div>`;
+  // Update subtitle
+  const sub = document.getElementById('sesiones-sub');
+  if (sub) {
+    const total = STATE.sessions.length;
+    const totalH = Math.round(STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60*10)/10;
+    sub.textContent = `${total} sesiones · ${totalH}h en total`;
   }
-  // Day cells
+
+  // Grid cells
+  let cells = '';
+  for (let i = 0; i < offset; i++) cells += `<div></div>`;
   for (let d = 1; d <= daysInMonth; d++) {
-    const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dateStr = `${monthStr}-${String(d).padStart(2,'0')}`;
     const sessions = sessionsByDay[d] || [];
     const isToday = dateStr === today;
-    const hasBJJ = sessions.some(s => s.type !== 'Gym');
-    const hasGym = sessions.some(s => s.type === 'Gym');
-    const dots = sessions.slice(0,3).map(s =>
-      `<div style="width:4px;height:4px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'}"></div>`
-    ).join('');
-
-    cells += `<div onclick="calendarDayClick('${dateStr}')" style="
-      aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:2px;border-radius:5px;cursor:${sessions.length?'pointer':'default'};
-      background:${sessions.length?'var(--bg3)':'transparent'};
-      border:${isToday?'1.5px solid var(--orange)':'1px solid transparent'};
-      transition:background .12s
-    " ${sessions.length?'onmouseenter="this.style.background=\'var(--bg4)\'"onmouseleave="this.style.background=\'var(--bg3)\'"':''}>
-      <div style="font-size:10px;font-weight:${isToday?'700':'400'};color:${isToday?'var(--orange)':sessions.length?'var(--cream)':'var(--muted2)'}">${d}</div>
-      ${dots?`<div style="display:flex;gap:1px">${dots}</div>`:''}
+    const isSel = dateStr === selectedDay;
+    const dot = sessions.length
+      ? `<div style="display:flex;gap:2px;justify-content:center;margin-top:2px">${sessions.slice(0,3).map(s=>`<div style="width:4px;height:4px;border-radius:50%;background:${isSel?'rgba(255,255,255,.85)':typeColors[s.type]||'var(--muted2)'}"></div>`).join('')}</div>`
+      : '';
+    cells += `<div onclick="selectCalDay('${dateStr}')" style="
+      display:flex;flex-direction:column;align-items:center;padding:6px 2px;
+      border-radius:8px;cursor:pointer;
+      background:${isSel?'var(--orange)':'transparent'};
+      border:1.5px solid ${isToday&&!isSel?'var(--orange)':'transparent'};
+      transition:background .12s">
+      <div style="font-size:12px;font-weight:${isSel||isToday?'700':'400'};
+        color:${isSel?'#fff':isToday?'var(--orange)':sessions.length?'var(--cream)':'var(--muted2)'}">
+        ${d}
+      </div>
+      ${dot}
     </div>`;
   }
+
+  // Selected day sessions as big cards
+  const selSessions = selectedDay?.startsWith(monthStr)
+    ? (sessionsByDay[parseInt(selectedDay.slice(8))] || [])
+    : [];
+  const selDate = selectedDay ? new Date(selectedDay+'T00:00:00') : null;
+  const selLabel = !selectedDay ? '' :
+    selectedDay === today ? 'Hoy' :
+    selDate.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});
+
+  const selCards = selSessions.length
+    ? selSessions.map(s => {
+        const realIdx = STATE.sessions.indexOf(s);
+        const focosHtml = s.focos?.length
+          ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">${s.focos.map(f=>`<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:var(--bg4);color:var(--muted2);border:1px solid var(--border)">${f.position}${f.intent?' · '+INTENT_LABEL[f.intent]:''}</span>`).join('')}</div>`
+          : '';
+        const gymBadge = s.gym ? `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg4);color:var(--muted2);border:1px solid var(--border)">📍 ${s.gym}</span>` : '';
+        const partnersBadge = s.training_partners ? `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg4);color:var(--muted2);border:1px solid var(--border)">👥 ${s.training_partners}</span>` : '';
+        return `<div onclick="openSessionDetail(${realIdx})" style="
+          background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+          padding:20px 22px;cursor:pointer;transition:border-color .12s"
+          onmouseenter="this.style.borderColor='var(--border2)'"
+          onmouseleave="this.style.borderColor='var(--border)'">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:10px;height:10px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'}"></div>
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800">${s.type}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              ${s.feeling ? `<span style="font-size:20px">${feelingEmojis[s.feeling-1]}</span>` : ''}
+              <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;color:var(--orange)">${Math.round((s.duration||0)/60*10)/10}h</div>
+            </div>
+          </div>
+          ${gymBadge||partnersBadge ? `<div style="display:flex;gap:6px;margin-bottom:6px">${gymBadge}${partnersBadge}</div>` : ''}
+          ${focosHtml}
+          ${s.notes ? `<div style="font-size:12px;color:var(--muted2);margin-top:8px;line-height:1.5">${s.notes}</div>` : ''}
+        </div>`;
+      }).join('')
+    : `<div style="text-align:center;padding:24px 0;color:var(--muted2)">
+        <div style="font-size:13px;margin-bottom:12px">Sin sesiones este día</div>
+        <button onclick="openModal('add-session')" style="font-size:12px;padding:8px 16px;background:var(--orange);border:none;border-radius:var(--r2);color:#fff;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:600">+ Añadir sesión</button>
+      </div>`;
 
   el.innerHTML = `
-    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:4px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <button onclick="calendarPrev()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">←</button>
-        <div style="font-size:12px;font-weight:600;color:var(--muted3);text-transform:capitalize;letter-spacing:.04em">${monthName}</div>
-        <button onclick="calendarNext()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:16px;padding:0 4px;line-height:1">→</button>
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:20px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px">
+        <button onclick="calendarPrev()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:22px;line-height:1;padding:0 4px">‹</button>
+        <div style="font-size:13px;font-weight:600;text-transform:capitalize;color:var(--cream)">${monthName}</div>
+        <button onclick="calendarNext()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:22px;line-height:1;padding:0 4px">›</button>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">
-        ${dayNames.map(d=>`<div style="text-align:center;font-size:9px;font-weight:600;color:var(--muted);padding:2px 0">${d}</div>`).join('')}
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);padding:0 12px;margin-bottom:4px">
+        ${['L','M','X','J','V','S','D'].map(d=>`<div style="text-align:center;font-size:10px;font-weight:600;color:var(--muted);padding:2px 0">${d}</div>`).join('')}
       </div>
-      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:0 12px 12px">
         ${cells}
       </div>
-      <div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">
-        ${Object.entries(typeColors).map(([t,c])=>`<div style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--muted2)"><div style="width:6px;height:6px;border-radius:50%;background:${c}"></div>${t}</div>`).join('')}
-      </div>
+    </div>
+    <div>
+      <div style="font-size:12px;font-weight:600;color:var(--orange);text-transform:capitalize;margin-bottom:12px;letter-spacing:.04em">${selLabel}</div>
+      <div style="display:flex;flex-direction:column;gap:10px">${selCards}</div>
     </div>`;
 }
 
-function calendarPrev() {
-  calendarMonth.setMonth(calendarMonth.getMonth() - 1);
-  renderCalendar();
-}
-function calendarNext() {
-  calendarMonth.setMonth(calendarMonth.getMonth() + 1);
-  renderCalendar();
-}
-function calendarDayClick(dateStr) {
-  // Scroll to that date in sessions list
-  const sessions = STATE.sessions.filter(s => s.date === dateStr);
-  if (!sessions.length) return;
-  // Find the session card and highlight it
-  const sorted = [...STATE.sessions].sort((a,b) => b.date.localeCompare(a.date));
-  const idx = sorted.findIndex(s => s.date === dateStr);
-  if (idx >= 0) {
-    const card = document.querySelectorAll('.session-full')[idx];
-    if (card) {
-      card.scrollIntoView({behavior:'smooth', block:'center'});
-      card.style.borderColor = 'var(--orange)';
-      setTimeout(() => card.style.borderColor = '', 1500);
-    }
-  }
-}
+function selectCalDay(dateStr) { selectedDay = dateStr; closeDetail(); renderCalendar(); }
+function calendarPrev() { calendarMonth.setMonth(calendarMonth.getMonth()-1); renderCalendar(); }
+function calendarNext() { calendarMonth.setMonth(calendarMonth.getMonth()+1); renderCalendar(); }
 
-// ═══════════════════════════════════════════════════════
+
+
+
 // WEEKLY SUMMARY (for Progreso)
 // ═══════════════════════════════════════════════════════
 function renderWeeklySummary() {
@@ -2119,7 +2149,7 @@ function renderWeeklySummary() {
 
   const feelingSessions = weekSessions.filter(s => s.feeling);
   const avgFeeling = feelingSessions.length ? Math.round(feelingSessions.reduce((s,x)=>s+x.feeling,0)/feelingSessions.length) : null;
-  const feelingEmojis = {1:'🤕',2:'😴',3:'😐',4:'💪',5:'🔥'};
+  const feelingEmojis = {1:'🤕',2:'😴',3:'🙂',4:'💪',5:'🔥'};
   const weekLabel = `${monday.toLocaleDateString('es-ES',{day:'numeric',month:'short'})} – ${new Date(monday.getTime()+6*86400000).toLocaleDateString('es-ES',{day:'numeric',month:'short'})}`;
 
   el.innerHTML = `
