@@ -366,14 +366,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>Progreso
     </div>
     <div class="nav-item" id="snav-tecnicas" onclick="switchView('tecnicas')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Técnicas
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>Movimientos
     </div>
     <div class="nav-item" id="snav-sesiones" onclick="switchView('sesiones')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Sesiones
     </div>
     <div class="nav-divider"></div>
     <div class="nav-item" id="snav-coach" onclick="switchView('coach')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Coach
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Fuera del tatami
     </div>
     <div class="nav-item" id="snav-perfil" onclick="switchView('perfil')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>Perfil
@@ -408,28 +408,30 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
     <div id="recent-sessions-wrap"></div>
   </div>
 
-  <!-- TÉCNICAS -->
+  <!-- MOVIMIENTOS -->
   <div class="view" id="view-tecnicas">
-    <div class="page-title">Técnicas</div>
-    <div class="page-sub">Enciclopedia completa · Marca las que has visto en clase</div>
-    <div class="filter-row" id="tech-filters">
-      <button class="filter-pill active" data-filter="all">Todas</button>
-      <button class="filter-pill" data-filter="priority">⚡ Esenciales blanco</button>
-      <button class="filter-pill" data-filter="seen">Vistas en clase</button>
-      <button class="filter-pill" data-filter="unseen">Por descubrir</button>
-      <button class="filter-pill" data-filter="gi">Gi</button>
-      <button class="filter-pill" data-filter="nogi">NoGi</button>
-      <button class="filter-pill" data-filter="advanced">Nivel azul+</button>
+    <div class="page-title">Movimientos</div>
+    <div class="page-sub">Librería completa organizada por posición e intent</div>
+    <div style="display:flex;gap:0;margin-bottom:20px;background:var(--bg2);border-radius:var(--r2);padding:3px;width:fit-content">
+      <button class="login-tab active" id="mov-tab-all" onclick="switchMovTab('all')" style="padding:8px 20px;font-size:13px">Todas</button>
+      <button class="login-tab" id="mov-tab-mine" onclick="switchMovTab('mine')" style="padding:8px 20px;font-size:13px">Mis movimientos</button>
     </div>
-    <div class="status-legend">
-      <div class="sl-item"><div class="sl-dot" style="background:transparent;border:1.5px dashed var(--muted);width:9px;height:9px;border-radius:50%"></div>No vista</div>
-      <div class="sl-sep"></div>
-      <div class="sl-item"><div class="sl-dot" style="background:var(--muted2)"></div>Vista · nueva</div>
-      <div class="sl-item"><div class="sl-dot" style="background:var(--amber)"></div>Practicando</div>
-      <div class="sl-item"><div class="sl-dot" style="background:var(--green)"></div>Fluyendo</div>
-      <div class="sl-item"><div class="sl-dot" style="background:var(--orange)"></div>Automática</div>
-      <div class="sl-sep"></div>
-      <div class="sl-item" style="font-size:11px;color:var(--muted2)">Toca el ○ para marcar como vista</div>
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted2)">
+        <div style="width:10px;height:10px;border-radius:50%;background:#EB5E2833;border:1.5px solid var(--orange)"></div>Dominante
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted2)">
+        <div style="width:10px;height:10px;border-radius:50%;background:#7B74E033;border:1.5px solid var(--purple)"></div>Neutral
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted2)">
+        <div style="width:10px;height:10px;border-radius:50%;background:#4CAF8A33;border:1.5px solid var(--green)"></div>Defensivo
+      </div>
+      <div style="width:1px;height:14px;background:var(--border2)"></div>
+      <span style="font-size:11px;color:#E05050;font-weight:700">ATAQUE</span>
+      <span style="font-size:11px;color:#4CAF8A;font-weight:700">DEFENSA</span>
+      <span style="font-size:11px;color:#E8A838;font-weight:700">TRANSICIÓN</span>
+      <div style="width:1px;height:14px;background:var(--border2)"></div>
+      <span style="font-size:11px;color:var(--muted2)">Toca ○ para marcar vista</span>
     </div>
     <div id="enc-container"></div>
   </div>
@@ -444,23 +446,38 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
     <div id="sessions-list"></div>
   </div>
 
-  <!-- COACH -->
+  <!-- FUERA DEL TATAMI -->
   <div class="view" id="view-coach">
-    <div class="page-title">Coach</div>
-    <div class="page-sub">Tu asistente personal de BJJ — próximamente vía WhatsApp</div>
-    <div class="coach-page-hero">
-      <div class="coach-page-ava">🥋</div>
-      <div>
-        <div class="coach-page-name">Tu coach IA</div>
-        <div class="coach-page-sub">Registra sesiones en lenguaje natural y analiza tu progreso con IA</div>
-        <div class="coming-badge"><div class="coming-dot"></div>En desarrollo · Fase 2</div>
-      </div>
+    <div class="page-title">Fuera del tatami</div>
+    <div class="page-sub">Análisis, coaching IA y más — próximamente</div>
+
+    <div style="background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);padding:40px 32px;text-align:center;margin-bottom:20px">
+      <div style="font-size:48px;margin-bottom:16px">🥋</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;margin-bottom:8px">En construcción</div>
+      <div style="font-size:14px;color:var(--muted2);max-width:400px;margin:0 auto;line-height:1.7">Esta sección recogerá todo lo que ocurre fuera del tatami — análisis de tu progreso, coaching con IA, y herramientas para evolucionar más rápido.</div>
     </div>
-    <div class="coach-features">
-      <div class="cf"><div class="cf-icon">💬</div><div class="cf-title">Bot de WhatsApp</div><div class="cf-sub">Registra sesiones desde el vestuario en lenguaje natural. La IA lo estructura automáticamente.</div></div>
-      <div class="cf"><div class="cf-icon">🔗</div><div class="cf-title">Análisis de cadenas</div><div class="cf-sub">Detecta qué técnicas que ya dominas abren nuevas cadenas que aún no explotas.</div></div>
-      <div class="cf"><div class="cf-icon">🎯</div><div class="cf-title">Tips personalizados</div><div class="cf-sub">Si llevas tiempo sin trabajar una posición, el coach te lo recuerda.</div></div>
-      <div class="cf"><div class="cf-icon">📊</div><div class="cf-title">Resumen semanal</div><div class="cf-sub">Cada domingo: horas, técnicas y recomendaciones basadas en tu grafo personal.</div></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;opacity:.5">
+        <div style="font-size:22px;margin-bottom:10px">💬</div>
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px">Coach IA</div>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.5">Pregunta sobre tu progreso, pide consejo técnico o registra sesiones en lenguaje natural desde la app.</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;opacity:.5">
+        <div style="font-size:22px;margin-bottom:10px">📊</div>
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px">Dashboard semanal</div>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.5">Resumen visual de tu semana — horas, sesiones, feeling medio y distribución por tipo.</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;opacity:.5">
+        <div style="font-size:22px;margin-bottom:10px">🎯</div>
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px">Tips personales</div>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.5">Análisis de tu grafo de movimientos para detectar puntos débiles y próximos objetivos técnicos.</div>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:20px;opacity:.5">
+        <div style="font-size:22px;margin-bottom:10px">📅</div>
+        <div style="font-size:14px;font-weight:500;margin-bottom:4px">Resumen semanal</div>
+        <div style="font-size:12px;color:var(--muted2);line-height:1.5">Cada domingo, un resumen automático de tu semana con recomendaciones para la siguiente.</div>
+      </div>
     </div>
   </div>
 
@@ -481,7 +498,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 
 <nav class="mobile-nav">
   <div class="mobile-nav-item active" id="mnav-progreso" onclick="switchView('progreso')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg><span>Progreso</span></div>
-  <div class="mobile-nav-item" id="mnav-tecnicas" onclick="switchView('tecnicas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Técnicas</span></div>
+  <div class="mobile-nav-item" id="mnav-tecnicas" onclick="switchView('tecnicas')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg><span>Movimientos</span></div>
   <div class="mobile-nav-item" id="mnav-sesiones" onclick="switchView('sesiones')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Sesiones</span></div>
   <div class="mobile-nav-item" id="mnav-coach" onclick="switchView('coach')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Coach</span></div>
   <div class="mobile-nav-item" id="mnav-perfil" onclick="switchView('perfil')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg><span>Perfil</span></div>
@@ -489,7 +506,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 
 <!-- MODAL: NUEVA SESIÓN -->
 <div class="modal-overlay" id="modal-add-session" onclick="closeModal('add-session')">
-  <div class="modal" onclick="event.stopPropagation()">
+  <div class="modal" onclick="event.stopPropagation()" style="width:560px">
     <div class="modal-title">Nueva sesión</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="input-group"><label class="input-label">Fecha</label><input class="input-field" type="date" id="session-date"></div>
@@ -515,26 +532,24 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
       </div>
       <div id="feeling-label" style="font-size:12px;color:var(--muted2);margin-top:6px;min-height:16px"></div>
     </div>
-    <div class="input-group"><label class="input-label">Posición trabajada</label>
-      <div class="type-pills" id="position-pills" style="flex-wrap:wrap">
-        <button class="type-pill" onclick="selPos(this)">De pie</button>
-        <button class="type-pill" onclick="selPos(this)">Guardia cerrada</button>
-        <button class="type-pill" onclick="selPos(this)">Guardia abierta</button>
-        <button class="type-pill" onclick="selPos(this)">Half guard</button>
-        <button class="type-pill" onclick="selPos(this)">Side control</button>
-        <button class="type-pill" onclick="selPos(this)">Montada</button>
-        <button class="type-pill" onclick="selPos(this)">Espalda</button>
-        <button class="type-pill" onclick="selPos(this)">General / Sparring</button>
+
+    <!-- FOCOS -->
+    <div class="input-group">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <label class="input-label" style="margin:0">Focos <span style="color:var(--muted2);font-size:10px">lo que trabajaste — añade hasta 5</span></label>
+        <button onclick="addFoco()" style="font-size:11px;padding:4px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--orange);cursor:pointer;font-family:'DM Sans',sans-serif">+ Añadir foco</button>
       </div>
+      <div id="focos-list" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
-    <div class="input-group"><label class="input-label">Notas <span style="color:var(--muted2);font-size:10px;margin-left:4px">opcional</span></label>
-      <textarea class="input-field" id="session-notes" rows="2" placeholder="Algo que destacar..."></textarea>
-    </div>
+
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="input-group"><label class="input-label">Gimnasio <span style="color:var(--muted2);font-size:10px">opcional</span></label>
         <input class="input-field" type="text" id="session-gym" placeholder="Kalmma"></div>
       <div class="input-group"><label class="input-label">Compañeros <span style="color:var(--muted2);font-size:10px">opcional</span></label>
         <input class="input-field" type="text" id="session-partners" placeholder="John, Paco..."></div>
+    </div>
+    <div class="input-group"><label class="input-label">Notas <span style="color:var(--muted2);font-size:10px">opcional</span></label>
+      <textarea class="input-field" id="session-notes" rows="2" placeholder="Algo que destacar..."></textarea>
     </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('add-session')">Cancelar</button>
@@ -595,97 +610,164 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 // ═══════════════════════════════════════════════════════
 // GRAPH DATA
 // ═══════════════════════════════════════════════════════
-const GRAPH = {
-  nodes: [
-    {id:'tech_bridge',name:'Bridge',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Hip extension used to create force and height. Foundation for all reversals and escapes.'},
-    {id:'tech_shrimp',name:'Shrimp',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Hip escape used to recover space and rebuild frames when pinned.'},
-    {id:'tech_technical_stand_up',name:'Technical Stand-Up',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Safe method of returning to standing while protecting against re-engagement.'},
-    {id:'tech_back_heist',name:'Back Heist',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Hip-heisting movement used to rotate underneath and recover angle or base.'},
-    {id:'tech_sit_out',name:'Sit-Out',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Turn-out movement used from turtle and scrambles to face the opponent.'},
-    {id:'tech_shoulder_roll',name:'Shoulder Roll',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Rolling movement used in guard retention, turtle work, and scramble recovery.'},
-    {id:'tech_granby_roll',name:'Granby Roll',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Inversion-based roll used to escape, reguard, or scramble.'},
-    {id:'tech_inversion',name:'Inversion',family:'foundational',subtype:'movement',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Shoulder-supported inversion used to create angle, retain guard, or attack.'},
-    {id:'tech_guard_pull',name:'Guard Pull',family:'standing',subtype:'transition',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Deliberate transition from standing directly into a preferred guard position.'},
-    {id:'tech_collar_drag',name:'Collar Drag',family:'standing',subtype:'takedown',formats:['gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Forward-dragging takedown entry built around the collar grip. Sets up the back.'},
-    {id:'tech_arm_drag',name:'Arm Drag',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Off-balancing drag that exposes the side or back. Works from standing and butterfly.'},
-    {id:'tech_single_leg_takedown',name:'Single Leg Takedown',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'High-percentage leg attack focused on isolating and finishing one leg.'},
-    {id:'tech_double_leg_takedown',name:'Double Leg Takedown',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Penetration-based takedown attacking both legs simultaneously.'},
-    {id:'tech_ankle_pick',name:'Ankle Pick',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Low-risk takedown combining upper-body pull with a quick ankle capture.'},
-    {id:'tech_snap_down',name:'Snap Down',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Head-and-arm snap used to break posture and enter front headlock or turtle.'},
-    {id:'tech_osoto_gari',name:'Osoto Gari',family:'standing',subtype:'takedown',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Major outer reap from judo used as a direct takedown or finishing reap.'},
-    {id:'tech_scissor_sweep',name:'Scissor Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Classic closed-guard sweep using opposing leg pressure to tip the opponent sideways.'},
-    {id:'tech_hip_bump_sweep',name:'Hip Bump Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Closed-guard sweep built on a sit-up angle and explosive hip drive. Chains naturally with Kimura.'},
-    {id:'tech_pendulum_sweep',name:'Pendulum Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Closed-guard sweep using a swinging leg to tip the opponent over the trapped arm.'},
-    {id:'tech_flower_sweep',name:'Flower Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Closed-guard sweep using a leg pendulum and upper-body pull to tip the opponent sideways.'},
-    {id:'tech_double_ankle_sweep',name:'Double Ankle Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Sweep against a standing opponent by simultaneously knocking out both base points.'},
-    {id:'tech_butterfly_sweep',name:'Butterfly Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Elevating sweep using inside butterfly hooks and an upper-body pull to reverse.'},
-    {id:'tech_tripod_sweep',name:'Tripod Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Open-guard sweep pushing one hip/leg while reaping or pulling the post leg.'},
-    {id:'tech_de_la_riva_sweep',name:'De La Riva Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Primary sweeping family from De La Riva guard using the outside hook.'},
-    {id:'tech_knee_lever_sweep',name:'Knee Lever Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Half-guard sweep that uses knee-line lifting or levering to reverse the top player.'},
-    {id:'tech_single_leg_x_sweep',name:'Single Leg X Sweep',family:'sweep',subtype:'sweep',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Off-balancing sweep that lifts and turns the isolated leg from Single Leg X position.'},
-    {id:'tech_standing_guard_break',name:'Standing Guard Break',family:'guard_pass',subtype:'guard break',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Opening the closed guard from a standing posture. Essential to pass closed guard.'},
-    {id:'tech_kneeling_guard_break',name:'Kneeling Guard Break',family:'guard_pass',subtype:'guard break',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Opening the closed guard from a kneeling position using posture and wedge pressure.'},
-    {id:'tech_toreando_pass',name:'Toreando Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Lateral guard pass that redirects both legs to the side while the passer moves around.'},
-    {id:'tech_knee_cut_pass',name:'Knee Cut Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Diagonal pass that cuts the knee through the guard to establish side control.'},
-    {id:'tech_stack_pass',name:'Stack Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Folding pressure pass used to collapse the guard and drive through.'},
-    {id:'tech_over_under_pass',name:'Over-Under Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'core',belt_level:'blue',white_belt_priority:false,desc:'Tight pressure pass using chest-to-chest control.'},
-    {id:'tech_leg_drag_pass',name:'Leg Drag Pass',family:'guard_pass',subtype:'pass',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Pass that pins a leg across the body to create side control.'},
-    {id:'tech_bridge_and_roll_escape',name:'Bridge and Roll Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Mount escape using a hip bridge and rotation to roll the opponent to the side.'},
-    {id:'tech_elbow_knee_escape',name:'Elbow-Knee Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Mount escape using an elbow frame and knee insertion to recover half guard.'},
-    {id:'tech_side_control_hip_escape',name:'Side Control Hip Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Shrimping escape from side control to recover closed or open guard.'},
-    {id:'tech_side_control_underhook_escape',name:'Side Control Underhook Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Underhook-based escape from side control leading to a standup or dog fight.'},
-    {id:'tech_back_escape',name:'Back Escape',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Escape from back control by sliding the hip to remove hooks and recover guard.'},
-    {id:'tech_turtle_recovery',name:'Turtle Recovery',family:'escape',subtype:'escape',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Return from turtle position to guard or standing while preventing back takes.'},
-    {id:'tech_rear_naked_choke',name:'Rear Naked Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Primary back-control submission using forearm pressure against the carotid arteries.'},
-    {id:'tech_guillotine_choke',name:'Guillotine Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Front headlock choke applied from guard or in the clinch. Many finishing variations.'},
-    {id:'tech_triangle_choke',name:'Triangle Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Leg choke isolating the neck and one arm inside a triangular leg lock.'},
-    {id:'tech_arm_triangle_choke',name:'Arm Triangle Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Head-and-arm choke applied from mount, side control, or while passing.'},
-    {id:'tech_cross_collar_choke',name:'Cross Collar Choke',family:'submission',subtype:'choke',formats:['gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Gi choke using crossed deep lapel grips, applied inside closed guard or from mount.'},
-    {id:'tech_bow_and_arrow_choke',name:'Bow and Arrow Choke',family:'submission',subtype:'choke',formats:['gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'High-percentage collar choke from the back using a leg as a lever for extra torque.'},
-    {id:'tech_north_south_choke',name:'North-South Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Chest-pressure choke applied from the north-south position.'},
-    {id:'tech_anaconda_choke',name:'Anaconda Choke',family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Front headlock arm-in choke finished by threading the arm and rolling or squeezing.'},
-    {id:'tech_darce_choke',name:"D'Arce Choke",family:'submission',subtype:'choke',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Front headlock arm-in choke where the choking arm threads across the neck.'},
-    {id:'tech_straight_armbar',name:'Straight Armbar',family:'submission',subtype:'joint lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Straight-arm elbow lock using hip extension and elbow control. Applied from guard, mount, and back.'},
-    {id:'tech_kimura',name:'Kimura',family:'submission',subtype:'joint lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Bent-arm shoulder lock with a figure-four grip. Chains with Hip Bump and back takes.'},
-    {id:'tech_americana',name:'Americana',family:'submission',subtype:'joint lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:true,desc:'Bent-arm shoulder lock finished with an outside rotational figure-four. Common from side control and mount.'},
-    {id:'tech_omoplata',name:'Omoplata',family:'submission',subtype:'joint lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Shoulder lock using the legs to isolate and rotate the trapped arm. Chains with triangle.'},
-    {id:'tech_straight_ankle_lock',name:'Straight Ankle Lock',family:'submission',subtype:'leg lock',formats:['gi','no-gi'],tier:'core',belt_level:'white',white_belt_priority:false,desc:'Primary straight foot and ankle lock. Entry point for the leg lock system.'},
-    {id:'tech_heel_hook',name:'Heel Hook',family:'submission',subtype:'leg lock',formats:['no-gi'],tier:'advanced_core',belt_level:'purple',white_belt_priority:false,desc:'Rotational leg lock attacking the heel and knee line. High-risk, high-percentage at advanced levels.'},
-    {id:'tech_toe_hold',name:'Toe Hold',family:'submission',subtype:'leg lock',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Figure-four foot lock that rotates the ankle and applies knee torsion simultaneously.'},
-    {id:'tech_kneebar',name:'Kneebar',family:'submission',subtype:'leg lock',formats:['gi','no-gi'],tier:'advanced_core',belt_level:'blue',white_belt_priority:false,desc:'Straight leg lock attacking hyperextension of the knee.'},
-  ],
-  chains:{
-    'tech_straight_armbar':['tech_triangle_choke','tech_omoplata','tech_kimura'],
-    'tech_kimura':['tech_straight_armbar','tech_hip_bump_sweep'],
-    'tech_triangle_choke':['tech_straight_armbar','tech_omoplata'],
-    'tech_hip_bump_sweep':['tech_kimura','tech_guillotine_choke'],
-    'tech_scissor_sweep':['tech_hip_bump_sweep','tech_pendulum_sweep'],
-    'tech_butterfly_sweep':['tech_arm_drag'],
-    'tech_arm_drag':['tech_single_leg_takedown'],
-    'tech_toreando_pass':['tech_knee_cut_pass'],
-    'tech_knee_cut_pass':['tech_toreando_pass'],
-    'tech_guillotine_choke':['tech_anaconda_choke','tech_darce_choke'],
-    'tech_elbow_knee_escape':['tech_bridge_and_roll_escape'],
-    'tech_bridge_and_roll_escape':['tech_elbow_knee_escape'],
-  },
-  paths:[
-    {id:'p1',label:'Closed Guard Submission Cycle',sequence:['tech_triangle_choke','tech_straight_armbar','tech_omoplata'],notes:'Classic closed-guard dilemma chain.'},
-    {id:'p2',label:'Closed Guard Sweep Cycle',sequence:['tech_scissor_sweep','tech_hip_bump_sweep','tech_flower_sweep','tech_pendulum_sweep'],notes:'Core closed-guard sweeping options.'},
-    {id:'p3',label:'Butterfly to Back',sequence:['tech_arm_drag','tech_rear_naked_choke'],notes:'Common butterfly progression.'},
-    {id:'p4',label:'Mount Finishing System',sequence:['tech_arm_triangle_choke','tech_straight_armbar','tech_triangle_choke'],notes:'Core mount submission trio.'},
-    {id:'p5',label:'Front Headlock System',sequence:['tech_guillotine_choke','tech_anaconda_choke','tech_darce_choke'],notes:'Main front-headlock attack family.'},
-    {id:'p6',label:'Escape to Reguard',sequence:['tech_elbow_knee_escape','tech_bridge_and_roll_escape'],notes:'Typical defensive progression from mount back to guard.'},
-  ]
+// ═══════════════════════════════════════════════════════
+// NUEVO MODELO: POSITION + INTENT + TECHNIQUE
+// ═══════════════════════════════════════════════════════
+
+// State derivado automáticamente de Position
+const POSITION_STATE = {
+  'Standing':             'neutral',
+  'Guard (Bottom)':       'neutral',
+  'Guard (Top)':          'neutral',
+  'Turtle':               'neutral',
+  'Side Control (Top)':   'dominant',
+  'Mount (Top)':          'dominant',
+  'Back Control':         'dominant',
+  'Side Control (Bottom)':'defensive',
+  'Mount (Bottom)':       'defensive',
+  'Back Taken':           'defensive',
 };
 
-const POSITION_MAP = [
-  {id:'foundational',name:'Foundational Movements',color:'#666',desc:'Movimientos base usados en todo el BJJ',families:['foundational']},
-  {id:'standing',name:'Standing & Takedowns',color:'#E8A838',desc:'Fase de pie, clinch y derribos',families:['standing']},
-  {id:'sweep',name:'Sweeps',color:'#7B74E0',desc:'Reversals desde guardia bottom',families:['sweep']},
-  {id:'guard_pass',name:'Guard Passing',color:'#4CAF8A',desc:'Abrir y pasar la guardia',families:['guard_pass']},
-  {id:'escape',name:'Escapes & Recoveries',color:'#EB5E28',desc:'Escapar de posiciones dominantes',families:['escape']},
-  {id:'submission',name:'Submissions',color:'#E05050',desc:'Finalizaciones por sumisión',families:['submission']},
+const STATE_COLOR = {
+  dominant:  '#EB5E28',
+  neutral:   '#7B74E0',
+  defensive: '#4CAF8A',
+};
+
+const STATE_LABEL = {
+  dominant:  'Dominante',
+  neutral:   'Neutral',
+  defensive: 'Defensivo',
+};
+
+// Técnicas remapeadas al nuevo modelo
+// Cada técnica puede aparecer en múltiples posiciones/intents
+const TECHNIQUES = [
+  // ── STANDING ──────────────────────────────────────────
+  {id:'tech_guard_pull',       name:'Guard Pull',            position:'Standing',        intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Deliberate transition from standing directly into a preferred guard position.'},
+  {id:'tech_collar_drag',      name:'Collar Drag',           position:'Standing',        intent:'Attack',     formats:['gi'],         belt:'white', priority:true,  desc:'Forward-dragging takedown entry built around the collar grip. Sets up the back.'},
+  {id:'tech_arm_drag',         name:'Arm Drag',              position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Off-balancing drag that exposes the side or back. Works from standing and butterfly.'},
+  {id:'tech_single_leg',       name:'Single Leg Takedown',   position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'High-percentage leg attack focused on isolating and finishing one leg.'},
+  {id:'tech_double_leg',       name:'Double Leg Takedown',   position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Penetration-based takedown attacking both legs simultaneously.'},
+  {id:'tech_ankle_pick',       name:'Ankle Pick',            position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Low-risk takedown combining upper-body pull with a quick ankle capture.'},
+  {id:'tech_snap_down',        name:'Snap Down',             position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Head-and-arm snap used to break posture and enter front headlock or turtle.'},
+  {id:'tech_osoto_gari',       name:'Osoto Gari',            position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Major outer reap from judo used as a direct takedown or finishing reap.'},
+  {id:'tech_technical_standup',name:'Technical Stand-Up',    position:'Standing',        intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Safe method of returning to standing while protecting against re-engagement.'},
+  {id:'tech_guillotine_stand', name:'Guillotine Choke',      position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Front headlock choke applied from guard or in the clinch. Many finishing variations.'},
+
+  // ── GUARD (BOTTOM) ────────────────────────────────────
+  {id:'tech_scissor_sweep',    name:'Scissor Sweep',         position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Classic closed-guard sweep using opposing leg pressure to tip the opponent sideways.'},
+  {id:'tech_hip_bump_sweep',   name:'Hip Bump Sweep',        position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Closed-guard sweep built on a sit-up angle and explosive hip drive. Chains naturally with Kimura.'},
+  {id:'tech_pendulum_sweep',   name:'Pendulum Sweep',        position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Closed-guard sweep using a swinging leg to tip the opponent over the trapped arm.'},
+  {id:'tech_flower_sweep',     name:'Flower Sweep',          position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Closed-guard sweep using a leg pendulum and upper-body pull.'},
+  {id:'tech_double_ankle',     name:'Double Ankle Sweep',    position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Sweep against a standing opponent by simultaneously knocking out both base points.'},
+  {id:'tech_butterfly_sweep',  name:'Butterfly Sweep',       position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Elevating sweep using inside butterfly hooks and an upper-body pull to reverse.'},
+  {id:'tech_tripod_sweep',     name:'Tripod Sweep',          position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Open-guard sweep pushing one hip/leg while reaping or pulling the post leg.'},
+  {id:'tech_dlr_sweep',        name:'De La Riva Sweep',      position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Primary sweeping family from De La Riva guard using the outside hook.'},
+  {id:'tech_knee_lever_sweep', name:'Knee Lever Sweep',      position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Half-guard sweep that uses knee-line lifting or levering to reverse the top player.'},
+  {id:'tech_slx_sweep',        name:'Single Leg X Sweep',    position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Off-balancing sweep that lifts and turns the isolated leg from Single Leg X.'},
+  {id:'tech_triangle',         name:'Triangle Choke',        position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Leg choke isolating the neck and one arm inside a triangular leg lock.'},
+  {id:'tech_armbar_guard',     name:'Straight Armbar',       position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Straight-arm elbow lock using hip extension. Applied from closed guard.'},
+  {id:'tech_kimura_guard',     name:'Kimura',                position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Bent-arm shoulder lock with a figure-four grip. Chains with Hip Bump and back takes.'},
+  {id:'tech_omoplata',         name:'Omoplata',              position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Shoulder lock using the legs to isolate and rotate the trapped arm. Chains with triangle.'},
+  {id:'tech_cross_collar',     name:'Cross Collar Choke',    position:'Guard (Bottom)',  intent:'Attack',     formats:['gi'],         belt:'white', priority:true,  desc:'Gi choke using crossed deep lapel grips, applied inside closed guard.'},
+  {id:'tech_guillotine_guard', name:'Guillotine Choke',      position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Front headlock choke caught or pulled guard to finish.'},
+  {id:'tech_ankle_lock_guard', name:'Straight Ankle Lock',   position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Primary straight foot and ankle lock from open guard entanglements.'},
+  {id:'tech_shrimp',           name:'Shrimp',                position:'Guard (Bottom)',  intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Hip escape used to recover space and rebuild frames when pinned.'},
+  {id:'tech_inversion',        name:'Inversion',             position:'Guard (Bottom)',  intent:'Transition', formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Shoulder-supported inversion used to create angle, retain guard, or attack.'},
+  {id:'tech_granby',           name:'Granby Roll',           position:'Guard (Bottom)',  intent:'Transition', formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Inversion-based roll used to escape, reguard, or scramble.'},
+
+  // ── GUARD (TOP) ───────────────────────────────────────
+  {id:'tech_standing_break',   name:'Standing Guard Break',  position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Opening the closed guard from a standing posture. Essential to pass closed guard.'},
+  {id:'tech_kneeling_break',   name:'Kneeling Guard Break',  position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Opening the closed guard from a kneeling position using posture and wedge pressure.'},
+  {id:'tech_toreando',         name:'Toreando Pass',         position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Lateral guard pass that redirects both legs to the side while the passer moves around.'},
+  {id:'tech_knee_cut',         name:'Knee Cut Pass',         position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Diagonal pass that cuts the knee through the guard to establish side control.'},
+  {id:'tech_stack_pass',       name:'Stack Pass',            position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Folding pressure pass used to collapse the guard and drive through.'},
+  {id:'tech_over_under',       name:'Over-Under Pass',       position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Tight pressure pass using chest-to-chest control.'},
+  {id:'tech_leg_drag',         name:'Leg Drag Pass',         position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Pass that pins a leg across the body to create side control.'},
+  {id:'tech_arm_drag_top',     name:'Arm Drag (Top)',        position:'Guard (Top)',     intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:false, desc:'Arm drag from guard top to expose the back or change angle for the pass.'},
+
+  // ── SIDE CONTROL (TOP) ────────────────────────────────
+  {id:'tech_americana',        name:'Americana',             position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Bent-arm shoulder lock finished with an outside rotational figure-four.'},
+  {id:'tech_kimura_sc',        name:'Kimura',                position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Bent-arm shoulder lock with a figure-four grip applied from side control.'},
+  {id:'tech_armbar_sc',        name:'Straight Armbar',       position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'white', priority:false, desc:'Straight-arm elbow lock transitioning from side control.'},
+  {id:'tech_arm_triangle_sc',  name:'Arm Triangle Choke',    position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'white', priority:false, desc:'Head-and-arm choke applied while passing or from side control.'},
+  {id:'tech_ns_choke',         name:'North-South Choke',     position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Chest-pressure choke applied from the north-south position.'},
+  {id:'tech_mount_transition', name:'Transition to Mount',   position:'Side Control (Top)', intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:true, desc:'Moving from side control to mount to increase positional control.'},
+  {id:'tech_back_take_sc',     name:'Back Take',             position:'Side Control (Top)', intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:true, desc:'Taking the back from side control when opponent turns into you.'},
+
+  // ── SIDE CONTROL (BOTTOM) ─────────────────────────────
+  {id:'tech_hip_escape_sc',    name:'Hip Escape',            position:'Side Control (Bottom)', intent:'Defense', formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Shrimping escape from side control to recover closed or open guard.'},
+  {id:'tech_underhook_escape', name:'Underhook Escape',      position:'Side Control (Bottom)', intent:'Defense', formats:['gi','no-gi'], belt:'white', priority:false, desc:'Underhook-based escape from side control leading to a standup or dog fight.'},
+  {id:'tech_bridge_sc',        name:'Bridge',                position:'Side Control (Bottom)', intent:'Defense', formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Hip extension used to create space and disruption from bottom side control.'},
+
+  // ── MOUNT (TOP) ───────────────────────────────────────
+  {id:'tech_armbar_mount',     name:'Straight Armbar',       position:'Mount (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Straight-arm elbow lock from mount using hip extension.'},
+  {id:'tech_cross_collar_mount',name:'Cross Collar Choke',   position:'Mount (Top)',     intent:'Attack',     formats:['gi'],         belt:'white', priority:true,  desc:'Gi choke using crossed deep lapel grips from mount.'},
+  {id:'tech_arm_triangle_mount',name:'Arm Triangle Choke',   position:'Mount (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Head-and-arm choke from mount — typically transitioned from side control.'},
+  {id:'tech_americana_mount',  name:'Americana',             position:'Mount (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Bent-arm shoulder lock from high mount when opponent defends straight.'},
+  {id:'tech_triangle_mount',   name:'Triangle Choke',        position:'Mount (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Triangle finished by rolling to guard when opponent postures from mount.'},
+
+  // ── MOUNT (BOTTOM) ────────────────────────────────────
+  {id:'tech_bridge_roll',      name:'Bridge and Roll Escape',position:'Mount (Bottom)',  intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Mount escape using a hip bridge and rotation to roll the opponent.'},
+  {id:'tech_elbow_knee',       name:'Elbow-Knee Escape',     position:'Mount (Bottom)',  intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Mount escape using an elbow frame and knee insertion to recover half guard.'},
+
+  // ── BACK CONTROL ──────────────────────────────────────
+  {id:'tech_rnc',              name:'Rear Naked Choke',      position:'Back Control',   intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Primary back-control submission using forearm pressure against the carotid arteries.'},
+  {id:'tech_bow_arrow',        name:'Bow and Arrow Choke',   position:'Back Control',   intent:'Attack',     formats:['gi'],         belt:'blue',  priority:false, desc:'High-percentage collar choke from the back using a leg as a lever for extra torque.'},
+  {id:'tech_armbar_back',      name:'Straight Armbar',       position:'Back Control',   intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Armbar applied when the opponent defends the choke with both hands.'},
+
+  // ── BACK TAKEN ────────────────────────────────────────
+  {id:'tech_back_escape',      name:'Back Escape',           position:'Back Taken',     intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Escape from back control by sliding the hip to remove hooks and recover guard.'},
+
+  // ── TURTLE ────────────────────────────────────────────
+  {id:'tech_turtle_recovery',  name:'Turtle Recovery',       position:'Turtle',         intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:false, desc:'Return from turtle position to guard or standing while preventing back takes.'},
+  {id:'tech_sit_out',          name:'Sit-Out',               position:'Turtle',         intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:false, desc:'Turn-out movement used from turtle and scrambles to face the opponent.'},
+  {id:'tech_shoulder_roll',    name:'Shoulder Roll',         position:'Turtle',         intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:false, desc:'Rolling movement used in guard retention, turtle work, and scramble recovery.'},
+  {id:'tech_anaconda',         name:'Anaconda Choke',        position:'Turtle',         intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Front headlock arm-in choke finished by threading the arm and rolling or squeezing.'},
+  {id:'tech_darce',            name:"D'Arce Choke",          position:'Turtle',         intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Front headlock arm-in choke where the choking arm threads across the neck.'},
+
+  // LEG LOCKS (Guard Bottom / Guard Top entanglements)
+  {id:'tech_heel_hook',        name:'Heel Hook',             position:'Guard (Bottom)',  intent:'Attack',     formats:['no-gi'],      belt:'purple',priority:false, desc:'Rotational leg lock attacking the heel and knee line. High-risk at advanced levels.'},
+  {id:'tech_toe_hold',         name:'Toe Hold',              position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Figure-four foot lock that rotates the ankle and applies knee torsion simultaneously.'},
+  {id:'tech_kneebar',          name:'Kneebar',               position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Straight leg lock attacking hyperextension of the knee.'},
 ];
+
+// Chains entre técnicas (mantener compatibilidad)
+const CHAINS = {
+  'tech_armbar_guard':    ['tech_triangle','tech_omoplata','tech_kimura_guard'],
+  'tech_kimura_guard':    ['tech_armbar_guard','tech_hip_bump_sweep'],
+  'tech_triangle':        ['tech_armbar_guard','tech_omoplata'],
+  'tech_hip_bump_sweep':  ['tech_kimura_guard','tech_guillotine_guard'],
+  'tech_scissor_sweep':   ['tech_hip_bump_sweep','tech_pendulum_sweep'],
+  'tech_butterfly_sweep': ['tech_arm_drag'],
+  'tech_arm_drag':        ['tech_single_leg'],
+  'tech_toreando':        ['tech_knee_cut'],
+  'tech_knee_cut':        ['tech_toreando','tech_mount_transition'],
+  'tech_rnc':             ['tech_bow_arrow','tech_armbar_back'],
+  'tech_elbow_knee':      ['tech_bridge_roll'],
+  'tech_bridge_roll':     ['tech_elbow_knee'],
+  'tech_guillotine_stand':['tech_anaconda','tech_darce'],
+};
+
+// Orden de posiciones para la enciclopedia
+const POSITIONS_ORDER = [
+  {id:'Standing',             state:'neutral',   color:'#E8A838', desc:'Fase de pie, clinch y derribos'},
+  {id:'Guard (Bottom)',       state:'neutral',   color:'#7B74E0', desc:'Guardias desde abajo — ataque y retención'},
+  {id:'Guard (Top)',          state:'neutral',   color:'#4CAF8A', desc:'Pasar y controlar la guardia'},
+  {id:'Side Control (Top)',   state:'dominant',  color:'#EB5E28', desc:'Control lateral dominante'},
+  {id:'Side Control (Bottom)',state:'defensive', color:'#4CAF8A', desc:'Escapar del control lateral'},
+  {id:'Mount (Top)',          state:'dominant',  color:'#EB5E28', desc:'Montada — posición más dominante'},
+  {id:'Mount (Bottom)',       state:'defensive', color:'#4CAF8A', desc:'Escapar de la montada'},
+  {id:'Back Control',         state:'dominant',  color:'#EB5E28', desc:'Control de espalda — máxima ventaja'},
+  {id:'Back Taken',           state:'defensive', color:'#4CAF8A', desc:'Escapar cuando te controlan la espalda'},
+  {id:'Turtle',               state:'neutral',   color:'#7B74E0', desc:'Posición tortuga — defenderse y recuperar'},
+];
+
+const INTENT_COLOR = { Attack:'#E05050', Defense:'#4CAF8A', Transition:'#E8A838' };
+const INTENT_LABEL = { Attack:'Ataque', Defense:'Defensa', Transition:'Transición' };
+const BELT_LABEL   = { white:'Blanco', blue:'Azul', purple:'Morado' };
+
 
 // ═══════════════════════════════════════════════════════
 // STATE — localStorage
@@ -712,8 +794,8 @@ function saveState() {
 
 let STATE = loadState();
 
-GRAPH.nodes.forEach(n => {
-  if (!STATE.techniques[n.id]) STATE.techniques[n.id] = {seen:false,status:'new',notes:'',sessions:[]};
+TECHNIQUES.forEach(t => {
+  if (!STATE.techniques[t.id]) STATE.techniques[t.id] = {seen:false,status:'new',notes:'',sessions:[]};
 });
 
 // ═══════════════════════════════════════════════════════
@@ -861,7 +943,9 @@ async function loadFromSupabase() {
   }
 }
 // ═══════════════════════════════════════════════════════
-function getNode(id){return GRAPH.nodes.find(n=>n.id===id)}
+// HELPERS
+// ═══════════════════════════════════════════════════════
+function getTech(id){ return TECHNIQUES.find(t=>t.id===id); }
 function seenClass(id){
   const st=STATE.techniques[id];
   if(!st?.seen) return '';
@@ -950,8 +1034,8 @@ function renderProgreso(){
   const monthS=thisMonthSessions();
   const monthMin=monthS.reduce((sum,s)=>sum+(parseInt(s.duration)||0),0);
   const monthH=Math.round(monthMin/60*10)/10;
-  const wbNodes=GRAPH.nodes.filter(n=>n.white_belt_priority);
-  const seenWB=wbNodes.filter(n=>STATE.techniques[n.id]?.seen).length;
+  const wbNodes=TECHNIQUES.filter(t=>t.priority&&t.belt==='white');
+  const seenWB=wbNodes.filter(t=>STATE.techniques[t.id]?.seen).length;
   const uniqueDays=new Set(monthS.map(s=>s.date)).size;
 
   document.getElementById('stat-hours').textContent=monthH||'0';
@@ -1092,10 +1176,14 @@ function renderSessions(){
     ${sorted.map((s,si)=>{
       const realIdx=sortedToReal[si];
       const feelHtml=s.feeling?`<span style="font-size:18px">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>`:'';
-      const posHtml=s.position?`<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${s.position}</span>`:'';
       const gcalBadge=s.from_gcal?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:rgba(76,175,138,.12);color:var(--green);border:1px solid rgba(76,175,138,.25)">📅 Calendar</span>`:'';
-      const gymBadge=s.gym&&s.gym!=='Kalmma'?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">📍 ${s.gym}</span>`:'';
+      const gymBadge=s.gym?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">📍 ${s.gym}</span>`:'';
       const partnersBadge=s.training_partners?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">👥 ${s.training_partners}</span>`:'';
+      const focosHtml=(s.focos&&s.focos.length)?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
+        ${s.focos.map(f=>`<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${(STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)')}22;color:${STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)'};border:1px solid ${(STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)')}44">
+          ${f.position}${f.intent?' · '+INTENT_LABEL[f.intent]:''}${f.technique?' · '+getTech(f.technique)?.name:''}
+        </span>`).join('')}
+      </div>`:'';
       return `<div class="session-full" onclick="openSessionDetail(${realIdx})" style="cursor:pointer">
         <div class="sf-header">
           <div class="sf-left">
@@ -1108,14 +1196,80 @@ function renderSessions(){
             <span style="font-size:11px;color:var(--muted2);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r2)" onclick="event.stopPropagation();deleteSession(${realIdx})">✕</span>
           </div>
         </div>
-        <div class="sf-date">${fmtDate(s.date)}${posHtml}${gcalBadge}${gymBadge}${partnersBadge}</div>
-        ${s.notes?`<div class="sf-note">${s.notes}</div>`:`<div style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic">Toca para añadir detalles →</div>`}
+        <div class="sf-date">${fmtDate(s.date)}${gcalBadge}${gymBadge}${partnersBadge}</div>
+        ${focosHtml}
+        ${s.notes?`<div class="sf-note" style="margin-top:6px">${s.notes}</div>`:(!s.focos||!s.focos.length)?`<div style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic">Toca para añadir detalles →</div>`:''}
       </div>`;
     }).join('')}
   </div>`;
 }
 
-let currentStar=0, currentPos='';
+// ── FOCOS (session events) ────────────────────────────
+let currentFocos = []; // [{position, intent, technique}]
+let currentStar = 0;
+
+const POSITIONS_LIST = ['Standing','Guard (Bottom)','Guard (Top)','Side Control (Top)','Side Control (Bottom)','Mount (Top)','Mount (Bottom)','Back Control','Back Taken','Turtle'];
+const INTENTS_LIST   = ['Attack','Defense','Transition'];
+
+function addFoco() {
+  if (currentFocos.length >= 5) return;
+  currentFocos.push({position: '', intent: '', technique: ''});
+  renderFocos();
+}
+
+function removeFoco(idx) {
+  currentFocos.splice(idx, 1);
+  renderFocos();
+}
+
+function renderFocos() {
+  const list = document.getElementById('focos-list');
+  if (!list) return;
+  if (currentFocos.length === 0) {
+    list.innerHTML = `<div style="font-size:12px;color:var(--muted2);font-style:italic;padding:8px 0">Sin focos añadidos — opcional pero recomendado</div>`;
+    return;
+  }
+  list.innerHTML = currentFocos.map((f, i) => {
+    const techOptions = TECHNIQUES
+      .filter(t => !f.position || t.position === f.position)
+      .filter(t => !f.intent || t.intent === f.intent)
+      .map(t => `<option value="${t.id}" ${f.technique===t.id?'selected':''}>${t.name}</option>`)
+      .join('');
+
+    return `<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:12px;position:relative">
+      <button onclick="removeFoco(${i})" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:13px">✕</button>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Posición</div>
+          <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+            onchange="currentFocos[${i}].position=this.value;currentFocos[${i}].technique='';renderFocos()">
+            <option value="">— Posición —</option>
+            ${POSITIONS_LIST.map(p=>`<option value="${p}" ${f.position===p?'selected':''}>${p}</option>`).join('')}
+          </select>
+        </div>
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Intent</div>
+          <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+            onchange="currentFocos[${i}].intent=this.value;currentFocos[${i}].technique='';renderFocos()">
+            <option value="">— Intent —</option>
+            ${INTENTS_LIST.map(it=>`<option value="${it}" ${f.intent===it?'selected':''}>${INTENT_LABEL[it]||it}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Técnica <span style="color:var(--muted);font-size:9px">opcional</span></div>
+        <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+          onchange="currentFocos[${i}].technique=this.value">
+          <option value="">— Sin técnica específica —</option>
+          ${techOptions}
+        </select>
+      </div>
+      ${f.position ? `<div style="margin-top:6px;font-size:11px;color:${STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)'}">
+        ${f.position} · ${STATE_LABEL[POSITION_STATE[f.position]]||''}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
 const FEELINGS={5:'🔥 En llamas',4:'💪 Fuerte',3:'😐 Normal',2:'😴 Cansado',1:'🤕 Roto'};
 
 function setFeeling(btn){
@@ -1123,12 +1277,6 @@ function setFeeling(btn){
   document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');
   document.getElementById('feeling-label').textContent=btn.dataset.label;
-}
-
-function selPos(btn){
-  document.querySelectorAll('#position-pills .type-pill').forEach(p=>p.classList.remove('sel'));
-  btn.classList.add('sel');
-  currentPos=btn.textContent;
 }
 
 function saveSession(){
@@ -1140,7 +1288,8 @@ function saveSession(){
   const partners=document.getElementById('session-partners').value.trim();
   if(!duration||parseInt(duration)<1){document.getElementById('session-duration').focus();return;}
 
-  STATE.sessions.push({date,type,duration:parseInt(duration),feeling:currentStar||null,position:currentPos||null,notes,gym:gym||null,training_partners:partners||null});
+  const validFocos=currentFocos.filter(f=>f.position&&f.intent);
+  STATE.sessions.push({date,type,duration:parseInt(duration),feeling:currentStar||null,focos:validFocos,notes,gym:gym||null,training_partners:partners||null});
   saveState();
   syncToSupabase();
   closeModal('add-session');
@@ -1148,12 +1297,11 @@ function saveSession(){
   renderProgreso();
   updateSidebar();
 
-  currentStar=0;currentPos='';
+  currentStar=0; currentFocos=[];
   document.getElementById('session-duration').value='';
   document.getElementById('session-notes').value='';
   document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
   if(document.getElementById('feeling-label')) document.getElementById('feeling-label').textContent='';
-  document.querySelectorAll('#position-pills .type-pill').forEach(p=>p.classList.remove('sel'));
 }
 
 function deleteSession(idx){
@@ -1170,13 +1318,21 @@ function openSessionDetail(idx){
   if(!s) return;
   const typeColors={Gi:'var(--purple)',NoGi:'var(--green)','Open mat':'var(--orange)',Gym:'var(--amber)','Competición':'#E05050'};
   const types=['Gi','NoGi','Open mat','Gym','Competición'];
-  const positions=['De pie','Guardia cerrada','Guardia abierta','Half guard','Side control','Montada','Espalda','General / Sparring'];
   const feelingEmojis=['🤕','😴','😐','💪','🔥'];
-  const feelingLabels=['Roto','Cansado','Normal','Fuerte','En llamas'];
 
   const typePills=types.map(t=>`<button class="type-pill${s.type===t?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'type','${t}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">${t}</button>`).join('');
-  const positionPills=positions.map(p=>`<button class="type-pill${s.position===p?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'position','${p}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${p}</button>`).join('');
   const feelingBtns=feelingEmojis.map((e,i)=>`<button class="feeling-btn${s.feeling===(i+1)?' sel':''}" onclick="updateSessionField(${idx},'feeling',${i+1});document.querySelectorAll('#sdp-feelings .feeling-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${e}</button>`).join('');
+
+  // Focos display
+  const focos=s.focos||[];
+  const focosHtml=focos.length?focos.map((f,fi)=>{
+    const sc=STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)';
+    const techName=f.technique?getTech(f.technique)?.name:'';
+    return `<div style="background:var(--bg3);border:1px solid ${sc}44;border-left:3px solid ${sc};border-radius:var(--r2);padding:10px 12px;margin-bottom:6px">
+      <div style="font-size:12px;font-weight:600;color:${sc};margin-bottom:2px">${f.position} · ${INTENT_LABEL[f.intent]||f.intent}</div>
+      <div style="font-size:11px;color:var(--muted2)">${STATE_LABEL[POSITION_STATE[f.position]]||''}${techName?' · '+techName:''}</div>
+    </div>`;
+  }).join(''):`<div style="font-size:12px;color:var(--muted2);font-style:italic">Sin focos registrados</div>`;
 
   document.getElementById('detail-content').innerHTML=`
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
@@ -1196,12 +1352,12 @@ function openSessionDetail(idx){
     </div>
     <div class="dp-section">Feeling</div>
     <div class="feeling-btns" id="sdp-feelings">${feelingBtns}</div>
-    <div class="dp-section">Posición trabajada</div>
-    <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${positionPills}</div>
+    <div class="dp-section">Focos</div>
+    ${focosHtml}
     <div class="dp-section">Notas</div>
     <textarea class="dp-notes-field" placeholder="Qué trabajaste, qué salió bien, qué mejorar..." oninput="updateSessionField(${idx},'notes',this.value)">${s.notes||''}</textarea>
     <div class="dp-section">Gimnasio</div>
-    <input type="text" value="${s.gym||''}" placeholder="Kalmma"
+    <input type="text" value="${s.gym||''}" placeholder="Tu academia"
       style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 12px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
       oninput="updateSessionField(${idx},'gym',this.value)"
       onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
@@ -1234,61 +1390,91 @@ let currentFilter='all', activeDetailId=null;
 function renderEnc(filter){
   currentFilter=filter;
   const container=document.getElementById('enc-container');
-  const total=GRAPH.nodes.length;
-  const totalSeen=GRAPH.nodes.filter(n=>STATE.techniques[n.id]?.seen).length;
-  const wb=GRAPH.nodes.filter(n=>n.white_belt_priority);
-  const wbSeen=wb.filter(n=>STATE.techniques[n.id]?.seen).length;
+  const total=TECHNIQUES.length;
+  const totalSeen=TECHNIQUES.filter(t=>STATE.techniques[t.id]?.seen).length;
+  const wb=TECHNIQUES.filter(t=>t.priority&&t.belt==='white');
+  const wbSeen=wb.filter(t=>STATE.techniques[t.id]?.seen).length;
 
   let html=`<div class="enc-topbar"><div class="enc-stats">
     <span class="enc-stat">Total: <strong>${totalSeen}/${total} vistas</strong></span>
     <span class="enc-stat hi">Esenciales blanco: <strong>${wbSeen}/${wb.length}</strong></span>
   </div></div>`;
 
-  POSITION_MAP.forEach(pos=>{
-    let nodes=GRAPH.nodes.filter(n=>pos.families.includes(n.family));
-    if(filter==='priority') nodes=nodes.filter(n=>n.white_belt_priority);
-    else if(filter==='seen') nodes=nodes.filter(n=>STATE.techniques[n.id]?.seen);
-    else if(filter==='unseen') nodes=nodes.filter(n=>!STATE.techniques[n.id]?.seen);
-    else if(filter==='gi') nodes=nodes.filter(n=>n.formats.includes('gi'));
-    else if(filter==='nogi') nodes=nodes.filter(n=>n.formats.includes('no-gi'));
-    else if(filter==='advanced') nodes=nodes.filter(n=>n.belt_level!=='white'||!n.white_belt_priority);
-    if(!nodes.length) return;
+  POSITIONS_ORDER.forEach(pos=>{
+    let techs=TECHNIQUES.filter(t=>t.position===pos.id);
+    if(filter==='priority') techs=techs.filter(t=>t.priority&&t.belt==='white');
+    else if(filter==='seen') techs=techs.filter(t=>STATE.techniques[t.id]?.seen);
+    else if(filter==='unseen') techs=techs.filter(t=>!STATE.techniques[t.id]?.seen);
+    else if(filter==='gi') techs=techs.filter(t=>t.formats.includes('gi'));
+    else if(filter==='nogi') techs=techs.filter(t=>t.formats.includes('no-gi'));
+    else if(filter==='advanced') techs=techs.filter(t=>t.belt!=='white');
+    if(!techs.length) return;
 
-    const seenInPos=nodes.filter(n=>STATE.techniques[n.id]?.seen).length;
-    const pct=nodes.length?Math.round(seenInPos/nodes.length*100):0;
+    const seenInPos=techs.filter(t=>STATE.techniques[t.id]?.seen).length;
+    const pct=techs.length?Math.round(seenInPos/techs.length*100):0;
+    const stateColor=STATE_COLOR[pos.state];
+    const stateLabel=STATE_LABEL[pos.state];
+    const posKey=pos.id.replace(/[^a-z0-9]/gi,'_');
+    const isCollapsed=collapsedPositions.has(pos.id);
+
+    // Group by intent within position
+    const intents=['Attack','Defense','Transition'];
+    const byIntent={};
+    intents.forEach(i=>{ byIntent[i]=techs.filter(t=>t.intent===i); });
 
     html+=`<div class="position-block">
-      <div class="pos-header">
-        <div class="pos-accent" style="background:${pos.color}"></div>
-        <div class="pos-info"><div class="pos-name">${pos.name}</div><div class="pos-desc">${pos.desc}</div></div>
-        <div class="pos-progress">
-          <div class="pos-prog-bar"><div class="pos-prog-fill" style="width:${pct}%"></div></div>
-          <div class="pos-count">${seenInPos}/${nodes.length} vistas</div>
+      <div class="pos-header" onclick="togglePosition('${pos.id}')" style="cursor:pointer">
+        <div class="pos-accent" style="background:${stateColor}"></div>
+        <div class="pos-info">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+            <div class="pos-name">${pos.id}</div>
+            <span style="font-size:10px;padding:1px 8px;border-radius:99px;background:${stateColor}22;color:${stateColor};border:1px solid ${stateColor}44;font-weight:600">${stateLabel}</span>
+          </div>
+          <div class="pos-desc">${pos.desc}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="pos-progress">
+            <div class="pos-prog-bar"><div class="pos-prog-fill" style="width:${pct}%;background:${stateColor}"></div></div>
+            <div class="pos-count">${seenInPos}/${techs.length} vistas</div>
+          </div>
+          <svg id="pos-chevron-${posKey}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2" style="flex-shrink:0;transition:transform .2s;transform:${isCollapsed?'rotate(-90deg)':'rotate(0deg)'}"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
       </div>
-      <div class="tech-grid">`;
+      <div id="pos-content-${posKey}" style="display:${isCollapsed?'none':'block'}">`;
 
-    nodes.forEach(n=>{
-      const sc=seenClass(n.id);
-      const seen=STATE.techniques[n.id]?.seen;
-      html+=`<div class="enc-card${sc?' '+sc:''}" id="card-${n.id}" onclick="openDetail('${n.id}')">
-        <div class="enc-card-top">
-          ${beltPill(n.belt_level)}
-          <div class="status-ring" onclick="event.stopPropagation();toggleSeen('${n.id}')" title="${seen?'Marcar como no vista':'Marcar como vista en clase'}">
-            ${seen?checkSvg():''}
+    // Render by intent groups
+    intents.forEach(intent=>{
+      const group=byIntent[intent];
+      if(!group.length) return;
+      html+=`<div style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:0 2px">
+          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${INTENT_COLOR[intent]}">${INTENT_LABEL[intent]}</span>
+          <div style="flex:1;height:1px;background:${INTENT_COLOR[intent]}33"></div>
+        </div>
+        <div class="tech-grid">`;
+
+      group.forEach(t=>{
+        const sc=seenClass(t.id);
+        const seen=STATE.techniques[t.id]?.seen;
+        html+=`<div class="enc-card${sc?' '+sc:''}" id="card-${t.id}" onclick="openDetail('${t.id}')">
+          <div class="enc-card-top">
+            <span style="font-size:10px;padding:1px 7px;border-radius:4px;font-weight:600;background:${t.belt==='white'?'rgba(255,252,242,.08)':t.belt==='blue'?'rgba(123,116,224,.18)':'rgba(180,80,180,.15)'};color:${t.belt==='white'?'var(--muted2)':t.belt==='blue'?'var(--purple)':'#c080c0'}">${BELT_LABEL[t.belt]||t.belt}</span>
+            <div class="status-ring" onclick="event.stopPropagation();toggleSeen('${t.id}')" title="${seen?'Marcar como no vista':'Marcar como vista en clase'}">
+              ${seen?checkSvg():''}
+            </div>
           </div>
-        </div>
-        <div class="enc-card-type">${n.subtype}</div>
-        <div class="enc-card-name">${n.name}</div>
-        <div class="enc-card-desc">${n.desc.slice(0,90)}${n.desc.length>90?'…':''}</div>
-        <div class="enc-card-footer">
-          ${modeBadge(n.formats)}
-          ${n.white_belt_priority?'<span class="badge b-priority">esencial</span>':''}
-          ${n.tier==='advanced_core'?'<span class="badge b-adv">avanzado</span>':''}
-        </div>
-      </div>`;
+          <div class="enc-card-name">${t.name}</div>
+          <div class="enc-card-desc">${t.desc.slice(0,80)}${t.desc.length>80?'…':''}</div>
+          <div class="enc-card-footer">
+            ${modeBadge(t.formats)}
+            ${t.priority?'<span class="badge b-priority">esencial</span>':''}
+            ${t.belt!=='white'?'<span class="badge b-adv">avanzado</span>':''}
+          </div>
+        </div>`;
+      });
+      html+=`</div></div>`;
     });
-    html+=`</div></div>`;
+    html+=`</div></div>`;  // close pos-content + position-block
   });
   container.innerHTML=html;
 }
@@ -1306,11 +1492,11 @@ function toggleSeen(id){
     const ring=card.querySelector('.status-ring');
     if(ring) ring.innerHTML=st.seen?checkSvg():'';
   }
-  // Update enc stats
-  const total=GRAPH.nodes.length;
-  const totalSeen=GRAPH.nodes.filter(n=>STATE.techniques[n.id]?.seen).length;
-  const wb=GRAPH.nodes.filter(n=>n.white_belt_priority);
-  const wbSeen=wb.filter(n=>STATE.techniques[n.id]?.seen).length;
+  // Update stats
+  const total=TECHNIQUES.length;
+  const totalSeen=TECHNIQUES.filter(t=>STATE.techniques[t.id]?.seen).length;
+  const wb=TECHNIQUES.filter(t=>t.priority&&t.belt==='white');
+  const wbSeen=wb.filter(t=>STATE.techniques[t.id]?.seen).length;
   const tb=document.querySelector('.enc-topbar');
   if(tb) tb.innerHTML=`<div class="enc-stats">
     <span class="enc-stat">Total: <strong>${totalSeen}/${total} vistas</strong></span>
@@ -1322,22 +1508,23 @@ function toggleSeen(id){
 
 function openDetail(id){
   activeDetailId=id;
-  const n=getNode(id);
-  if(!n) return;
+  const t=getTech(id);
+  if(!t) return;
   const st=STATE.techniques[id];
-  const chains=(GRAPH.chains[id]||[]).map(cid=>{const cn=getNode(cid);return cn?`<span class="dp-chain-tag" onclick="openDetail('${cid}')">${cn.name}</span>`:''}).join('');
-  const relPaths=GRAPH.paths.filter(p=>p.sequence.includes(id));
-  const pathsHtml=relPaths.length?relPaths.map(p=>{
-    const seq=p.sequence.map(sid=>{const sn=getNode(sid);return sn?`<span${sid===id?' style="color:var(--cream);font-weight:500"':''}>${sn.name}</span>`:sid}).join(' → ');
-    return `<div class="dp-path"><div class="dp-path-label">${p.label}</div><div class="dp-path-seq">${seq}</div></div>`;
-  }).join(''):'<div class="dp-empty">Sin common paths definidos.</div>';
+  const chains=(CHAINS[id]||[]).map(cid=>{const ct=getTech(cid);return ct?`<span class="dp-chain-tag" onclick="openDetail('${cid}')">${ct.name}</span>`:''}).join('');
   const statusOpts=[{s:'new',label:'Vista · nueva',dot:'var(--muted2)'},{s:'practicing',label:'Practicando',dot:'var(--amber)'},{s:'flowing',label:'Fluyendo',dot:'var(--green)'},{s:'auto',label:'Automática',dot:'var(--orange)'}];
+  const stateColor=STATE_COLOR[POSITION_STATE[t.position]];
+  const stateLabel=STATE_LABEL[POSITION_STATE[t.position]];
 
   document.getElementById('detail-content').innerHTML=`
-    <div class="dp-belt-row">${beltPill(n.belt_level)}</div>
-    <div class="dp-name">${n.name}</div>
-    <div class="dp-type">${n.subtype} · ${n.family.replace('_',' ')}</div>
-    <div class="dp-badges">${modeBadge(n.formats)}${n.white_belt_priority?'<span class="badge b-priority">esencial blanco</span>':''}${n.tier==='advanced_core'?'<span class="badge b-adv">nivel avanzado</span>':''}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+      <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${stateColor}22;color:${stateColor};border:1px solid ${stateColor}44;font-weight:600">${t.position}</span>
+      <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${INTENT_COLOR[t.intent]}22;color:${INTENT_COLOR[t.intent]};border:1px solid ${INTENT_COLOR[t.intent]}44;font-weight:600">${INTENT_LABEL[t.intent]}</span>
+      <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(255,252,242,.06);color:var(--muted2);font-weight:600">${stateLabel}</span>
+    </div>
+    <div class="dp-name">${t.name}</div>
+    <div class="dp-type">${t.position} · ${INTENT_LABEL[t.intent]}</div>
+    <div class="dp-badges">${modeBadge(t.formats)}${t.priority?'<span class="badge b-priority">esencial blanco</span>':''}${t.belt!=='white'?'<span class="badge b-adv">nivel avanzado</span>':''}</div>
     <button class="dp-seen-toggle ${st.seen?'seen-active':'unseen'}" onclick="toggleSeen('${id}');setTimeout(()=>openDetail('${id}'),50)">
       ${st.seen
         ?`<svg width="14" height="14" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="2,6 5,9 10,3"/></svg> Vista en clase`
@@ -1350,13 +1537,11 @@ function openDetail(id){
       </div>
     </div>
     <div class="dp-section">Descripción</div>
-    <div class="dp-desc-text">${n.desc}</div>
+    <div class="dp-desc-text">${t.desc}</div>
     <div class="dp-section">Notas personales</div>
     <textarea class="dp-notes-field" placeholder="Escribe tus notas, detalles, errores clave..." oninput="saveNotes('${id}',this.value)">${st.notes||''}</textarea>
     <div class="dp-section">Cadenas directas</div>
     ${chains?`<div class="dp-chains">${chains}</div>`:'<div class="dp-empty">Sin cadenas definidas.</div>'}
-    <div class="dp-section">Common paths</div>
-    <div class="dp-paths">${pathsHtml}</div>
     <div class="dp-section">Sesiones donde la trabajé</div>
     <div class="dp-sessions">${(st.sessions||[]).length?(st.sessions||[]).map(s=>`<div class="dp-session-item">→ <span>${s}</span></div>`).join(''):'<div class="dp-empty">Sin sesiones registradas aún.</div>'}</div>
   `;
@@ -1366,14 +1551,13 @@ function openDetail(id){
 function setStatus(id,btn){
   STATE.techniques[id].status=btn.dataset.s;
   saveState();
+  syncToSupabase();
   document.querySelectorAll('.dp-status-btn').forEach(b=>b.className='dp-status-btn');
   btn.classList.add('active-'+btn.dataset.s);
   const card=document.getElementById('card-'+id);
   if(card){const sc=seenClass(id);card.className='enc-card'+(sc?' '+sc:'');}
 }
 
-function saveNotes(id,val){STATE.techniques[id].notes=val;saveState();syncToSupabase();}
-function closeDetail(){document.getElementById('detail-panel').classList.remove('open');activeDetailId=null;}
 
 // ═══════════════════════════════════════════════════════
 // PROFILE
@@ -1676,7 +1860,7 @@ function importData(input){
       if(!imported.profile||!imported.sessions||!imported.techniques){alert('Archivo no válido.');return;}
       if(confirm(`¿Importar datos de ${parsed.exported_at?new Date(parsed.exported_at).toLocaleDateString('es-ES'):'backup'}? Esto reemplazará los datos actuales.`)){
         STATE=imported;
-        GRAPH.nodes.forEach(n=>{if(!STATE.techniques[n.id]) STATE.techniques[n.id]={seen:false,status:'new',notes:'',sessions:[]};});
+        TECHNIQUES.forEach(t=>{if(!STATE.techniques[t.id]) STATE.techniques[t.id]={seen:false,status:'new',notes:'',sessions:[]};});
         if(STATE.onboarding_dismissed===undefined) STATE.onboarding_dismissed=false;
         if(!STATE.gcal_token) STATE.gcal_token=null;
         saveState();updateSidebar();renderProgreso();renderEnc(currentFilter);renderSessions();renderProfile();
@@ -1704,14 +1888,31 @@ async function confirmReset(){
 // ═══════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════
-document.getElementById('tech-filters').addEventListener('click',e=>{
-  const btn=e.target.closest('.filter-pill');
-  if(!btn) return;
-  document.querySelectorAll('#tech-filters .filter-pill').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  renderEnc(btn.dataset.filter);
+// Collapsible state per position
+const collapsedPositions = new Set();
+
+function switchMovTab(tab) {
+  currentFilter = tab === 'mine' ? 'seen' : 'all';
+  document.getElementById('mov-tab-all').classList.toggle('active', tab==='all');
+  document.getElementById('mov-tab-mine').classList.toggle('active', tab==='mine');
+  renderEnc(currentFilter);
   closeDetail();
-});
+}
+
+function togglePosition(posId) {
+  if (collapsedPositions.has(posId)) collapsedPositions.delete(posId);
+  else collapsedPositions.add(posId);
+  const content = document.getElementById('pos-content-' + posId.replace(/[^a-z0-9]/gi,'_'));
+  const chevron = document.getElementById('pos-chevron-' + posId.replace(/[^a-z0-9]/gi,'_'));
+  if (content) content.style.display = collapsedPositions.has(posId) ? 'none' : 'block';
+  if (chevron) chevron.style.transform = collapsedPositions.has(posId) ? 'rotate(-90deg)' : 'rotate(0deg)';
+}
+
+function saveNotes(id,val){STATE.techniques[id].notes=val;saveState();syncToSupabase();}
+function closeDetail(){
+  document.getElementById('detail-panel').classList.remove('open');
+  activeDetailId=null;
+}
 
 function switchView(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -1738,10 +1939,10 @@ function openModal(name){
     document.getElementById('session-gym').value=STATE.profile.gym||'';
     document.getElementById('session-partners').value='';
     document.getElementById('type-pills-main').querySelectorAll('.type-pill').forEach((p,i)=>p.classList.toggle('sel',i===0));
-    currentStar=0;currentPos='';
+    currentStar=0; currentFocos=[];
     document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
     if(document.getElementById('feeling-label')) document.getElementById('feeling-label').textContent='';
-    document.querySelectorAll('#position-pills .type-pill').forEach(p=>p.classList.remove('sel'));
+    renderFocos();
   }
   if(name==='edit-profile'){
     const p=STATE.profile;
@@ -1782,20 +1983,25 @@ function checkPin() {
 
 function initApp() {
   handleGcalCallback();
-  // Try to load from Supabase, then render
+  // Load from Supabase first, then render everything
   loadFromSupabase().then(() => {
-    // Re-init technique state for any missing nodes
-    GRAPH.nodes.forEach(n => {
-      if (!STATE.techniques[n.id]) STATE.techniques[n.id] = {seen:false,status:'new',notes:'',sessions:[]};
+    TECHNIQUES.forEach(t => {
+      if (!STATE.techniques[t.id]) STATE.techniques[t.id] = {seen:false,status:'new',notes:'',sessions:[]};
     });
     updateSidebar();
     renderProgreso();
-    renderEnc('all');
+    renderEnc(currentFilter);
     renderSessions();
+    renderProfile();
+    // Also render coach if it's the active view
+    if (document.getElementById('view-coach')?.classList.contains('active')) {
+    }
   });
 }
 
-// ═══ INIT ═══
+// ═══════════════════════════════════════════════════════
+// COACH
+// ═══════════════════════════════════════════════════════
 if (sessionStorage.getItem('bjj_unlocked') === '1') {
   document.getElementById('pin-screen').style.display = 'none';
   document.getElementById('app-shell').style.display = 'flex';
