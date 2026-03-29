@@ -1401,6 +1401,160 @@ function closeDetail(){
   activeDetailId=null;
 }
 
+// ═══════════════════════════════════════════════════════
+// PROFILE
+// ═══════════════════════════════════════════════════════
+function renderProfile(){
+  const p=STATE.profile;
+  const el=document.getElementById('profile-content');
+  if(!el) return;
+  const beltLabels={white:'Blanco',blue:'Azul',purple:'Morado',brown:'Marrón'};
+  const sexLabels={M:'Masculino',F:'Femenino',O:'Otro'};
+
+  if(!p.name){
+    el.innerHTML=`<div class="empty-state">
+      <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+      <div class="empty-title">Sin perfil configurado</div>
+      <div class="empty-desc">Añade tu información para personalizar el progreso.</div>
+      <button class="empty-cta" onclick="openModal('edit-profile')">Crear perfil</button>
+    </div>`;
+    return;
+  }
+
+  const initials=p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const avatarHtml=p.photo
+    ?`<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()"><div class="profile-avatar" style="padding:0"><img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div><div class="profile-avatar-overlay">Cambiar foto</div></div>`
+    :`<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()"><div class="profile-avatar">${initials}</div><div class="profile-avatar-overlay">Añadir foto</div></div>`;
+
+  const totalH=Math.round((STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60+(p.prior_hours||0))*10)/10;
+  const sessionH=Math.round(STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60*10)/10;
+  const gradeLabel=p.stripe&&p.stripe!=='0'?`${p.stripe==='1'?'1er':p.stripe+'º'} grado`:'0 grados';
+
+  el.innerHTML=`
+    <div class="profile-hero">
+      ${avatarHtml}
+      <div>
+        <div class="profile-name">${p.name}</div>
+        <div class="profile-since">${p.gym||'—'} · desde ${fmtDate(p.start)||'—'}</div>
+        <div class="belt-badge-hero"><div class="belt-visual"></div><div class="belt-text">Cinturón ${beltLabels[p.belt]||p.belt} · ${gradeLabel}</div></div>
+      </div>
+    </div>
+    <div class="profile-table" style="margin-bottom:20px">
+      <div class="profile-row"><div class="pr-label">Nombre</div><div class="pr-right"><div class="pr-value">${p.name}</div><div class="pr-edit" onclick="openModal('edit-profile')">Editar</div></div></div>
+      <div class="profile-row"><div class="pr-label">Academia</div><div class="pr-right"><div class="pr-value">${p.gym||'—'}</div><div class="pr-edit" onclick="openModal('edit-profile')">Editar</div></div></div>
+      <div class="profile-row"><div class="pr-label">Cinturón</div><div class="pr-right"><div class="pr-value">${beltLabels[p.belt]||p.belt} · ${gradeLabel}</div><div class="pr-edit" onclick="openModal('edit-profile')">Editar</div></div></div>
+      <div class="profile-row"><div class="pr-label">Peso / Altura</div><div class="pr-right"><div class="pr-value">${p.weight?p.weight+'kg':'—'} / ${p.height?p.height+'cm':'—'}</div></div></div>
+      <div class="profile-row"><div class="pr-label">Horas en sesiones</div><div class="pr-right"><div class="pr-value">${sessionH}h registradas</div></div></div>
+      <div class="profile-row"><div class="pr-label">Horas previas</div><div class="pr-right"><div class="pr-value">${p.prior_hours||0}h</div><div class="pr-edit" onclick="openModal('edit-profile')">Editar</div></div></div>
+      <div class="profile-row" style="background:rgba(235,94,40,.04)"><div class="pr-label" style="font-weight:500;color:var(--cream)">Horas totales</div><div class="pr-right"><div class="pr-value" style="color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700">${totalH}h</div></div></div>
+    </div>
+    <div style="padding:16px 0;border-top:1px solid var(--border);margin-bottom:4px">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:12px;font-weight:500">Integraciones</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div style="background:var(--bg2);border:1px solid ${STATE.gcal_token?'rgba(76,175,138,.35)':'var(--border3)'};border-radius:var(--r);padding:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${STATE.gcal_token?'var(--green)':'var(--muted2)'}" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+              <span style="font-size:13px;font-weight:500">Google Calendar</span>
+            </div>
+            ${STATE.gcal_token?'<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(76,175,138,.15);color:var(--green);font-weight:600">✓ Conectado</span>':''}
+          </div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:10px">${STATE.gcal_token?`Última sync: ${STATE.gcal_last_sync?new Date(STATE.gcal_last_sync).toLocaleDateString('es-ES'):'Nunca'}`:'Suma automáticamente las horas de tus eventos de BJJ.'}</div>
+          ${STATE.gcal_token
+            ?`<div style="display:flex;gap:8px"><button onclick="syncGoogleCalendar()" style="flex:1;padding:7px;background:var(--green);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">↻ Sincronizar</button><button onclick="disconnectGcal()" style="padding:7px 10px;background:none;border:1px solid var(--border2);border-radius:var(--r2);font-size:11px;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">Desconectar</button></div>`
+            :`<button onclick="connectGoogleCalendar()" style="width:100%;padding:8px;background:var(--orange);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">Conectar Google Calendar</button>`
+          }
+        </div>
+        <div style="background:var(--bg2);border:1px dashed var(--border3);border-radius:var(--r);padding:16px;opacity:.5">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span style="font-size:13px;font-weight:500">Bot de Telegram</span>
+          </div>
+          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Registra sesiones desde el vestuario en lenguaje natural.</div>
+          <div style="margin-top:10px"><a href="https://t.me/bjjjourney_carlos_bot" target="_blank" style="font-size:12px;padding:6px 12px;border-radius:var(--r2);background:var(--bg3);color:var(--purple);text-decoration:none;font-weight:600">Abrir bot →</a></div>
+        </div>
+      </div>
+    </div>
+    <div style="padding:16px 0;border-top:1px solid var(--border)">
+      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:12px;font-weight:500">Copia de seguridad</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" style="padding:10px 18px;font-size:13px" onclick="exportData()">↓ Exportar datos</button>
+        <label style="padding:10px 18px;font-size:13px;font-weight:600;border:1px solid var(--border2);border-radius:var(--r2);color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">↑ Importar<input type="file" accept=".json" style="display:none" onchange="importData(this)"></label>
+        <button style="padding:10px 18px;font-size:13px;font-weight:600;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);color:#E05050;background:none;cursor:pointer;font-family:'DM Sans',sans-serif" onclick="confirmReset()">Borrar todo</button>
+      </div>
+    </div>`;
+}
+
+function saveProfile(){
+  STATE.profile={
+    name:document.getElementById('profile-name').value.trim(),
+    gym:document.getElementById('profile-gym').value.trim(),
+    belt:document.getElementById('profile-belt').value,
+    stripe:document.getElementById('profile-stripe').value,
+    start:document.getElementById('profile-start').value,
+    prior_hours:parseFloat(document.getElementById('profile-prior-hours').value)||0,
+    weight:document.getElementById('profile-weight').value,
+    height:document.getElementById('profile-height').value,
+    sex:document.getElementById('profile-sex').value,
+    photo:STATE.profile.photo
+  };
+  saveState(); syncToSupabase();
+  closeModal('edit-profile');
+  renderProfile(); renderProgreso(); updateSidebar();
+}
+
+function uploadPhoto(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=new Image();
+    img.onload=()=>{
+      const canvas=document.createElement('canvas');
+      canvas.width=200; canvas.height=200;
+      const ctx=canvas.getContext('2d');
+      const size=Math.min(img.width,img.height);
+      ctx.drawImage(img,(img.width-size)/2,(img.height-size)/2,size,size,0,0,200,200);
+      STATE.profile.photo=canvas.toDataURL('image/jpeg',.85);
+      saveState(); syncToSupabase(); renderProfile(); updateSidebar();
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function exportData(){
+  const blob=new Blob([JSON.stringify(STATE,null,2)],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`bjj-journey-backup-${todayStr()}.json`;
+  a.click();
+}
+
+function importData(input){
+  const file=input.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const data=JSON.parse(e.target.result);
+      if(data.profile&&data.sessions){
+        Object.assign(STATE,data);
+        saveState(); syncToSupabase();
+        updateSidebar(); renderProgreso(); renderCalendar(); renderProfile(); renderEnc(currentFilter);
+        alert('Datos importados correctamente.');
+      } else { alert('Archivo no válido.'); }
+    } catch(err){ alert('Error al importar: '+err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function confirmReset(){
+  if(!confirm('¿Borrar todos tus datos locales? Esta acción no se puede deshacer.')) return;
+  localStorage.removeItem('bjj_journey_v1');
+  location.reload();
+}
+
 function switchView(id){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   ['snav','mnav'].forEach(p=>{
