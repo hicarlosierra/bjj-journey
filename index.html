@@ -766,16 +766,8 @@ const sb = {
   }
 };
 
-// Genera un user_id único y persistente en localStorage
-function getUserId() {
-  let uid = localStorage.getItem('bjj_user_id');
-  if (!uid) {
-    uid = 'carlos_l8pxk4jqtfg'; // ID fijo para Carlos
-    localStorage.setItem('bjj_user_id', uid);
-  }
-  return uid;
-}
-const USER_ID = getUserId();
+// ID fijo — siempre el mismo independientemente del dispositivo o localStorage
+const USER_ID = 'carlos_l8pxk4jqtfg';
 
 // Sync: sube todo el estado a Supabase
 async function syncToSupabase() {
