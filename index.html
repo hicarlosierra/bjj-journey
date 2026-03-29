@@ -823,7 +823,7 @@ async function syncToSupabase() {
 // Load from Supabase on startup
 async function loadFromSupabase() {
   try {
-    const { data: profile } = await sb.from('profiles').eq('user_id', USER_ID).maybeSingle().select();
+    const { data: profile } = await sb.from('profiles').eq('user_id', USER_ID).maybeSingle();
     if (profile) {
       STATE.profile = {
         name: profile.name || '', gym: profile.gym || '',
@@ -853,12 +853,10 @@ async function loadFromSupabase() {
       });
     }
 
-    // Supabase es la fuente de verdad — sobreescribe localStorage
     saveState();
     return true;
   } catch(e) {
     console.warn('Supabase load error:', e.message);
-    // Fallback: usar localStorage si Supabase falla
     return false;
   }
 }
