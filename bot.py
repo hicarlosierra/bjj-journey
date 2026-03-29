@@ -48,6 +48,9 @@ async def sb_ensure_profile():
 async def load_user_context() -> str:
     sessions = await sb_get("sessions", "&order=date.desc&limit=50")
     techniques = await sb_get("techniques", "&seen=eq.true")
+    profile_data = await sb_get("profiles")
+    profile = profile_data[0] if profile_data else {}
+    default_gym = profile.get("gym") or "tu gimnasio"
 
     today = date.today()
     this_month = [s for s in sessions if s.get("date","")[:7] == today.strftime("%Y-%m")]
@@ -66,6 +69,7 @@ async def load_user_context() -> str:
     seen_count = len(techniques)
 
     return f"""Hoy es {today.strftime('%A %d de %B de %Y')}.
+Gimnasio habitual de Carlos: {default_gym}
 
 STATS DE CARLOS:
 - Total: {total_h}h en {len(sessions)} sesiones
@@ -101,6 +105,13 @@ Cuando Carlos te cuente un entreno, extrae: fecha, tipo (Gi/NoGi/Open mat/Gym/Co
 FEELING: 1=🤕Roto, 2=😴Cansado, 3=😐Normal, 4=💪Fuerte, 5=🔥En llamas
 
 POSICIONES: "De pie", "Guardia cerrada", "Guardia abierta", "Half guard", "Side control", "Montada", "Espalda", "General / Sparring"
+
+CAMPOS OPCIONALES:
+- gym: nombre del gimnasio si lo menciona. Si no lo menciona, usa el gimnasio habitual de Carlos que aparece en el contexto
+- training_partners: nombres de compañeros si los menciona, separados por coma (ej: "John, Paco")
+
+SAVE_SESSION incluye todos los campos:
+SAVE_SESSION:{"date":"YYYY-MM-DD","type":"Gi","duration":90,"feeling":4,"position":"Guardia cerrada","notes":"...","gym":"Kalmma","training_partners":"John"}
 
 EJEMPLOS:
 - "hoy gi 90 min, guardia cerrada, muy bien" → respuesta natural + SAVE_SESSION al final
@@ -202,6 +213,8 @@ async def handle_message(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
             session_data["id"] = f"{USER_ID}_{session_data.get('date','x')}_{uuid.uuid4().hex[:8]}"
             session_data["user_id"] = USER_ID
             session_data.setdefault("from_gcal", False)
+            session_data.setdefault("gym", "Kalmma")
+            session_data.setdefault("training_partners", None)
             await sb_ensure_profile()
             await sb_upsert("sessions", session_data)
         except Exception as e:
