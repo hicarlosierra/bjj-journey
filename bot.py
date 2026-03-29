@@ -102,7 +102,7 @@ Cuando Carlos te cuente un entreno, extrae: fecha, tipo (Gi/NoGi/Open mat/Gym/Co
 - Cuando tengas todo, incluye en tu respuesta un bloque JSON así (al final, invisible para el usuario):
   SAVE_SESSION:{"date":"YYYY-MM-DD","type":"Gi","duration":90,"feeling":4,"position":"Guardia cerrada","notes":"..."}
 
-FEELING: 1=🤕Roto, 2=😴Cansado, 3=😐Normal, 4=💪Fuerte, 5=🔥En llamas
+FEELING: 1=🤕Roto, 2=😴Cansado, 3=🙂Normal, 4=💪Fuerte, 5=🔥En llamas
 
 POSICIONES: "De pie", "Guardia cerrada", "Guardia abierta", "Half guard", "Side control", "Montada", "Espalda", "General / Sparring"
 
@@ -164,7 +164,7 @@ def extract_session(text: str):
         return None, text
 
 # ── HANDLERS ─────────────────────────────────────────────
-FEELING_EMOJI = {5:"🔥",4:"💪",3:"😐",2:"😴",1:"🤕"}
+FEELING_EMOJI = {5:"🔥",4:"💪",3:"🙂",2:"😴",1:"🤕"}
 
 async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
     chat_id = str(update.effective_chat.id)
