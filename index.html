@@ -729,26 +729,27 @@ const sb = {
     'Prefer': 'resolution=merge-duplicates'
   },
   from(table) {
-    return {
-      _table: table,
-      _filters: [],
-      _order: null,
-      eq(col, val) { this._filters.push(`${col}=eq.${val}`); return this; },
-      order(col, {ascending}={}) { this._order = `${col}.${ascending?'asc':'desc'}`; return this; },
+    const state = { table, filters: [], orderStr: null };
+    const api = {
+      eq(col, val) { state.filters.push(`${col}=eq.${encodeURIComponent(val)}`); return api; },
+      order(col, {ascending}={}) { state.orderStr = `${col}.${ascending?'asc':'desc'}`; return api; },
       async select(cols='*') {
-        const q = this._filters.length ? '?' + this._filters.join('&') + (this._order?`&order=${this._order}`:'') : (this._order?`?order=${this._order}`:'');
-        const r = await fetch(`${sb._url}/${this._table}${q}`, {headers: sb._headers});
+        let q = state.filters.length ? state.filters.join('&') : '';
+        if (state.orderStr) q += (q?'&':'') + `order=${state.orderStr}`;
+        const url = `${sb._url}/${state.table}${q?'?'+q:''}`;
+        const r = await fetch(url, {headers: sb._headers});
         const data = await r.json();
         return {data: Array.isArray(data) ? data : [], error: r.ok ? null : data};
       },
       async maybeSingle() {
-        const q = this._filters.length ? '?' + this._filters.join('&') + '&limit=1' : '?limit=1';
-        const r = await fetch(`${sb._url}/${this._table}${q}`, {headers: sb._headers});
+        let q = state.filters.length ? state.filters.join('&') + '&limit=1' : 'limit=1';
+        const url = `${sb._url}/${state.table}?${q}`;
+        const r = await fetch(url, {headers: sb._headers});
         const data = await r.json();
         return {data: Array.isArray(data) && data.length > 0 ? data[0] : null, error: r.ok ? null : data};
       },
       async upsert(payload) {
-        const r = await fetch(`${sb._url}/${this._table}`, {
+        const r = await fetch(`${sb._url}/${state.table}`, {
           method: 'POST',
           headers: {...sb._headers, 'Prefer': 'resolution=merge-duplicates'},
           body: JSON.stringify(payload)
@@ -756,11 +757,12 @@ const sb = {
         return {error: r.ok ? null : await r.json()};
       },
       async delete() {
-        const q = this._filters.length ? '?' + this._filters.join('&') : '';
-        const r = await fetch(`${sb._url}/${this._table}${q}`, {method: 'DELETE', headers: sb._headers});
+        let q = state.filters.length ? '?' + state.filters.join('&') : '';
+        const r = await fetch(`${sb._url}/${state.table}${q}`, {method: 'DELETE', headers: sb._headers});
         return {error: r.ok ? null : await r.json()};
       }
     };
+    return api;
   }
 };
 
@@ -829,7 +831,7 @@ async function syncToSupabase() {
 // Load from Supabase on startup
 async function loadFromSupabase() {
   try {
-    const { data: profile } = await sb.from('profiles').select('*').eq('user_id', USER_ID).maybeSingle();
+    const { data: profile } = await sb.from('profiles').eq('user_id', USER_ID).maybeSingle().select();
     if (profile) {
       STATE.profile = {
         name: profile.name || '', gym: profile.gym || '',
@@ -841,34 +843,30 @@ async function loadFromSupabase() {
       };
     }
 
-    const { data: sessions } = await sb.from('sessions').select('*').eq('user_id', USER_ID).order('date', { ascending: false });
-    if (sessions && sessions.length > 0) {
-      const sbSessions = sessions.map(s => ({
+    const { data: sessions } = await sb.from('sessions').eq('user_id', USER_ID).order('date', {ascending: false}).select();
+    if (sessions) {
+      STATE.sessions = sessions.map(s => ({
         id: s.id, date: s.date, type: s.type || 'Gi',
         duration: s.duration || 60, feeling: s.feeling,
         position: s.position, notes: s.notes || '',
         from_gcal: s.from_gcal || false, gcal_event_id: s.gcal_event_id,
         gym: s.gym || null, training_partners: s.training_partners || null
       }));
-      // Merge: keep local sessions that don't exist in Supabase (by date+type)
-      const sbKeys = new Set(sbSessions.map(s => s.date + '_' + s.type));
-      const localOnly = STATE.sessions.filter(s => !s.from_gcal && !sbKeys.has(s.date + '_' + s.type));
-      STATE.sessions = [...sbSessions, ...localOnly];
     }
 
-    const { data: techs } = await sb.from('techniques').select('*').eq('user_id', USER_ID);
+    const { data: techs } = await sb.from('techniques').eq('user_id', USER_ID).select();
     if (techs) {
       techs.forEach(t => {
         STATE.techniques[t.technique_id] = { seen: t.seen, status: t.status, notes: t.notes || '', sessions: [] };
       });
     }
 
+    // Supabase es la fuente de verdad — sobreescribe localStorage
     saveState();
-    // Upload any local-only sessions to Supabase
-    if (STATE.sessions.some(s => !s.id)) syncToSupabase();
     return true;
   } catch(e) {
     console.warn('Supabase load error:', e.message);
+    // Fallback: usar localStorage si Supabase falla
     return false;
   }
 }
@@ -1700,9 +1698,16 @@ function importData(input){
   reader.readAsText(file);
 }
 
-function confirmReset(){
+async function confirmReset(){
   if(confirm('¿Seguro que quieres borrar todos los datos? Esta acción no se puede deshacer.')){
-    localStorage.removeItem('bjj_journey_v1');location.reload();
+    // Borrar de Supabase
+    try {
+      await sb.from('sessions').eq('user_id', USER_ID).delete();
+      await sb.from('techniques').eq('user_id', USER_ID).delete();
+      await sb.from('profiles').eq('user_id', USER_ID).delete();
+    } catch(e) { console.warn('Error borrando de Supabase:', e); }
+    localStorage.removeItem('bjj_journey_v1');
+    location.reload();
   }
 }
 
