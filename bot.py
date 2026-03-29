@@ -2,9 +2,233 @@ import os
 import json
 import httpx
 import asyncio
-from datetime import datetime
+from datetime import datetime, date
 from telegram import Update
 from telegram.ext import Application, MessageHandler, CommandHandler, filters, ContextTypes
+
+# ── CONFIG ──────────────────────────────────────────────
+TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
+CLAUDE_API_KEY = os.environ["CLAUDE_API_KEY"]
+SUPABASE_URL   = os.environ["SUPABASE_URL"]
+SUPABASE_KEY   = os.environ["SUPABASE_KEY"]
+USER_ID        = os.environ["BJJ_USER_ID"]
+ALLOWED_CHAT   = os.environ.get("ALLOWED_CHAT_ID", "")
+
+# ── SUPABASE ─────────────────────────────────────────────
+SB_HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json",
+    "Prefer": "resolution=merge-duplicates"
+}
+
+async def sb_get(table: str, filters: str = "") -> list:
+    url = f"{SUPABASE_URL}/rest/v1/{table}?user_id=eq.{USER_ID}{filters}"
+    async with httpx.AsyncClient() as client:
+        r = await client.get(url, headers=SB_HEADERS)
+        return r.json() if r.status_code == 200 else []
+
+async def sb_upsert(table: str, data: dict) -> int:
+    url = f"{SUPABASE_URL}/rest/v1/{table}"
+    async with httpx.AsyncClient() as client:
+        r = await client.post(url, headers=SB_HEADERS, json=data)
+        return r.status_code
+
+async def sb_ensure_profile():
+    existing = await sb_get("profiles")
+    if not existing:
+        await sb_upsert("profiles", {"user_id": USER_ID, "name": "Carlos"})
+
+# ── LOAD USER CONTEXT ────────────────────────────────────
+async def load_user_context() -> str:
+    """Carga el historial del usuario de Supabase para dárselo a Claude como contexto."""
+    sessions = await sb_get("sessions", "&order=date.desc&limit=50")
+    techniques = await sb_get("techniques", "&seen=eq.true")
+
+    if not sessions:
+        return "El usuario no tiene sesiones registradas todavía."
+
+    # Calcular stats
+    today = date.today()
+    this_month = [s for s in sessions if s.get("date", "")[:7] == today.strftime("%Y-%m")]
+    total_min = sum(s.get("duration", 0) or 0 for s in sessions)
+    month_min = sum(s.get("duration", 0) or 0 for s in this_month)
+    total_h = round(total_min / 60, 1)
+    month_h = round(month_min / 60, 1)
+
+    # Últimas 5 sesiones
+    recent = sessions[:5]
+    recent_str = "\n".join([
+        f"  - {s['date']} | {s.get('type','?')} | {round((s.get('duration',0) or 0)/60,1)}h"
+        + (f" | {s.get('position','')}" if s.get('position') else "")
+        + (f" | feeling {s.get('feeling','')}" if s.get('feeling') else "")
+        + (f" | {s.get('notes','')}" if s.get('notes') else "")
+        for s in recent
+    ])
+
+    # Técnicas vistas
+    seen_count = len(techniques)
+    seen_names = [t.get("technique_id","").replace("tech_","").replace("_"," ") for t in techniques[:10]]
+
+    context = f"""DATOS DEL USUARIO (Carlos):
+- Total horas entrenadas: {total_h}h ({len(sessions)} sesiones)
+- Horas este mes: {month_h}h ({len(this_month)} sesiones)
+- Técnicas vistas en clase: {seen_count}
+
+ÚLTIMAS 5 SESIONES:
+{recent_str}
+
+ALGUNAS TÉCNICAS VISTAS: {', '.join(seen_names) if seen_names else 'ninguna aún'}
+Hoy es: {today.strftime('%Y-%m-%d')} ({today.strftime('%A')})"""
+
+    return context
+
+# ── CLAUDE ───────────────────────────────────────────────
+SYSTEM_PROMPT = """Eres el asistente personal de BJJ Journey de Carlos, un practicante de BJJ en Madrid (Kalmma Fight Club), cinturón blanco.
+
+Tienes dos modos de operación:
+
+MODO 1 — GUARDAR SESIÓN:
+Si el mensaje parece una sesión de BJJ, devuelve EXACTAMENTE este JSON (sin texto extra, sin backticks):
+{"action": "save_session", "date": "YYYY-MM-DD", "type": "Gi|NoGi|Open mat|Gym|Competición", "duration": 90, "feeling": 4, "position": "Guardia cerrada|De pie|Guardia abierta|Half guard|Side control|Montada|Espalda|General / Sparring|null", "notes": "..."}
+
+Feeling: 5=🔥En llamas, 4=💪Fuerte, 3=😐Normal, 2=😴Cansado, 1=🤕Roto (null si no se menciona)
+
+MODO 2 — RESPONDER PREGUNTA:
+Si el mensaje es una pregunta sobre progreso, estadísticas o cualquier otra cosa, responde en texto natural usando el contexto del usuario. Sé conciso y útil. Devuelve:
+{"action": "reply", "text": "tu respuesta aquí"}
+
+EJEMPLOS DE SESIÓN: "hoy gi 90 min", "nogi 1h estaba roto", "open mat esta mañana"
+EJEMPLOS DE PREGUNTA: "cuántas horas llevo", "qué trabajé ayer", "cómo voy este mes", "dame un resumen"
+
+IMPORTANTE: Responde SIEMPRE con JSON válido, sin markdown, sin backticks."""
+
+async def call_claude(message: str, context: str) -> dict:
+    url = "https://api.anthropic.com/v1/messages"
+    headers = {
+        "x-api-key": CLAUDE_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json"
+    }
+    body = {
+        "model": "claude-haiku-4-5-20251001",
+        "max_tokens": 512,
+        "system": SYSTEM_PROMPT,
+        "messages": [{
+            "role": "user",
+            "content": f"CONTEXTO:\n{context}\n\nMENSAJE DE CARLOS: {message}"
+        }]
+    }
+    async with httpx.AsyncClient(timeout=20) as client:
+        r = await client.post(url, headers=headers, json=body)
+        if r.status_code != 200:
+            raise Exception(f"Claude API error {r.status_code}: {r.text[:200]}")
+        raw = r.json()["content"][0]["text"].strip()
+        raw = raw.replace("```json", "").replace("```", "").strip()
+        return json.loads(raw)
+
+# ── HANDLERS ─────────────────────────────────────────────
+FEELING_EMOJI = {5: "🔥 En llamas", 4: "💪 Fuerte", 3: "😐 Normal", 2: "😴 Cansado", 1: "🤕 Roto"}
+
+async def start(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text(
+        "👋 Hola Carlos! Soy tu asistente de BJJ Journey.\n\n"
+        "Puedo hacer dos cosas:\n\n"
+        "🥋 *Guardar sesiones* — cuéntame tu entreno:\n"
+        "_Hoy 90 min gi, guardia cerrada, me sentí fuerte_\n\n"
+        "📊 *Responder preguntas* — sobre tu progreso:\n"
+        "_¿Cuántas horas llevo este mes?_\n"
+        "_¿Cómo voy esta semana?_\n"
+        "_Dame un resumen_",
+        parse_mode="Markdown"
+    )
+
+async def stats(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    if ALLOWED_CHAT and str(update.effective_chat.id) != ALLOWED_CHAT:
+        return
+    await ctx.bot.send_chat_action(update.effective_chat.id, "typing")
+    context = await load_user_context()
+    result = await call_claude("Dame un resumen completo de mi progreso", context)
+    text = result.get("text", context)
+    await update.message.reply_text(text)
+
+async def handle_message(update: Update, ctx: ContextTypes.DEFAULT_TYPE):
+    if ALLOWED_CHAT and str(update.effective_chat.id) != ALLOWED_CHAT:
+        return
+
+    msg = update.message.text
+    await ctx.bot.send_chat_action(update.effective_chat.id, "typing")
+
+    # Cargar contexto del usuario
+    context = await load_user_context()
+
+    try:
+        result = await call_claude(msg, context)
+    except Exception as e:
+        await update.message.reply_text(f"❌ Error: {str(e)[:200]}")
+        return
+
+    action = result.get("action")
+
+    # MODO 2: Respuesta a pregunta
+    if action == "reply":
+        await update.message.reply_text(result.get("text", "No entendí la pregunta."))
+        return
+
+    # MODO 1: Guardar sesión
+    if action == "save_session":
+        import uuid
+        today = date.today().strftime("%Y-%m-%d")
+        session_date = result.get("date", today)
+        session_data = {
+            "id": f"{USER_ID}_{session_date}_{uuid.uuid4().hex[:8]}",
+            "user_id": USER_ID,
+            "date": session_date,
+            "type": result.get("type", "Gi"),
+            "duration": result.get("duration", 60),
+            "feeling": result.get("feeling"),
+            "position": result.get("position"),
+            "notes": result.get("notes", ""),
+            "from_gcal": False
+        }
+
+        await sb_ensure_profile()
+        status = await sb_upsert("sessions", session_data)
+
+        if status in (200, 201):
+            duration_h = round(result.get("duration", 60) / 60, 1)
+            feeling = result.get("feeling")
+            feeling_str = f" · {FEELING_EMOJI[feeling]}" if feeling else ""
+            position_str = f" · {result['position']}" if result.get("position") else ""
+            notes_str = f"\n📝 {result['notes']}" if result.get("notes") else ""
+
+            await update.message.reply_text(
+                f"✅ *Sesión guardada*\n\n"
+                f"📅 {session_date}\n"
+                f"🥋 {result.get('type','Gi')} · {duration_h}h{feeling_str}{position_str}"
+                f"{notes_str}\n\n"
+                f"_Abre la app para verla en tu historial_",
+                parse_mode="Markdown"
+            )
+        else:
+            await update.message.reply_text(f"❌ Error al guardar (status {status})")
+        return
+
+    # Fallback
+    await update.message.reply_text("🤔 No entendí eso. Cuéntame tu sesión o hazme una pregunta sobre tu progreso.")
+
+# ── MAIN ─────────────────────────────────────────────────
+def main():
+    app = Application.builder().token(TELEGRAM_TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("stats", stats))
+    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+    print("🤖 BJJ Journey Bot arrancado v2")
+    app.run_polling(drop_pending_updates=True)
+
+if __name__ == "__main__":
+    main()
+
 
 # ── CONFIG ──────────────────────────────────────────────
 TELEGRAM_TOKEN = os.environ["TELEGRAM_TOKEN"]
