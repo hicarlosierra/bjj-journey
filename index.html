@@ -342,7 +342,6 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 .pin-btn{width:100%;padding:14px;background:var(--orange);border:none;border-radius:var(--r);font-size:16px;font-weight:600;color:var(--cream);font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s}
 .pin-btn:hover{opacity:.88}
 </style>
-<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <!-- PIN SCREEN -->
@@ -531,6 +530,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
     <div class="input-group"><label class="input-label">Notas <span style="color:var(--muted2);font-size:10px;margin-left:4px">opcional</span></label>
       <textarea class="input-field" id="session-notes" rows="2" placeholder="Algo que destacar..."></textarea>
     </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="input-group"><label class="input-label">Gimnasio <span style="color:var(--muted2);font-size:10px">opcional</span></label>
+        <input class="input-field" type="text" id="session-gym" placeholder="Kalmma"></div>
+      <div class="input-group"><label class="input-label">Compañeros <span style="color:var(--muted2);font-size:10px">opcional</span></label>
+        <input class="input-field" type="text" id="session-partners" placeholder="John, Paco..."></div>
+    </div>
     <div class="modal-actions">
       <button class="btn-secondary" onclick="closeModal('add-session')">Cancelar</button>
       <button class="btn-primary" onclick="saveSession()">Guardar sesión</button>
@@ -714,9 +719,50 @@ GRAPH.nodes.forEach(n => {
 // ═══════════════════════════════════════════════════════
 // SUPABASE — sync sin login
 // ═══════════════════════════════════════════════════════
-const SB_URL = 'https://uanglczkvvsjoqctqmlh.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbmdsY3prdnZzam9xY3RxbWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTExMDcsImV4cCI6MjA5MDA4NzEwN30.PYA5TyodU_nbrXFHKTnqUXJX5QkxMf5u2zppwDC4W8M';
-const sb = supabase.createClient(SB_URL, SB_KEY);
+// Supabase REST client — sin CDN, fetch nativo
+const sb = {
+  _url: 'https://uanglczkvvsjoqctqmlh.supabase.co/rest/v1',
+  _headers: {
+    'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbmdsY3prdnZzam9xY3RxbWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTExMDcsImV4cCI6MjA5MDA4NzEwN30.PYA5TyodU_nbrXFHKTnqUXJX5QkxMf5u2zppwDC4W8M',
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVhbmdsY3prdnZzam9xY3RxbWxoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MTExMDcsImV4cCI6MjA5MDA4NzEwN30.PYA5TyodU_nbrXFHKTnqUXJX5QkxMf5u2zppwDC4W8M',
+    'Content-Type': 'application/json',
+    'Prefer': 'resolution=merge-duplicates'
+  },
+  from(table) {
+    return {
+      _table: table,
+      _filters: [],
+      _order: null,
+      eq(col, val) { this._filters.push(`${col}=eq.${val}`); return this; },
+      order(col, {ascending}={}) { this._order = `${col}.${ascending?'asc':'desc'}`; return this; },
+      async select(cols='*') {
+        const q = this._filters.length ? '?' + this._filters.join('&') + (this._order?`&order=${this._order}`:'') : (this._order?`?order=${this._order}`:'');
+        const r = await fetch(`${sb._url}/${this._table}${q}`, {headers: sb._headers});
+        const data = await r.json();
+        return {data: Array.isArray(data) ? data : [], error: r.ok ? null : data};
+      },
+      async maybeSingle() {
+        const q = this._filters.length ? '?' + this._filters.join('&') + '&limit=1' : '?limit=1';
+        const r = await fetch(`${sb._url}/${this._table}${q}`, {headers: sb._headers});
+        const data = await r.json();
+        return {data: Array.isArray(data) && data.length > 0 ? data[0] : null, error: r.ok ? null : data};
+      },
+      async upsert(payload) {
+        const r = await fetch(`${sb._url}/${this._table}`, {
+          method: 'POST',
+          headers: {...sb._headers, 'Prefer': 'resolution=merge-duplicates'},
+          body: JSON.stringify(payload)
+        });
+        return {error: r.ok ? null : await r.json()};
+      },
+      async delete() {
+        const q = this._filters.length ? '?' + this._filters.join('&') : '';
+        const r = await fetch(`${sb._url}/${this._table}${q}`, {method: 'DELETE', headers: sb._headers});
+        return {error: r.ok ? null : await r.json()};
+      }
+    };
+  }
+};
 
 // Genera un user_id único y persistente en localStorage
 function getUserId() {
@@ -754,7 +800,9 @@ async function syncToSupabase() {
         duration: s.duration, feeling: s.feeling || null,
         position: s.position || null, notes: s.notes || '',
         from_gcal: s.from_gcal || false,
-        gcal_event_id: s.gcal_event_id || null
+        gcal_event_id: s.gcal_event_id || null,
+        gym: s.gym || null,
+        training_partners: s.training_partners || null
       }));
       // Assign ids back
       sessionRows.forEach((row, i) => { if (!STATE.sessions[i].id) STATE.sessions[i].id = row.id; });
@@ -799,7 +847,8 @@ async function loadFromSupabase() {
         id: s.id, date: s.date, type: s.type || 'Gi',
         duration: s.duration || 60, feeling: s.feeling,
         position: s.position, notes: s.notes || '',
-        from_gcal: s.from_gcal || false, gcal_event_id: s.gcal_event_id
+        from_gcal: s.from_gcal || false, gcal_event_id: s.gcal_event_id,
+        gym: s.gym || null, training_partners: s.training_partners || null
       }));
       // Merge: keep local sessions that don't exist in Supabase (by date+type)
       const sbKeys = new Set(sbSessions.map(s => s.date + '_' + s.type));
@@ -1057,6 +1106,8 @@ function renderSessions(){
       const feelHtml=s.feeling?`<span style="font-size:18px">${['🤕','😴','😐','💪','🔥'][s.feeling-1]}</span>`:'';
       const posHtml=s.position?`<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${s.position}</span>`:'';
       const gcalBadge=s.from_gcal?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:rgba(76,175,138,.12);color:var(--green);border:1px solid rgba(76,175,138,.25)">📅 Calendar</span>`:'';
+      const gymBadge=s.gym&&s.gym!=='Kalmma'?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">📍 ${s.gym}</span>`:'';
+      const partnersBadge=s.training_partners?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">👥 ${s.training_partners}</span>`:'';
       return `<div class="session-full" onclick="openSessionDetail(${realIdx})" style="cursor:pointer">
         <div class="sf-header">
           <div class="sf-left">
@@ -1069,7 +1120,7 @@ function renderSessions(){
             <span style="font-size:11px;color:var(--muted2);cursor:pointer;padding:4px 8px;border:1px solid var(--border);border-radius:var(--r2)" onclick="event.stopPropagation();deleteSession(${realIdx})">✕</span>
           </div>
         </div>
-        <div class="sf-date">${fmtDate(s.date)}${posHtml}${gcalBadge}</div>
+        <div class="sf-date">${fmtDate(s.date)}${posHtml}${gcalBadge}${gymBadge}${partnersBadge}</div>
         ${s.notes?`<div class="sf-note">${s.notes}</div>`:`<div style="font-size:11px;color:var(--muted);margin-top:4px;font-style:italic">Toca para añadir detalles →</div>`}
       </div>`;
     }).join('')}
@@ -1097,9 +1148,11 @@ function saveSession(){
   const type=document.querySelector('#type-pills-main .type-pill.sel')?.textContent||'Gi';
   const duration=document.getElementById('session-duration').value;
   const notes=document.getElementById('session-notes').value.trim();
+  const gym=document.getElementById('session-gym').value.trim();
+  const partners=document.getElementById('session-partners').value.trim();
   if(!duration||parseInt(duration)<1){document.getElementById('session-duration').focus();return;}
 
-  STATE.sessions.push({date,type,duration:parseInt(duration),feeling:currentStar||null,position:currentPos||null,notes});
+  STATE.sessions.push({date,type,duration:parseInt(duration),feeling:currentStar||null,position:currentPos||null,notes,gym:gym||null,training_partners:partners||null});
   saveState();
   syncToSupabase();
   closeModal('add-session');
@@ -1159,6 +1212,16 @@ function openSessionDetail(idx){
     <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${positionPills}</div>
     <div class="dp-section">Notas</div>
     <textarea class="dp-notes-field" placeholder="Qué trabajaste, qué salió bien, qué mejorar..." oninput="updateSessionField(${idx},'notes',this.value)">${s.notes||''}</textarea>
+    <div class="dp-section">Gimnasio</div>
+    <input type="text" value="${s.gym||''}" placeholder="Kalmma"
+      style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 12px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+      oninput="updateSessionField(${idx},'gym',this.value)"
+      onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
+    <div class="dp-section">Compañeros</div>
+    <input type="text" value="${s.training_partners||''}" placeholder="John, Paco..."
+      style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 12px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+      oninput="updateSessionField(${idx},'training_partners',this.value)"
+      onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
     <div style="margin-top:18px">
       <button onclick="deleteSession(${idx});closeDetail()" style="width:100%;padding:10px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:13px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer">Eliminar sesión</button>
     </div>`;
@@ -1677,6 +1740,8 @@ function openModal(name){
     document.getElementById('session-date').value=todayStr();
     document.getElementById('session-duration').value='';
     document.getElementById('session-notes').value='';
+    document.getElementById('session-gym').value=STATE.profile.gym||'';
+    document.getElementById('session-partners').value='';
     document.getElementById('type-pills-main').querySelectorAll('.type-pill').forEach((p,i)=>p.classList.toggle('sel',i===0));
     currentStar=0;currentPos='';
     document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
