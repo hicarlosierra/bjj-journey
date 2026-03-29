@@ -798,10 +798,12 @@ async function supaGet(table, filters) {
 }
 
 async function supaDelete(table, id) {
-  return fetch(`${SUPA_URL}/${table}?id=eq.${id}`, {
+  const res = await fetch(`${SUPA_URL}/${table}?id=eq.${encodeURIComponent(id)}`, {
     method: 'DELETE',
     headers: SUPA_HEADERS
   });
+  if (!res.ok) console.warn(`Supabase delete ${table} failed:`, await res.text());
+  return res;
 }
 
 // Keep sb alias for deleteSession compatibility
@@ -1641,7 +1643,7 @@ function setFeeling(btn){
   if(lbl) lbl.textContent=btn.dataset.label;
 }
 
-function saveSession(){
+async function saveSession(){
   const date=document.getElementById('session-date').value||todayStr();
   const type=document.querySelector('#type-pills-main .type-pill.sel')?.textContent||'Gi';
   const duration=document.getElementById('session-duration').value;
@@ -1652,8 +1654,25 @@ function saveSession(){
 
   const validFocos=currentFocos.filter(f=>f.category);
   const id='sess_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
-  STATE.sessions.push({id,date,type,duration:parseInt(duration),feeling:currentStar||null,focos:validFocos,notes,gym:gym||null,training_partners:partners||null});
-  saveState(); syncToSupabase();
+  const session={id,date,type,duration:parseInt(duration),feeling:currentStar||null,focos:validFocos,notes,gym:gym||null,training_partners:partners||null};
+
+  STATE.sessions.push(session);
+  saveState();
+
+  // Upload immediately to Supabase
+  try {
+    await supaUpsert('sessions', {
+      id, user_id: USER_ID, date, type,
+      duration: parseInt(duration),
+      feeling: currentStar||null,
+      notes: notes||null,
+      gym: gym||null,
+      training_partners: partners||null,
+      focos: JSON.stringify(validFocos),
+      from_gcal: false
+    });
+  } catch(e) { console.warn('Session upload failed:', e); }
+
   closeModal('add-session');
   renderCalendar(); renderProgreso(); renderWeeklySummary(); updateSidebar();
 
@@ -1666,12 +1685,12 @@ function saveSession(){
   if(lbl) lbl.textContent='';
 }
 
-function deleteSession(idx){
+async function deleteSession(idx){
   const s=STATE.sessions[idx];
-  if(s?.id) sb.from('sessions').eq('id',s.id).delete().then(()=>{});
   STATE.sessions.splice(idx,1);
   saveState();
   closeDetail();
+  if(s?.id) { try { await supaDelete('sessions', s.id); } catch(e){} }
   renderCalendar(); renderProgreso(); updateSidebar();
 }
 
