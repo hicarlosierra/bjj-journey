@@ -426,23 +426,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
       <button class="filter-pill active" id="mov-tab-all" onclick="switchMovTab('all')">Todas</button>
       <button class="filter-pill" id="mov-tab-mine" onclick="switchMovTab('mine')">Mis movimientos</button>
     </div>
-    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;flex-wrap:wrap">
-      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted2)">
-        <div style="width:10px;height:10px;border-radius:50%;background:#EB5E2833;border:1.5px solid var(--orange)"></div>Dominante
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted2)">
-        <div style="width:10px;height:10px;border-radius:50%;background:#7B74E033;border:1.5px solid var(--purple)"></div>Neutral
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted2)">
-        <div style="width:10px;height:10px;border-radius:50%;background:#4CAF8A33;border:1.5px solid var(--green)"></div>Defensivo
-      </div>
-      <div style="width:1px;height:14px;background:var(--border2)"></div>
-      <span style="font-size:11px;color:#E05050;font-weight:700">ATAQUE</span>
-      <span style="font-size:11px;color:#4CAF8A;font-weight:700">DEFENSA</span>
-      <span style="font-size:11px;color:#E8A838;font-weight:700">TRANSICIÓN</span>
-      <div style="width:1px;height:14px;background:var(--border2)"></div>
-      <span style="font-size:11px;color:var(--muted2)">Toca ○ para marcar vista</span>
-    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap" id="enc-legend"></div>
     <div id="enc-container"></div>
   </div>
 
@@ -629,162 +613,128 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
 // ═══════════════════════════════════════════════════════
 
 // State derivado automáticamente de Position
-const POSITION_STATE = {
-  'Standing':             'neutral',
-  'Guard (Bottom)':       'neutral',
-  'Guard (Top)':          'neutral',
-  'Turtle':               'neutral',
-  'Side Control (Top)':   'dominant',
-  'Mount (Top)':          'dominant',
-  'Back Control':         'dominant',
-  'Side Control (Bottom)':'defensive',
-  'Mount (Bottom)':       'defensive',
-  'Back Taken':           'defensive',
-};
+// ═══════════════════════════════════════════════════════
+// NUEVO MODELO: CATEGORÍA + POSICIÓN (whitebeltclub style)
+// ═══════════════════════════════════════════════════════
 
-const STATE_COLOR = {
-  dominant:  '#EB5E28',
-  neutral:   '#7B74E0',
-  defensive: '#4CAF8A',
-};
+const CATEGORIES = [
+  { id:'submission', label:'Submission', color:'#E05050', icon:'🔒' },
+  { id:'sweep',      label:'Sweep',      color:'#7B74E0', icon:'🔄' },
+  { id:'escape',     label:'Escape',     color:'#4CAF8A', icon:'🚪' },
+  { id:'passing',    label:'Passing',    color:'#EB5E28', icon:'⚡' },
+  { id:'control',    label:'Control',    color:'#E8A838', icon:'🏆' },
+  { id:'guard',      label:'Guard',      color:'#5BA3D9', icon:'🛡️' },
+  { id:'takedown',   label:'Takedown',   color:'#C084FC', icon:'⬇️' },
+];
 
-const STATE_LABEL = {
-  dominant:  'Dominante',
-  neutral:   'Neutral',
-  defensive: 'Defensivo',
-};
+const POSITIONS = [
+  'Closed guard bottom',
+  'Closed guard top',
+  'Half guard bottom',
+  'Half guard top',
+  'Open guard bottom',
+  'Open guard top',
+  'Side control top',
+  'Side control bottom',
+  'Mount top',
+  'Mount bottom',
+  'Back control',
+  'Back taken',
+  'Turtle',
+  'Standing',
+];
 
-// Técnicas remapeadas al nuevo modelo
-// Cada técnica puede aparecer en múltiples posiciones/intents
+// Category color lookup
+const CAT_COLOR = {};
+const CAT_LABEL = {};
+CATEGORIES.forEach(c => { CAT_COLOR[c.id] = c.color; CAT_LABEL[c.id] = c.label; });
+
+const BELT_LABEL = { white:'Blanco', blue:'Azul', purple:'Morado' };
+
+// Techniques — category + positions[] + formats + belt + priority
 const TECHNIQUES = [
-  // ── STANDING ──────────────────────────────────────────
-  {id:'tech_guard_pull',       name:'Guard Pull',            position:'Standing',        intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Deliberate transition from standing directly into a preferred guard position.'},
-  {id:'tech_collar_drag',      name:'Collar Drag',           position:'Standing',        intent:'Attack',     formats:['gi'],         belt:'white', priority:true,  desc:'Forward-dragging takedown entry built around the collar grip. Sets up the back.'},
-  {id:'tech_arm_drag',         name:'Arm Drag',              position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Off-balancing drag that exposes the side or back. Works from standing and butterfly.'},
-  {id:'tech_single_leg',       name:'Single Leg Takedown',   position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'High-percentage leg attack focused on isolating and finishing one leg.'},
-  {id:'tech_double_leg',       name:'Double Leg Takedown',   position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Penetration-based takedown attacking both legs simultaneously.'},
-  {id:'tech_ankle_pick',       name:'Ankle Pick',            position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Low-risk takedown combining upper-body pull with a quick ankle capture.'},
-  {id:'tech_snap_down',        name:'Snap Down',             position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Head-and-arm snap used to break posture and enter front headlock or turtle.'},
-  {id:'tech_osoto_gari',       name:'Osoto Gari',            position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Major outer reap from judo used as a direct takedown or finishing reap.'},
-  {id:'tech_technical_standup',name:'Technical Stand-Up',    position:'Standing',        intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Safe method of returning to standing while protecting against re-engagement.'},
-  {id:'tech_guillotine_stand', name:'Guillotine Choke',      position:'Standing',        intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Front headlock choke applied from guard or in the clinch. Many finishing variations.'},
+  // ── SUBMISSIONS ────────────────────────────────────────
+  {id:'rear_naked_choke',    name:'Rear Naked Choke',      category:'submission', positions:['Back control'],                       formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Primary back-control submission. Forearm across the carotid arteries.'},
+  {id:'triangle',            name:'Triangle Choke',        category:'submission', positions:['Closed guard bottom','Open guard bottom'], formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Leg choke isolating neck and one arm inside a triangular leg lock.'},
+  {id:'armbar_guard',        name:'Straight Armbar',       category:'submission', positions:['Closed guard bottom','Mount top'],    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Straight-arm elbow lock using hip extension.'},
+  {id:'kimura',              name:'Kimura',                category:'submission', positions:['Closed guard bottom','Side control top','Half guard bottom'], formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Bent-arm shoulder lock with figure-four grip.'},
+  {id:'americana',           name:'Americana',             category:'submission', positions:['Side control top','Mount top'],       formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Bent-arm shoulder lock finished with outside rotation.'},
+  {id:'omoplata',            name:'Omoplata',              category:'submission', positions:['Closed guard bottom','Open guard bottom'], formats:['gi','no-gi'], belt:'white', priority:false, desc:'Shoulder lock using the legs to isolate and rotate the trapped arm.'},
+  {id:'guillotine',          name:'Guillotine Choke',      category:'submission', positions:['Standing','Closed guard bottom'],    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Front headlock choke. Many finishing variations.'},
+  {id:'cross_collar',        name:'Cross Collar Choke',    category:'submission', positions:['Closed guard bottom','Mount top'],   formats:['gi'],         belt:'white', priority:true,  desc:'Gi choke using crossed deep lapel grips.'},
+  {id:'arm_triangle',        name:'Arm Triangle',          category:'submission', positions:['Side control top','Mount top'],      formats:['gi','no-gi'], belt:'white', priority:false, desc:'Head-and-arm choke from top positions.'},
+  {id:'bow_arrow',           name:'Bow and Arrow Choke',   category:'submission', positions:['Back control'],                     formats:['gi'],         belt:'blue',  priority:false, desc:'High-percentage collar choke from back using a leg as lever.'},
+  {id:'anaconda',            name:'Anaconda Choke',        category:'submission', positions:['Turtle','Standing'],                formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Arm-in choke finished by rolling or squeezing.'},
+  {id:'darce',               name:"D'Arce Choke",          category:'submission', positions:['Turtle','Half guard top'],          formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Front headlock arm-in choke threading the arm across the neck.'},
+  {id:'north_south_choke',   name:'North-South Choke',     category:'submission', positions:['Side control top'],                 formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Chest-pressure choke from north-south position.'},
+  {id:'ankle_lock',          name:'Straight Ankle Lock',   category:'submission', positions:['Open guard bottom','Open guard top'], formats:['gi','no-gi'], belt:'white', priority:false, desc:'Primary foot and ankle lock. Entry point for leg locks.'},
+  {id:'heel_hook',           name:'Heel Hook',             category:'submission', positions:['Open guard bottom','Open guard top'], formats:['no-gi'],     belt:'purple',priority:false, desc:'Rotational leg lock attacking the heel and knee line.'},
+  {id:'toe_hold',            name:'Toe Hold',              category:'submission', positions:['Open guard bottom','Open guard top'], formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Figure-four foot lock rotating ankle and applying knee torsion.'},
+  {id:'kneebar',             name:'Kneebar',               category:'submission', positions:['Open guard bottom','Open guard top'], formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Straight leg lock attacking hyperextension of the knee.'},
 
-  // ── GUARD (BOTTOM) ────────────────────────────────────
-  {id:'tech_scissor_sweep',    name:'Scissor Sweep',         position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Classic closed-guard sweep using opposing leg pressure to tip the opponent sideways.'},
-  {id:'tech_hip_bump_sweep',   name:'Hip Bump Sweep',        position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Closed-guard sweep built on a sit-up angle and explosive hip drive. Chains naturally with Kimura.'},
-  {id:'tech_pendulum_sweep',   name:'Pendulum Sweep',        position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Closed-guard sweep using a swinging leg to tip the opponent over the trapped arm.'},
-  {id:'tech_flower_sweep',     name:'Flower Sweep',          position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Closed-guard sweep using a leg pendulum and upper-body pull.'},
-  {id:'tech_double_ankle',     name:'Double Ankle Sweep',    position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Sweep against a standing opponent by simultaneously knocking out both base points.'},
-  {id:'tech_butterfly_sweep',  name:'Butterfly Sweep',       position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Elevating sweep using inside butterfly hooks and an upper-body pull to reverse.'},
-  {id:'tech_tripod_sweep',     name:'Tripod Sweep',          position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Open-guard sweep pushing one hip/leg while reaping or pulling the post leg.'},
-  {id:'tech_dlr_sweep',        name:'De La Riva Sweep',      position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Primary sweeping family from De La Riva guard using the outside hook.'},
-  {id:'tech_knee_lever_sweep', name:'Knee Lever Sweep',      position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Half-guard sweep that uses knee-line lifting or levering to reverse the top player.'},
-  {id:'tech_slx_sweep',        name:'Single Leg X Sweep',    position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Off-balancing sweep that lifts and turns the isolated leg from Single Leg X.'},
-  {id:'tech_triangle',         name:'Triangle Choke',        position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Leg choke isolating the neck and one arm inside a triangular leg lock.'},
-  {id:'tech_armbar_guard',     name:'Straight Armbar',       position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Straight-arm elbow lock using hip extension. Applied from closed guard.'},
-  {id:'tech_kimura_guard',     name:'Kimura',                position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Bent-arm shoulder lock with a figure-four grip. Chains with Hip Bump and back takes.'},
-  {id:'tech_omoplata',         name:'Omoplata',              position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Shoulder lock using the legs to isolate and rotate the trapped arm. Chains with triangle.'},
-  {id:'tech_cross_collar',     name:'Cross Collar Choke',    position:'Guard (Bottom)',  intent:'Attack',     formats:['gi'],         belt:'white', priority:true,  desc:'Gi choke using crossed deep lapel grips, applied inside closed guard.'},
-  {id:'tech_guillotine_guard', name:'Guillotine Choke',      position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Front headlock choke caught or pulled guard to finish.'},
-  {id:'tech_ankle_lock_guard', name:'Straight Ankle Lock',   position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Primary straight foot and ankle lock from open guard entanglements.'},
-  {id:'tech_shrimp',           name:'Shrimp',                position:'Guard (Bottom)',  intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Hip escape used to recover space and rebuild frames when pinned.'},
-  {id:'tech_inversion',        name:'Inversion',             position:'Guard (Bottom)',  intent:'Transition', formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Shoulder-supported inversion used to create angle, retain guard, or attack.'},
-  {id:'tech_granby',           name:'Granby Roll',           position:'Guard (Bottom)',  intent:'Transition', formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Inversion-based roll used to escape, reguard, or scramble.'},
+  // ── SWEEPS ─────────────────────────────────────────────
+  {id:'scissor_sweep',       name:'Scissor Sweep',         category:'sweep', positions:['Closed guard bottom'],                   formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Classic closed-guard sweep using opposing leg pressure.'},
+  {id:'hip_bump_sweep',      name:'Hip Bump Sweep',        category:'sweep', positions:['Closed guard bottom'],                   formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Sit-up sweep with explosive hip drive. Chains with Kimura.'},
+  {id:'pendulum_sweep',      name:'Pendulum Sweep',        category:'sweep', positions:['Closed guard bottom'],                   formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Swinging leg sweep tipping opponent over the trapped arm.'},
+  {id:'flower_sweep',        name:'Flower Sweep',          category:'sweep', positions:['Closed guard bottom'],                   formats:['gi','no-gi'], belt:'white', priority:false, desc:'Leg pendulum and upper-body pull to tip opponent sideways.'},
+  {id:'butterfly_sweep',     name:'Butterfly Sweep',       category:'sweep', positions:['Open guard bottom'],                     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Elevating sweep using inside butterfly hooks.'},
+  {id:'double_ankle_sweep',  name:'Double Ankle Sweep',    category:'sweep', positions:['Open guard bottom'],                     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Sweep knocking out both base points simultaneously.'},
+  {id:'tripod_sweep',        name:'Tripod Sweep',          category:'sweep', positions:['Open guard bottom'],                     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Push one hip/leg while reaping the post leg.'},
+  {id:'dlr_sweep',           name:'De La Riva Sweep',      category:'sweep', positions:['Open guard bottom'],                     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Primary sweeping family from DLR guard.'},
+  {id:'knee_lever_sweep',    name:'Knee Lever Sweep',      category:'sweep', positions:['Half guard bottom'],                     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Half-guard sweep using knee-line lifting to reverse top player.'},
+  {id:'slx_sweep',           name:'Single Leg X Sweep',    category:'sweep', positions:['Open guard bottom'],                     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Off-balancing sweep from Single Leg X position.'},
+  {id:'john_wayne_sweep',    name:'John Wayne Sweep',      category:'sweep', positions:['Half guard bottom'],                     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Half guard sweep using underhook and leg hook to reverse.'},
 
-  // ── GUARD (TOP) ───────────────────────────────────────
-  {id:'tech_standing_break',   name:'Standing Guard Break',  position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Opening the closed guard from a standing posture. Essential to pass closed guard.'},
-  {id:'tech_kneeling_break',   name:'Kneeling Guard Break',  position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Opening the closed guard from a kneeling position using posture and wedge pressure.'},
-  {id:'tech_toreando',         name:'Toreando Pass',         position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Lateral guard pass that redirects both legs to the side while the passer moves around.'},
-  {id:'tech_knee_cut',         name:'Knee Cut Pass',         position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Diagonal pass that cuts the knee through the guard to establish side control.'},
-  {id:'tech_stack_pass',       name:'Stack Pass',            position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Folding pressure pass used to collapse the guard and drive through.'},
-  {id:'tech_over_under',       name:'Over-Under Pass',       position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Tight pressure pass using chest-to-chest control.'},
-  {id:'tech_leg_drag',         name:'Leg Drag Pass',         position:'Guard (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Pass that pins a leg across the body to create side control.'},
-  {id:'tech_arm_drag_top',     name:'Arm Drag (Top)',        position:'Guard (Top)',     intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:false, desc:'Arm drag from guard top to expose the back or change angle for the pass.'},
+  // ── ESCAPES ────────────────────────────────────────────
+  {id:'bridge_roll',         name:'Bridge and Roll',       category:'escape', positions:['Mount bottom'],                          formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Mount escape using hip bridge and rotation.'},
+  {id:'elbow_knee',          name:'Elbow-Knee Escape',     category:'escape', positions:['Mount bottom'],                          formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Elbow frame and knee insertion to recover half guard.'},
+  {id:'hip_escape_sc',       name:'Hip Escape',            category:'escape', positions:['Side control bottom'],                   formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Shrimping escape from side control to recover guard.'},
+  {id:'underhook_escape',    name:'Underhook Escape',      category:'escape', positions:['Side control bottom'],                   formats:['gi','no-gi'], belt:'white', priority:false, desc:'Underhook escape from side control to standup or dog fight.'},
+  {id:'back_escape',         name:'Back Escape',           category:'escape', positions:['Back taken'],                            formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Sliding hip to remove hooks and recover guard.'},
+  {id:'turtle_recovery',     name:'Turtle Recovery',       category:'escape', positions:['Turtle'],                                formats:['gi','no-gi'], belt:'white', priority:false, desc:'Return from turtle to guard while preventing back takes.'},
 
-  // ── SIDE CONTROL (TOP) ────────────────────────────────
-  {id:'tech_americana',        name:'Americana',             position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Bent-arm shoulder lock finished with an outside rotational figure-four.'},
-  {id:'tech_kimura_sc',        name:'Kimura',                position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Bent-arm shoulder lock with a figure-four grip applied from side control.'},
-  {id:'tech_armbar_sc',        name:'Straight Armbar',       position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'white', priority:false, desc:'Straight-arm elbow lock transitioning from side control.'},
-  {id:'tech_arm_triangle_sc',  name:'Arm Triangle Choke',    position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'white', priority:false, desc:'Head-and-arm choke applied while passing or from side control.'},
-  {id:'tech_ns_choke',         name:'North-South Choke',     position:'Side Control (Top)', intent:'Attack',  formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Chest-pressure choke applied from the north-south position.'},
-  {id:'tech_mount_transition', name:'Transition to Mount',   position:'Side Control (Top)', intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:true, desc:'Moving from side control to mount to increase positional control.'},
-  {id:'tech_back_take_sc',     name:'Back Take',             position:'Side Control (Top)', intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:true, desc:'Taking the back from side control when opponent turns into you.'},
+  // ── PASSING ────────────────────────────────────────────
+  {id:'standing_guard_break',name:'Standing Guard Break',  category:'passing', positions:['Closed guard top'],                    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Opening closed guard from standing posture.'},
+  {id:'kneeling_guard_break',name:'Kneeling Guard Break',  category:'passing', positions:['Closed guard top'],                    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Opening closed guard from kneeling using posture and wedge.'},
+  {id:'toreando',            name:'Toreando Pass',         category:'passing', positions:['Open guard top'],                      formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Lateral guard pass redirecting both legs to the side.'},
+  {id:'knee_cut',            name:'Knee Cut Pass',         category:'passing', positions:['Half guard top','Open guard top'],     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Diagonal pass cutting the knee through to side control.'},
+  {id:'stack_pass',          name:'Stack Pass',            category:'passing', positions:['Closed guard top','Open guard top'],   formats:['gi','no-gi'], belt:'white', priority:false, desc:'Folding pressure pass to collapse the guard.'},
+  {id:'over_under',          name:'Over-Under Pass',       category:'passing', positions:['Open guard top'],                      formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Tight pressure pass using chest-to-chest control.'},
+  {id:'leg_drag',            name:'Leg Drag Pass',         category:'passing', positions:['Open guard top'],                      formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Pinning a leg across the body to create side control.'},
+  {id:'x_pass',              name:'X Pass',                category:'passing', positions:['Open guard top'],                      formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Explosive pass stepping laterally across the guard.'},
 
-  // ── SIDE CONTROL (BOTTOM) ─────────────────────────────
-  {id:'tech_hip_escape_sc',    name:'Hip Escape',            position:'Side Control (Bottom)', intent:'Defense', formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Shrimping escape from side control to recover closed or open guard.'},
-  {id:'tech_underhook_escape', name:'Underhook Escape',      position:'Side Control (Bottom)', intent:'Defense', formats:['gi','no-gi'], belt:'white', priority:false, desc:'Underhook-based escape from side control leading to a standup or dog fight.'},
-  {id:'tech_bridge_sc',        name:'Bridge',                position:'Side Control (Bottom)', intent:'Defense', formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Hip extension used to create space and disruption from bottom side control.'},
+  // ── CONTROL ────────────────────────────────────────────
+  {id:'side_control_hold',   name:'Holding Side Control',  category:'control', positions:['Side control top'],                    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Maintaining chest-to-chest pressure and blocking hips.'},
+  {id:'mount_control',       name:'Controlling Mount',     category:'control', positions:['Mount top'],                           formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Maintaining low mount with hooks and base.'},
+  {id:'back_control_hooks',  name:'Back Control with Hooks',category:'control', positions:['Back control'],                       formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Seatbelt grip with both hooks inside for full back control.'},
+  {id:'north_south',         name:'North-South Control',   category:'control', positions:['Side control top'],                   formats:['gi','no-gi'], belt:'white', priority:false, desc:'Head-to-hip control pinning the opponent flat.'},
 
-  // ── MOUNT (TOP) ───────────────────────────────────────
-  {id:'tech_armbar_mount',     name:'Straight Armbar',       position:'Mount (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Straight-arm elbow lock from mount using hip extension.'},
-  {id:'tech_cross_collar_mount',name:'Cross Collar Choke',   position:'Mount (Top)',     intent:'Attack',     formats:['gi'],         belt:'white', priority:true,  desc:'Gi choke using crossed deep lapel grips from mount.'},
-  {id:'tech_arm_triangle_mount',name:'Arm Triangle Choke',   position:'Mount (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Head-and-arm choke from mount — typically transitioned from side control.'},
-  {id:'tech_americana_mount',  name:'Americana',             position:'Mount (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Bent-arm shoulder lock from high mount when opponent defends straight.'},
-  {id:'tech_triangle_mount',   name:'Triangle Choke',        position:'Mount (Top)',     intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Triangle finished by rolling to guard when opponent postures from mount.'},
+  // ── GUARD ──────────────────────────────────────────────
+  {id:'closed_guard',        name:'Closed Guard',          category:'guard', positions:['Closed guard bottom'],                   formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Legs locked behind opponent\'s back. Most fundamental guard.'},
+  {id:'half_guard',          name:'Half Guard',            category:'guard', positions:['Half guard bottom'],                     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'One leg trapped between opponent\'s legs. Many entries and attacks.'},
+  {id:'butterfly_guard',     name:'Butterfly Guard',       category:'guard', positions:['Open guard bottom'],                     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Inside hooks under opponent\'s thighs. Excellent for sweeps.'},
+  {id:'dlr_guard',           name:'De La Riva Guard',      category:'guard', positions:['Open guard bottom'],                     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Outside hook wrapping the far leg. Rich attacking system.'},
+  {id:'spider_guard',        name:'Spider Guard',          category:'guard', positions:['Open guard bottom'],                     formats:['gi'],         belt:'blue',  priority:false, desc:'Sleeve grips with feet on biceps. Strong guard control.'},
+  {id:'guard_pull',          name:'Guard Pull',            category:'guard', positions:['Standing'],                              formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Deliberate transition from standing into preferred guard.'},
+  {id:'lasso_guard',         name:'Lasso Guard',           category:'guard', positions:['Open guard bottom'],                     formats:['gi'],         belt:'blue',  priority:false, desc:'Leg laced through the arm creating strong breaking leverage.'},
 
-  // ── MOUNT (BOTTOM) ────────────────────────────────────
-  {id:'tech_bridge_roll',      name:'Bridge and Roll Escape',position:'Mount (Bottom)',  intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Mount escape using a hip bridge and rotation to roll the opponent.'},
-  {id:'tech_elbow_knee',       name:'Elbow-Knee Escape',     position:'Mount (Bottom)',  intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Mount escape using an elbow frame and knee insertion to recover half guard.'},
-
-  // ── BACK CONTROL ──────────────────────────────────────
-  {id:'tech_rnc',              name:'Rear Naked Choke',      position:'Back Control',   intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Primary back-control submission using forearm pressure against the carotid arteries.'},
-  {id:'tech_bow_arrow',        name:'Bow and Arrow Choke',   position:'Back Control',   intent:'Attack',     formats:['gi'],         belt:'blue',  priority:false, desc:'High-percentage collar choke from the back using a leg as a lever for extra torque.'},
-  {id:'tech_armbar_back',      name:'Straight Armbar',       position:'Back Control',   intent:'Attack',     formats:['gi','no-gi'], belt:'white', priority:false, desc:'Armbar applied when the opponent defends the choke with both hands.'},
-
-  // ── BACK TAKEN ────────────────────────────────────────
-  {id:'tech_back_escape',      name:'Back Escape',           position:'Back Taken',     intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Escape from back control by sliding the hip to remove hooks and recover guard.'},
-
-  // ── TURTLE ────────────────────────────────────────────
-  {id:'tech_turtle_recovery',  name:'Turtle Recovery',       position:'Turtle',         intent:'Defense',    formats:['gi','no-gi'], belt:'white', priority:false, desc:'Return from turtle position to guard or standing while preventing back takes.'},
-  {id:'tech_sit_out',          name:'Sit-Out',               position:'Turtle',         intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:false, desc:'Turn-out movement used from turtle and scrambles to face the opponent.'},
-  {id:'tech_shoulder_roll',    name:'Shoulder Roll',         position:'Turtle',         intent:'Transition', formats:['gi','no-gi'], belt:'white', priority:false, desc:'Rolling movement used in guard retention, turtle work, and scramble recovery.'},
-  {id:'tech_anaconda',         name:'Anaconda Choke',        position:'Turtle',         intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Front headlock arm-in choke finished by threading the arm and rolling or squeezing.'},
-  {id:'tech_darce',            name:"D'Arce Choke",          position:'Turtle',         intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Front headlock arm-in choke where the choking arm threads across the neck.'},
-
-  // LEG LOCKS (Guard Bottom / Guard Top entanglements)
-  {id:'tech_heel_hook',        name:'Heel Hook',             position:'Guard (Bottom)',  intent:'Attack',     formats:['no-gi'],      belt:'purple',priority:false, desc:'Rotational leg lock attacking the heel and knee line. High-risk at advanced levels.'},
-  {id:'tech_toe_hold',         name:'Toe Hold',              position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Figure-four foot lock that rotates the ankle and applies knee torsion simultaneously.'},
-  {id:'tech_kneebar',          name:'Kneebar',               position:'Guard (Bottom)',  intent:'Attack',     formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Straight leg lock attacking hyperextension of the knee.'},
+  // ── TAKEDOWNS ──────────────────────────────────────────
+  {id:'single_leg',          name:'Single Leg Takedown',   category:'takedown', positions:['Standing'],                          formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Isolating and finishing one leg. Highest percentage takedown.'},
+  {id:'double_leg',          name:'Double Leg Takedown',   category:'takedown', positions:['Standing'],                          formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Penetration-based takedown attacking both legs.'},
+  {id:'arm_drag',            name:'Arm Drag',              category:'takedown', positions:['Standing','Open guard bottom'],       formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Off-balancing drag exposing the side or back.'},
+  {id:'collar_drag',         name:'Collar Drag',           category:'takedown', positions:['Standing'],                          formats:['gi'],         belt:'white', priority:true,  desc:'Forward-dragging takedown entry via collar grip.'},
+  {id:'ankle_pick',          name:'Ankle Pick',            category:'takedown', positions:['Standing'],                          formats:['gi','no-gi'], belt:'white', priority:false, desc:'Low-risk takedown combining upper pull with ankle capture.'},
+  {id:'snap_down',           name:'Snap Down',             category:'takedown', positions:['Standing'],                          formats:['gi','no-gi'], belt:'white', priority:false, desc:'Head-and-arm snap to break posture and enter front headlock.'},
+  {id:'osoto_gari',          name:'Osoto Gari',            category:'takedown', positions:['Standing'],                          formats:['gi','no-gi'], belt:'blue',  priority:false, desc:'Major outer reap from judo used as direct takedown.'},
+  {id:'technical_standup',   name:'Technical Stand-Up',    category:'takedown', positions:['Turtle','Open guard bottom'],        formats:['gi','no-gi'], belt:'white', priority:true,  desc:'Safe method of returning to standing while protecting re-engagement.'},
 ];
 
-// Chains entre técnicas (mantener compatibilidad)
-const CHAINS = {
-  'tech_armbar_guard':    ['tech_triangle','tech_omoplata','tech_kimura_guard'],
-  'tech_kimura_guard':    ['tech_armbar_guard','tech_hip_bump_sweep'],
-  'tech_triangle':        ['tech_armbar_guard','tech_omoplata'],
-  'tech_hip_bump_sweep':  ['tech_kimura_guard','tech_guillotine_guard'],
-  'tech_scissor_sweep':   ['tech_hip_bump_sweep','tech_pendulum_sweep'],
-  'tech_butterfly_sweep': ['tech_arm_drag'],
-  'tech_arm_drag':        ['tech_single_leg'],
-  'tech_toreando':        ['tech_knee_cut'],
-  'tech_knee_cut':        ['tech_toreando','tech_mount_transition'],
-  'tech_rnc':             ['tech_bow_arrow','tech_armbar_back'],
-  'tech_elbow_knee':      ['tech_bridge_roll'],
-  'tech_bridge_roll':     ['tech_elbow_knee'],
-  'tech_guillotine_stand':['tech_anaconda','tech_darce'],
-};
-
-// Orden de posiciones para la enciclopedia
-const POSITIONS_ORDER = [
-  {id:'Standing',             state:'neutral',   color:'#E8A838', desc:'Fase de pie, clinch y derribos'},
-  {id:'Guard (Bottom)',       state:'neutral',   color:'#7B74E0', desc:'Guardias desde abajo — ataque y retención'},
-  {id:'Guard (Top)',          state:'neutral',   color:'#4CAF8A', desc:'Pasar y controlar la guardia'},
-  {id:'Side Control (Top)',   state:'dominant',  color:'#EB5E28', desc:'Control lateral dominante'},
-  {id:'Side Control (Bottom)',state:'defensive', color:'#4CAF8A', desc:'Escapar del control lateral'},
-  {id:'Mount (Top)',          state:'dominant',  color:'#EB5E28', desc:'Montada — posición más dominante'},
-  {id:'Mount (Bottom)',       state:'defensive', color:'#4CAF8A', desc:'Escapar de la montada'},
-  {id:'Back Control',         state:'dominant',  color:'#EB5E28', desc:'Control de espalda — máxima ventaja'},
-  {id:'Back Taken',           state:'defensive', color:'#4CAF8A', desc:'Escapar cuando te controlan la espalda'},
-  {id:'Turtle',               state:'neutral',   color:'#7B74E0', desc:'Posición tortuga — defenderse y recuperar'},
-];
-
-const INTENT_COLOR = { Attack:'#E05050', Defense:'#4CAF8A', Transition:'#E8A838' };
-const INTENT_LABEL = { Attack:'Ataque', Defense:'Defensa', Transition:'Transición' };
-const BELT_LABEL   = { white:'Blanco', blue:'Azul', purple:'Morado' };
-
+// ─── Helper lookups ──────────────────────────────────
+function getCat(id){ return CATEGORIES.find(c=>c.id===id); }
+function getTech(id){ return TECHNIQUES.find(t=>t.id===id); }
 
 // ═══════════════════════════════════════════════════════
-// STATE — localStorage
+// STATE
 // ═══════════════════════════════════════════════════════
 function loadState() {
   try {
@@ -801,7 +751,6 @@ function loadState() {
     gcal_last_sync: null
   };
 }
-
 function saveState() {
   try { localStorage.setItem('bjj_journey_v1', JSON.stringify(STATE)); } catch(e) {}
 }
@@ -813,9 +762,9 @@ TECHNIQUES.forEach(t => {
 });
 
 // ═══════════════════════════════════════════════════════
-// SUPABASE — sync sin login
+// SUPABASE
 // ═══════════════════════════════════════════════════════
-// Supabase REST client — sin CDN, fetch nativo
+const USER_ID = 'carlos_l8pxk4jqtfg';
 const sb = {
   _url: 'https://uanglczkvvsjoqctqmlh.supabase.co/rest/v1',
   _headers: {
@@ -825,141 +774,111 @@ const sb = {
     'Prefer': 'resolution=merge-duplicates'
   },
   from(table) {
-    const state = { table, filters: [], orderStr: null };
-    const api = {
-      eq(col, val) { state.filters.push(`${col}=eq.${encodeURIComponent(val)}`); return api; },
-      order(col, {ascending}={}) { state.orderStr = `${col}.${ascending?'asc':'desc'}`; return api; },
-      async select(cols='*') {
-        let q = state.filters.length ? state.filters.join('&') : '';
-        if (state.orderStr) q += (q?'&':'') + `order=${state.orderStr}`;
-        const url = `${sb._url}/${state.table}${q?'?'+q:''}`;
-        const r = await fetch(url, {headers: sb._headers});
-        const data = await r.json();
-        return {data: Array.isArray(data) ? data : [], error: r.ok ? null : data};
-      },
-      async maybeSingle() {
-        let q = state.filters.length ? state.filters.join('&') + '&limit=1' : 'limit=1';
-        const url = `${sb._url}/${state.table}?${q}`;
-        const r = await fetch(url, {headers: sb._headers});
-        const data = await r.json();
-        return {data: Array.isArray(data) && data.length > 0 ? data[0] : null, error: r.ok ? null : data};
-      },
-      async upsert(payload) {
-        const r = await fetch(`${sb._url}/${state.table}`, {
-          method: 'POST',
-          headers: {...sb._headers, 'Prefer': 'resolution=merge-duplicates'},
-          body: JSON.stringify(payload)
-        });
-        return {error: r.ok ? null : await r.json()};
-      },
-      async delete() {
-        let q = state.filters.length ? '?' + state.filters.join('&') : '';
-        const r = await fetch(`${sb._url}/${state.table}${q}`, {method: 'DELETE', headers: sb._headers});
-        return {error: r.ok ? null : await r.json()};
-      }
+    let _table=table, _filters=[], _select='*';
+    const q = {
+      select(s){ _select=s; return q; },
+      eq(col,val){ _filters.push(`${col}=eq.${val}`); return q; },
+      delete(){ return fetch(`${sb._url}/${_table}?${_filters.join('&')}`,{method:'DELETE',headers:sb._headers}); },
+      async get(){ const r=await fetch(`${sb._url}/${_table}?select=${_select}&${_filters.join('&')}`,{headers:sb._headers}); return r.json(); },
+      async upsert(data){ return fetch(`${sb._url}/${_table}`,{method:'POST',headers:sb._headers,body:JSON.stringify(data)}); }
     };
-    return api;
+    return q;
   }
 };
 
-// ID fijo — siempre el mismo independientemente del dispositivo o localStorage
-const USER_ID = 'carlos_l8pxk4jqtfg';
-
-// Sync: sube todo el estado a Supabase
-async function syncToSupabase() {
-  const p = STATE.profile;
-  try {
-    // Upsert profile
-    await sb.from('profiles').upsert({
-      user_id: USER_ID,
-      name: p.name, gym: p.gym, belt: p.belt, stripe: p.stripe,
-      start_date: p.start || null,
-      prior_hours: p.prior_hours || 0,
-      weight: p.weight ? parseFloat(p.weight) : null,
-      height: p.height ? parseFloat(p.height) : null,
-      sex: p.sex, photo: p.photo,
-      updated_at: new Date().toISOString()
-    });
-
-    // Upsert sessions
-    if (STATE.sessions.length > 0) {
-      const sessionRows = STATE.sessions.map(s => ({
-        id: s.id || (USER_ID + '_' + s.date + '_' + Math.random().toString(36).slice(2)),
-        user_id: USER_ID,
-        date: s.date, type: s.type,
-        duration: s.duration, feeling: s.feeling || null,
-        position: s.position || null, notes: s.notes || '',
-        from_gcal: s.from_gcal || false,
-        gcal_event_id: s.gcal_event_id || null,
-        gym: s.gym || null,
-        training_partners: s.training_partners || null
-      }));
-      // Assign ids back
-      sessionRows.forEach((row, i) => { if (!STATE.sessions[i].id) STATE.sessions[i].id = row.id; });
-      await sb.from('sessions').upsert(sessionRows);
-    }
-
-    // Upsert techniques (only seen ones to save space)
-    const seenTechs = Object.entries(STATE.techniques)
-      .filter(([,t]) => t.seen || t.notes)
-      .map(([tid, t]) => ({
-        user_id: USER_ID,
-        technique_id: tid,
-        seen: t.seen, status: t.status, notes: t.notes || '',
-        updated_at: new Date().toISOString()
-      }));
-    if (seenTechs.length > 0) await sb.from('techniques').upsert(seenTechs);
-
-    saveState(); // also keep localStorage
-  } catch(e) {
-    console.warn('Supabase sync error:', e.message);
-  }
-}
-
-// Load from Supabase on startup
 async function loadFromSupabase() {
   try {
-    const { data: profile } = await sb.from('profiles').eq('user_id', USER_ID).maybeSingle();
-    if (profile) {
+    const [profileRes, sessionsRes, techRes] = await Promise.all([
+      sb.from('profiles').eq('user_id', USER_ID).get(),
+      sb.from('sessions').eq('user_id', USER_ID).select('*').get(),
+      sb.from('techniques').eq('user_id', USER_ID).get()
+    ]);
+    if (Array.isArray(profileRes) && profileRes[0]) {
+      const p = profileRes[0];
       STATE.profile = {
-        name: profile.name || '', gym: profile.gym || '',
-        belt: profile.belt || 'white', stripe: profile.stripe || '0',
-        start: profile.start_date || '',
-        prior_hours: profile.prior_hours || 0,
-        weight: profile.weight || '', height: profile.height || '',
-        sex: profile.sex || '', photo: profile.photo || null
+        name: p.name||'', gym: p.gym||'', belt: p.belt||'white',
+        stripe: p.stripe||'0', start: p.start_date||'',
+        prior_hours: p.prior_hours||0, weight: p.weight||'',
+        height: p.height||'', sex: p.sex||'', photo: p.photo||null
       };
     }
-
-    const { data: sessions } = await sb.from('sessions').eq('user_id', USER_ID).order('date', {ascending: false}).select();
-    if (sessions) {
-      STATE.sessions = sessions.map(s => ({
-        id: s.id, date: s.date, type: s.type || 'Gi',
-        duration: s.duration || 60, feeling: s.feeling,
-        position: s.position, notes: s.notes || '',
-        from_gcal: s.from_gcal || false, gcal_event_id: s.gcal_event_id,
-        gym: s.gym || null, training_partners: s.training_partners || null
+    if (Array.isArray(sessionsRes) && sessionsRes.length) {
+      STATE.sessions = sessionsRes.map(s => ({
+        id: s.id, date: s.date, type: s.type, duration: s.duration,
+        feeling: s.feeling, notes: s.notes||'', gym: s.gym||'',
+        training_partners: s.training_partners||'',
+        focos: s.focos ? (typeof s.focos === 'string' ? JSON.parse(s.focos) : s.focos) : [],
+        from_gcal: s.from_gcal||false, gcal_event_id: s.gcal_event_id||null
       }));
     }
-
-    const { data: techs } = await sb.from('techniques').eq('user_id', USER_ID).select();
-    if (techs) {
-      techs.forEach(t => {
-        STATE.techniques[t.technique_id] = { seen: t.seen, status: t.status, notes: t.notes || '', sessions: [] };
+    if (Array.isArray(techRes)) {
+      techRes.forEach(r => {
+        if (!STATE.techniques[r.technique_id]) STATE.techniques[r.technique_id] = {seen:false,status:'new',notes:'',sessions:[]};
+        STATE.techniques[r.technique_id].seen = r.seen||false;
+        STATE.techniques[r.technique_id].status = r.status||'new';
+        STATE.techniques[r.technique_id].notes = r.notes||'';
       });
     }
-
     saveState();
-    return true;
-  } catch(e) {
-    console.warn('Supabase load error:', e.message);
-    return false;
-  }
+  } catch(e) { console.warn('Supabase load failed:', e); }
 }
+
+async function syncToSupabase() {
+  try {
+    const p = STATE.profile;
+    await sb.from('profiles').upsert({
+      user_id: USER_ID, name: p.name, gym: p.gym, belt: p.belt,
+      stripe: p.stripe, start_date: p.start, prior_hours: p.prior_hours,
+      weight: p.weight, height: p.height, sex: p.sex, photo: p.photo,
+      updated_at: new Date().toISOString()
+    });
+    for (const s of STATE.sessions) {
+      if (!s.id) s.id = 'sess_' + Date.now() + '_' + Math.random().toString(36).slice(2,7);
+      await sb.from('sessions').upsert({
+        id: s.id, user_id: USER_ID, date: s.date, type: s.type,
+        duration: s.duration, feeling: s.feeling, notes: s.notes,
+        gym: s.gym, training_partners: s.training_partners,
+        focos: JSON.stringify(s.focos||[]),
+        from_gcal: s.from_gcal||false, gcal_event_id: s.gcal_event_id||null
+      });
+    }
+    const techEntries = Object.entries(STATE.techniques)
+      .filter(([,v]) => v.seen || v.notes)
+      .map(([id,v]) => ({user_id:USER_ID, technique_id:id, seen:v.seen, status:v.status, notes:v.notes, updated_at:new Date().toISOString()}));
+    if (techEntries.length) await sb.from('techniques').upsert(techEntries);
+  } catch(e) { console.warn('Supabase sync failed:', e); }
+}
+
 // ═══════════════════════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════════════════════
-function getTech(id){ return TECHNIQUES.find(t=>t.id===id); }
+function checkSvg(){ return `<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="2,6 5,9 10,3"/></svg>`; }
+function fmtDate(dateStr){ if(!dateStr) return ''; const d=new Date(dateStr+'T00:00:00'); return d.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'}); }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function thisMonthSessions(){ const now=new Date(); return STATE.sessions.filter(s=>{const d=new Date(s.date+'T00:00:00'); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}); }
+
+// Google Calendar stub
+function handleGcalCallback(){ const h=window.location.hash; if(!h.includes('access_token')) return; const p=new URLSearchParams(h.slice(1)); const token=p.get('access_token'); if(token){STATE.gcal_token=token;STATE.gcal_token_expiry=Date.now()+3500000;saveState();window.location.hash='';renderProfile();} }
+function connectGoogleCalendar(){ const clientId='YOUR_CLIENT_ID'; const redirect=window.location.href.split('#')[0]; window.location.href=`https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirect}&response_type=token&scope=https://www.googleapis.com/auth/calendar.readonly`; }
+function disconnectGcal(){ STATE.gcal_token=null;STATE.gcal_token_expiry=null;saveState();renderProfile(); }
+async function syncGoogleCalendar(){ alert('Sync requiere configurar OAuth client ID.'); }
+
+function updateSidebar(){
+  const p=STATE.profile;
+  const nameEl=document.getElementById('sidebar-name');
+  const beltEl=document.getElementById('sidebar-belt');
+  const avatarEl=document.getElementById('sidebar-avatar');
+  if(nameEl) nameEl.textContent=p.name||'Configurar perfil';
+  if(beltEl){
+    const beltMap={white:'Blanco',blue:'Azul',purple:'Morado',brown:'Marrón'};
+    const totalH=Math.round((STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60+(p.prior_hours||0))*10)/10;
+    beltEl.textContent=p.name?`${beltMap[p.belt]||p.belt} · ${totalH}h totales`:'Toca para empezar';
+  }
+  if(avatarEl){
+    if(p.photo){ avatarEl.innerHTML=`<img src="${p.photo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`; avatarEl.classList.remove('empty'); }
+    else{ avatarEl.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`; avatarEl.classList.add('empty'); }
+  }
+}
 function seenClass(id){
   const st=STATE.techniques[id];
   if(!st?.seen) return '';
@@ -1139,8 +1058,8 @@ function renderSessions(){
       const gymBadge=s.gym?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">📍 ${s.gym}</span>`:'';
       const partnersBadge=s.training_partners?`<span style="font-size:10px;padding:1px 7px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">👥 ${s.training_partners}</span>`:'';
       const focosHtml=(s.focos&&s.focos.length)?`<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:6px">
-        ${s.focos.map(f=>`<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${(STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)')}22;color:${STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)'};border:1px solid ${(STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)')}44">
-          ${f.position}${f.intent?' · '+INTENT_LABEL[f.intent]:''}${f.technique?' · '+getTech(f.technique)?.name:''}
+        ${s.focos.map(f=>`<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${f.category?CAT_COLOR[f.category]+'22':'var(--bg4)'};color:${f.category?CAT_COLOR[f.category]:'var(--muted2)'};border:1px solid ${f.category?CAT_COLOR[f.category]+'44':'var(--border)'}">
+          ${f.category?CAT_LABEL[f.category]:''}${f.position?' · '+f.position:''}${f.technique?' · '+getTech(f.technique)?.name:''}
         </span>`).join('')}
       </div>`:'';
       return `<div class="session-full" onclick="openSessionDetail(${realIdx})" style="cursor:pointer">
@@ -1164,15 +1083,13 @@ function renderSessions(){
 }
 
 // ── FOCOS (session events) ────────────────────────────
-let currentFocos = []; // [{position, intent, technique}]
+// ─── FOCOS — new category model ──────────────────────
+let currentFocos = []; // [{category, position, technique}]
 let currentStar = 0;
-
-const POSITIONS_LIST = ['Standing','Guard (Bottom)','Guard (Top)','Side Control (Top)','Side Control (Bottom)','Mount (Top)','Mount (Bottom)','Back Control','Back Taken','Turtle'];
-const INTENTS_LIST   = ['Attack','Defense','Transition'];
 
 function addFoco() {
   if (currentFocos.length >= 5) return;
-  currentFocos.push({position: '', intent: '', technique: ''});
+  currentFocos.push({category:'', position:'', technique:''});
   renderFocos();
 }
 
@@ -1184,34 +1101,33 @@ function removeFoco(idx) {
 function renderFocos() {
   const list = document.getElementById('focos-list');
   if (!list) return;
-  if (currentFocos.length === 0) {
-    list.innerHTML = `<div style="font-size:12px;color:var(--muted2);font-style:italic;padding:8px 0">Sin focos añadidos — opcional pero recomendado</div>`;
+  if (!currentFocos.length) {
+    list.innerHTML = `<div style="font-size:12px;color:var(--muted2);font-style:italic;padding:6px 0">Sin focos — opcional pero recomendado</div>`;
     return;
   }
   list.innerHTML = currentFocos.map((f, i) => {
-    const techOptions = TECHNIQUES
-      .filter(t => !f.position || t.position === f.position)
-      .filter(t => !f.intent || t.intent === f.intent)
-      .map(t => `<option value="${t.id}" ${f.technique===t.id?'selected':''}>${t.name}</option>`)
-      .join('');
-
-    return `<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:12px;position:relative">
+    const catColor = f.category ? CAT_COLOR[f.category] : 'var(--muted2)';
+    const posTechs = TECHNIQUES.filter(t =>
+      (!f.category || t.category === f.category) &&
+      (!f.position || t.positions.includes(f.position))
+    );
+    return `<div style="background:var(--bg3);border:1px solid var(--border2);border-left:3px solid ${catColor};border-radius:var(--r2);padding:12px;position:relative">
       <button onclick="removeFoco(${i})" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:13px">✕</button>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Categoría</div>
+          <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+            onchange="currentFocos[${i}].category=this.value;currentFocos[${i}].technique='';renderFocos()">
+            <option value="">— Categoría —</option>
+            ${CATEGORIES.map(c=>`<option value="${c.id}" ${f.category===c.id?'selected':''}>${c.label}</option>`).join('')}
+          </select>
+        </div>
         <div>
           <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Posición</div>
           <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
             onchange="currentFocos[${i}].position=this.value;currentFocos[${i}].technique='';renderFocos()">
             <option value="">— Posición —</option>
-            ${POSITIONS_LIST.map(p=>`<option value="${p}" ${f.position===p?'selected':''}>${p}</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Intent</div>
-          <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
-            onchange="currentFocos[${i}].intent=this.value;currentFocos[${i}].technique='';renderFocos()">
-            <option value="">— Intent —</option>
-            ${INTENTS_LIST.map(it=>`<option value="${it}" ${f.intent===it?'selected':''}>${INTENT_LABEL[it]||it}</option>`).join('')}
+            ${POSITIONS.map(p=>`<option value="${p}" ${f.position===p?'selected':''}>${p}</option>`).join('')}
           </select>
         </div>
       </div>
@@ -1220,270 +1136,134 @@ function renderFocos() {
         <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
           onchange="currentFocos[${i}].technique=this.value">
           <option value="">— Sin técnica específica —</option>
-          ${techOptions}
+          ${posTechs.map(t=>`<option value="${t.id}" ${f.technique===t.id?'selected':''}>${t.name}</option>`).join('')}
         </select>
       </div>
-      ${f.position ? `<div style="margin-top:6px;font-size:11px;color:${STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)'}">
-        ${f.position} · ${STATE_LABEL[POSITION_STATE[f.position]]||''}
-      </div>` : ''}
     </div>`;
   }).join('');
 }
-const FEELINGS={5:'🔥 En llamas',4:'💪 Fuerte',3:'🙂 Normal',2:'😴 Cansado',1:'🤕 Roto'};
 
-function setFeeling(btn){
-  currentStar=parseInt(btn.dataset.v);
-  document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel');
-  document.getElementById('feeling-label').textContent=btn.dataset.label;
-}
-
-function saveSession(){
-  const date=document.getElementById('session-date').value||todayStr();
-  const type=document.querySelector('#type-pills-main .type-pill.sel')?.textContent||'Gi';
-  const duration=document.getElementById('session-duration').value;
-  const notes=document.getElementById('session-notes').value.trim();
-  const gym=document.getElementById('session-gym').value.trim();
-  const partners=document.getElementById('session-partners').value.trim();
-  if(!duration||parseInt(duration)<1){document.getElementById('session-duration').focus();return;}
-
-  const validFocos=currentFocos.filter(f=>f.position&&f.intent);
-  STATE.sessions.push({date,type,duration:parseInt(duration),feeling:currentStar||null,focos:validFocos,notes,gym:gym||null,training_partners:partners||null});
-  saveState();
-  syncToSupabase();
-  closeModal('add-session');
-  renderSessions();
-  renderProgreso();
-  updateSidebar();
-
-  currentStar=0; currentFocos=[];
-  document.getElementById('session-duration').value='';
-  document.getElementById('session-notes').value='';
-  document.querySelectorAll('.feeling-btn').forEach(b=>b.classList.remove('sel'));
-  if(document.getElementById('feeling-label')) document.getElementById('feeling-label').textContent='';
-}
-
-function deleteSession(idx){
-  const s=STATE.sessions[idx];
-  if(s?.id) sb.from('sessions').eq('id',s.id).delete().then(()=>{});
-  STATE.sessions.splice(idx,1);
-  saveState();
-  closeDetail();
-  renderSessions();renderProgreso();updateSidebar();
-}
-
-// SESSION DETAIL PANEL
-function openSessionDetail(idx){
-  const s=STATE.sessions[idx];
-  if(!s) return;
-  const typeColors={Gi:'var(--purple)',NoGi:'var(--green)','Open mat':'var(--orange)',Gym:'var(--amber)','Competición':'#E05050'};
-  const types=['Gi','NoGi','Open mat','Gym','Competición'];
-  const feelingEmojis=['🤕','😴','🙂','💪','🔥'];
-
-  const typePills=types.map(t=>`<button class="type-pill${s.type===t?' sel':''}" style="font-size:11px;padding:5px 10px" onclick="updateSessionField(${idx},'type','${t}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">${t}</button>`).join('');
-  const feelingBtns=feelingEmojis.map((e,i)=>`<button class="feeling-btn${s.feeling===(i+1)?' sel':''}" onclick="updateSessionField(${idx},'feeling',${i+1});document.querySelectorAll('#sdp-feelings .feeling-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${e}</button>`).join('');
-
-  // Focos display
-  const focos=s.focos||[];
-  const focosHtml=focos.length?focos.map((f,fi)=>{
-    const sc=STATE_COLOR[POSITION_STATE[f.position]]||'var(--muted2)';
-    const techName=f.technique?getTech(f.technique)?.name:'';
-    return `<div style="background:var(--bg3);border:1px solid ${sc}44;border-left:3px solid ${sc};border-radius:var(--r2);padding:10px 12px;margin-bottom:6px">
-      <div style="font-size:12px;font-weight:600;color:${sc};margin-bottom:2px">${f.position} · ${INTENT_LABEL[f.intent]||f.intent}</div>
-      <div style="font-size:11px;color:var(--muted2)">${STATE_LABEL[POSITION_STATE[f.position]]||''}${techName?' · '+techName:''}</div>
-    </div>`;
-  }).join(''):`<div style="font-size:12px;color:var(--muted2);font-style:italic">Sin focos registrados</div>`;
-
-  document.getElementById('detail-content').innerHTML=`
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-      <div style="width:10px;height:10px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'}"></div>
-      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;line-height:1">${fmtDate(s.date)}</div>
-    </div>
-    <div style="font-size:12px;color:var(--muted2);margin-bottom:18px">${s.from_gcal?'📅 Importado de Google Calendar':'Sesión manual'}</div>
-    <div class="dp-section">Tipo</div>
-    <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${typePills}</div>
-    <div class="dp-section">Duración</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
-      <input type="number" id="sdp-duration" value="${s.duration||''}" min="1" inputmode="numeric"
-        style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 10px;font-size:14px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
-        oninput="updateSessionField(${idx},'duration',parseInt(this.value)||0);document.getElementById('sdp-dur-label').textContent=Math.round((parseInt(this.value)||0)/60*10)/10+'h'"
-        onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
-      <span id="sdp-dur-label" style="font-size:13px;color:var(--muted2)">${Math.round((s.duration||0)/60*10)/10}h</span>
-    </div>
-    <div class="dp-section">Feeling</div>
-    <div class="feeling-btns" id="sdp-feelings">${feelingBtns}</div>
-    <div class="dp-section">Focos</div>
-    ${focosHtml}
-    <div class="dp-section">Notas</div>
-    <textarea class="dp-notes-field" placeholder="Qué trabajaste, qué salió bien, qué mejorar..." oninput="updateSessionField(${idx},'notes',this.value)">${s.notes||''}</textarea>
-    <div class="dp-section">Gimnasio</div>
-    <input type="text" value="${s.gym||''}" placeholder="Tu academia"
-      style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 12px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
-      oninput="updateSessionField(${idx},'gym',this.value)"
-      onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
-    <div class="dp-section">Compañeros</div>
-    <input type="text" value="${s.training_partners||''}" placeholder="John, Paco..."
-      style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 12px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
-      oninput="updateSessionField(${idx},'training_partners',this.value)"
-      onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
-    <div style="margin-top:18px">
-      <button onclick="deleteSession(${idx});closeDetail()" style="width:100%;padding:10px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:13px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer">Eliminar sesión</button>
-    </div>`;
-
-  document.getElementById('detail-panel').classList.add('open');
-}
-
-function updateSessionField(idx,field,value){
-  if(!STATE.sessions[idx]) return;
-  STATE.sessions[idx][field]=value;
-  saveState();
-  syncToSupabase();
-  renderSessions();
-  if(field==='duration'){renderProgreso();updateSidebar();}
-}
-
-// ═══════════════════════════════════════════════════════
-// ENCYCLOPEDIA
+// ─── ENCYCLOPEDIA ─────────────────────────────────────
 // ═══════════════════════════════════════════════════════
 let currentFilter='all', activeDetailId=null;
+const collapsedPositions = new Set();
 
 function renderEnc(filter){
-  currentFilter=filter;
-  const container=document.getElementById('enc-container');
-  const total=TECHNIQUES.length;
-  const totalSeen=TECHNIQUES.filter(t=>STATE.techniques[t.id]?.seen).length;
-  const wb=TECHNIQUES.filter(t=>t.priority&&t.belt==='white');
-  const wbSeen=wb.filter(t=>STATE.techniques[t.id]?.seen).length;
+  currentFilter = filter;
+  const container = document.getElementById('enc-container');
 
-  let html=`<div class="enc-topbar"><div class="enc-stats">
+  // Render legend
+  const legend = document.getElementById('enc-legend');
+  if (legend) legend.innerHTML = CATEGORIES.map(c=>`<div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted2)"><div style="width:7px;height:7px;border-radius:50%;background:${c.color}"></div>${c.label}</div>`).join('') + `<div style="width:1px;height:12px;background:var(--border2)"></div><span style="font-size:11px;color:var(--muted2)">Toca ○ para marcar vista</span>`;
+
+  // Stats bar
+  const total = TECHNIQUES.length;
+  const totalSeen = TECHNIQUES.filter(t=>STATE.techniques[t.id]?.seen).length;
+  const wb = TECHNIQUES.filter(t=>t.priority&&t.belt==='white');
+  const wbSeen = wb.filter(t=>STATE.techniques[t.id]?.seen).length;
+
+  let html = `<div class="enc-topbar"><div class="enc-stats">
     <span class="enc-stat">Total: <strong>${totalSeen}/${total} vistas</strong></span>
     <span class="enc-stat hi">Esenciales blanco: <strong>${wbSeen}/${wb.length}</strong></span>
   </div></div>`;
 
-  POSITIONS_ORDER.forEach(pos=>{
-    let techs=TECHNIQUES.filter(t=>t.position===pos.id);
-    if(filter==='priority') techs=techs.filter(t=>t.priority&&t.belt==='white');
-    else if(filter==='seen') techs=techs.filter(t=>STATE.techniques[t.id]?.seen);
-    else if(filter==='unseen') techs=techs.filter(t=>!STATE.techniques[t.id]?.seen);
-    else if(filter==='gi') techs=techs.filter(t=>t.formats.includes('gi'));
-    else if(filter==='nogi') techs=techs.filter(t=>t.formats.includes('no-gi'));
-    else if(filter==='advanced') techs=techs.filter(t=>t.belt!=='white');
-    if(!techs.length) return;
+  // Group by category
+  CATEGORIES.forEach(cat => {
+    let techs = TECHNIQUES.filter(t => t.category === cat.id);
+    if (filter === 'seen') techs = techs.filter(t => STATE.techniques[t.id]?.seen);
+    if (!techs.length) return;
 
-    const seenInPos=techs.filter(t=>STATE.techniques[t.id]?.seen).length;
-    const pct=techs.length?Math.round(seenInPos/techs.length*100):0;
-    const stateColor=STATE_COLOR[pos.state];
-    const stateLabel=STATE_LABEL[pos.state];
-    const posKey=pos.id.replace(/[^a-z0-9]/gi,'_');
-    const isCollapsed=collapsedPositions.has(pos.id);
+    const seenInCat = techs.filter(t=>STATE.techniques[t.id]?.seen).length;
+    const pct = techs.length ? Math.round(seenInCat/techs.length*100) : 0;
+    const catKey = cat.id;
+    const isCollapsed = collapsedPositions.has(catKey);
 
-    // Group by intent within position
-    const intents=['Attack','Defense','Transition'];
-    const byIntent={};
-    intents.forEach(i=>{ byIntent[i]=techs.filter(t=>t.intent===i); });
-
-    html+=`<div class="position-block">
-      <div class="pos-header" onclick="togglePosition('${pos.id}')" style="cursor:pointer">
-        <div class="pos-accent" style="background:${stateColor}"></div>
+    html += `<div class="position-block">
+      <div class="pos-header" onclick="togglePosition('${catKey}')" style="cursor:pointer">
+        <div class="pos-accent" style="background:${cat.color}"></div>
         <div class="pos-info">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
-            <div class="pos-name">${pos.id}</div>
-            <span style="font-size:10px;padding:1px 8px;border-radius:99px;background:${stateColor}22;color:${stateColor};border:1px solid ${stateColor}44;font-weight:600">${stateLabel}</span>
+            <div class="pos-name">${cat.icon} ${cat.label}</div>
           </div>
-          <div class="pos-desc">${pos.desc}</div>
+          <div class="pos-desc">${techs.length} técnicas</div>
         </div>
         <div style="display:flex;align-items:center;gap:12px">
           <div class="pos-progress">
-            <div class="pos-prog-bar"><div class="pos-prog-fill" style="width:${pct}%;background:${stateColor}"></div></div>
-            <div class="pos-count">${seenInPos}/${techs.length} vistas</div>
+            <div class="pos-prog-bar"><div class="pos-prog-fill" style="width:${pct}%;background:${cat.color}"></div></div>
+            <div class="pos-count">${seenInCat}/${techs.length} vistas</div>
           </div>
-          <svg id="pos-chevron-${posKey}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2" style="flex-shrink:0;transition:transform .2s;transform:${isCollapsed?'rotate(-90deg)':'rotate(0deg)'}"><polyline points="6 9 12 15 18 9"/></svg>
+          <svg id="pos-chevron-${catKey}" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="2" style="flex-shrink:0;transition:transform .2s;transform:${isCollapsed?'rotate(-90deg)':'rotate(0deg)'}"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
       </div>
-      <div id="pos-content-${posKey}" style="display:${isCollapsed?'none':'block'}">`;
-
-    // Render by intent groups
-    intents.forEach(intent=>{
-      const group=byIntent[intent];
-      if(!group.length) return;
-      html+=`<div style="margin-bottom:12px">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;padding:0 2px">
-          <span style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:${INTENT_COLOR[intent]}">${INTENT_LABEL[intent]}</span>
-          <div style="flex:1;height:1px;background:${INTENT_COLOR[intent]}33"></div>
-        </div>
+      <div id="pos-content-${catKey}" style="display:${isCollapsed?'none':'block'}">
         <div class="tech-grid">`;
 
-      group.forEach(t=>{
-        const sc=seenClass(t.id);
-        const seen=STATE.techniques[t.id]?.seen;
-        html+=`<div class="enc-card${sc?' '+sc:''}" id="card-${t.id}" onclick="openDetail('${t.id}')">
-          <div class="enc-card-top">
-            <span style="font-size:10px;padding:1px 7px;border-radius:4px;font-weight:600;background:${t.belt==='white'?'rgba(255,252,242,.08)':t.belt==='blue'?'rgba(123,116,224,.18)':'rgba(180,80,180,.15)'};color:${t.belt==='white'?'var(--muted2)':t.belt==='blue'?'var(--purple)':'#c080c0'}">${BELT_LABEL[t.belt]||t.belt}</span>
-            <div class="status-ring" onclick="event.stopPropagation();toggleSeen('${t.id}')" title="${seen?'Marcar como no vista':'Marcar como vista en clase'}">
-              ${seen?checkSvg():''}
-            </div>
+    techs.forEach(t => {
+      const sc = seenClass(t.id);
+      const seen = STATE.techniques[t.id]?.seen;
+      const posTag = t.positions[0] ? `<span style="font-size:10px;color:var(--muted2)">${t.positions[0]}</span>` : '';
+      html += `<div class="enc-card${sc?' '+sc:''}" id="card-${t.id}" onclick="openDetail('${t.id}')">
+        <div class="enc-card-top">
+          <span style="font-size:10px;padding:1px 7px;border-radius:4px;font-weight:600;background:${t.belt==='white'?'rgba(255,252,242,.08)':t.belt==='blue'?'rgba(123,116,224,.18)':'rgba(180,80,180,.15)'};color:${t.belt==='white'?'var(--muted2)':t.belt==='blue'?'var(--purple)':'#c080c0'}">${BELT_LABEL[t.belt]||t.belt}</span>
+          <div class="status-ring" onclick="event.stopPropagation();toggleSeen('${t.id}')" title="${seen?'Marcar como no vista':'Marcar como vista'}">
+            ${seen?checkSvg():''}
           </div>
-          <div class="enc-card-name">${t.name}</div>
-          <div class="enc-card-desc">${t.desc.slice(0,80)}${t.desc.length>80?'…':''}</div>
-          <div class="enc-card-footer">
-            ${modeBadge(t.formats)}
-            ${t.priority?'<span class="badge b-priority">esencial</span>':''}
-            ${t.belt!=='white'?'<span class="badge b-adv">avanzado</span>':''}
-          </div>
-        </div>`;
-      });
-      html+=`</div></div>`;
+        </div>
+        <div class="enc-card-name">${t.name}</div>
+        <div style="font-size:10px;color:var(--muted2);margin-bottom:4px">${t.positions[0]||''}</div>
+        <div class="enc-card-desc">${t.desc.slice(0,75)}${t.desc.length>75?'…':''}</div>
+        <div class="enc-card-footer">
+          ${modeBadge(t.formats)}
+          ${t.priority?'<span class="badge b-priority">esencial</span>':''}
+          ${t.belt!=='white'?'<span class="badge b-adv">avanzado</span>':''}
+        </div>
+      </div>`;
     });
-    html+=`</div></div>`;  // close pos-content + position-block
+
+    html += `</div></div></div>`;
   });
-  container.innerHTML=html;
+
+  container.innerHTML = html;
 }
 
 function toggleSeen(id){
-  const st=STATE.techniques[id];
-  st.seen=!st.seen;
-  if(!st.seen) st.status='new';
-  saveState();
-  syncToSupabase();
-  const card=document.getElementById('card-'+id);
-  if(card){
-    const sc=seenClass(id);
-    card.className='enc-card'+(sc?' '+sc:'');
-    const ring=card.querySelector('.status-ring');
-    if(ring) ring.innerHTML=st.seen?checkSvg():'';
+  const st = STATE.techniques[id];
+  st.seen = !st.seen;
+  if (!st.seen) st.status = 'new';
+  saveState(); syncToSupabase();
+  const card = document.getElementById('card-'+id);
+  if (card) {
+    card.className = 'enc-card'+(seenClass(id)?' '+seenClass(id):'');
+    const ring = card.querySelector('.status-ring');
+    if (ring) ring.innerHTML = st.seen ? checkSvg() : '';
   }
-  // Update stats
-  const total=TECHNIQUES.length;
-  const totalSeen=TECHNIQUES.filter(t=>STATE.techniques[t.id]?.seen).length;
-  const wb=TECHNIQUES.filter(t=>t.priority&&t.belt==='white');
-  const wbSeen=wb.filter(t=>STATE.techniques[t.id]?.seen).length;
-  const tb=document.querySelector('.enc-topbar');
-  if(tb) tb.innerHTML=`<div class="enc-stats">
+  const total = TECHNIQUES.length;
+  const totalSeen = TECHNIQUES.filter(t=>STATE.techniques[t.id]?.seen).length;
+  const wb = TECHNIQUES.filter(t=>t.priority&&t.belt==='white');
+  const wbSeen = wb.filter(t=>STATE.techniques[t.id]?.seen).length;
+  const tb = document.querySelector('.enc-topbar');
+  if (tb) tb.innerHTML = `<div class="enc-stats">
     <span class="enc-stat">Total: <strong>${totalSeen}/${total} vistas</strong></span>
     <span class="enc-stat hi">Esenciales blanco: <strong>${wbSeen}/${wb.length}</strong></span>
   </div>`;
-  if(activeDetailId===id) openDetail(id);
+  if (activeDetailId===id) openDetail(id);
   renderProgreso();
 }
 
 function openDetail(id){
-  activeDetailId=id;
-  const t=getTech(id);
-  if(!t) return;
-  const st=STATE.techniques[id];
-  const chains=(CHAINS[id]||[]).map(cid=>{const ct=getTech(cid);return ct?`<span class="dp-chain-tag" onclick="openDetail('${cid}')">${ct.name}</span>`:''}).join('');
-  const statusOpts=[{s:'new',label:'Vista · nueva',dot:'var(--muted2)'},{s:'practicing',label:'Practicando',dot:'var(--amber)'},{s:'flowing',label:'Fluyendo',dot:'var(--green)'},{s:'auto',label:'Automática',dot:'var(--orange)'}];
-  const stateColor=STATE_COLOR[POSITION_STATE[t.position]];
-  const stateLabel=STATE_LABEL[POSITION_STATE[t.position]];
+  activeDetailId = id;
+  const t = getTech(id);
+  if (!t) return;
+  const st = STATE.techniques[id];
+  const cat = getCat(t.category);
+  const statusOpts = [{s:'new',label:'Vista · nueva',dot:'var(--muted2)'},{s:'practicing',label:'Practicando',dot:'var(--amber)'},{s:'flowing',label:'Fluyendo',dot:'var(--green)'},{s:'auto',label:'Automática',dot:'var(--orange)'}];
 
-  document.getElementById('detail-content').innerHTML=`
+  document.getElementById('detail-content').innerHTML = `
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-      <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${stateColor}22;color:${stateColor};border:1px solid ${stateColor}44;font-weight:600">${t.position}</span>
-      <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${INTENT_COLOR[t.intent]}22;color:${INTENT_COLOR[t.intent]};border:1px solid ${INTENT_COLOR[t.intent]}44;font-weight:600">${INTENT_LABEL[t.intent]}</span>
-      <span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(255,252,242,.06);color:var(--muted2);font-weight:600">${stateLabel}</span>
+      <span style="font-size:11px;padding:2px 10px;border-radius:99px;background:${cat?.color||'var(--muted2)'}22;color:${cat?.color||'var(--muted2)'};border:1px solid ${cat?.color||'var(--muted2)'}44;font-weight:600">${cat?.icon} ${cat?.label}</span>
+      ${t.positions.map(p=>`<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:var(--bg3);color:var(--muted2);border:1px solid var(--border)">${p}</span>`).join('')}
     </div>
     <div class="dp-name">${t.name}</div>
-    <div class="dp-type">${t.position} · ${INTENT_LABEL[t.intent]}</div>
     <div class="dp-badges">${modeBadge(t.formats)}${t.priority?'<span class="badge b-priority">esencial blanco</span>':''}${t.belt!=='white'?'<span class="badge b-adv">nivel avanzado</span>':''}</div>
     <button class="dp-seen-toggle ${st.seen?'seen-active':'unseen'}" onclick="toggleSeen('${id}');setTimeout(()=>openDetail('${id}'),50)">
       ${st.seen
@@ -1499,9 +1279,7 @@ function openDetail(id){
     <div class="dp-section">Descripción</div>
     <div class="dp-desc-text">${t.desc}</div>
     <div class="dp-section">Notas personales</div>
-    <textarea class="dp-notes-field" placeholder="Escribe tus notas, detalles, errores clave..." oninput="saveNotes('${id}',this.value)">${st.notes||''}</textarea>
-    <div class="dp-section">Cadenas directas</div>
-    ${chains?`<div class="dp-chains">${chains}</div>`:'<div class="dp-empty">Sin cadenas definidas.</div>'}
+    <textarea class="dp-notes-field" placeholder="Detalles, errores, puntos clave..." oninput="saveNotes('${id}',this.value)">${st.notes||''}</textarea>
     <div class="dp-section">Sesiones donde la trabajé</div>
     <div class="dp-sessions">${(st.sessions||[]).length?(st.sessions||[]).map(s=>`<div class="dp-session-item">→ <span>${s}</span></div>`).join(''):'<div class="dp-empty">Sin sesiones registradas aún.</div>'}</div>
   `;
@@ -1509,347 +1287,13 @@ function openDetail(id){
 }
 
 function setStatus(id,btn){
-  STATE.techniques[id].status=btn.dataset.s;
-  saveState();
-  syncToSupabase();
+  STATE.techniques[id].status = btn.dataset.s;
+  saveState(); syncToSupabase();
   document.querySelectorAll('.dp-status-btn').forEach(b=>b.className='dp-status-btn');
   btn.classList.add('active-'+btn.dataset.s);
-  const card=document.getElementById('card-'+id);
-  if(card){const sc=seenClass(id);card.className='enc-card'+(sc?' '+sc:'');}
+  const card = document.getElementById('card-'+id);
+  if (card) { card.className = 'enc-card'+(seenClass(id)?' '+seenClass(id):''); }
 }
-
-
-// ═══════════════════════════════════════════════════════
-// PROFILE
-// ═══════════════════════════════════════════════════════
-function renderProfile(){
-  const p=STATE.profile;
-  const el=document.getElementById('profile-content');
-  const beltLabels={white:'Blanco',blue:'Azul',purple:'Morado',brown:'Marrón'};
-  const sexLabels={M:'Masculino',F:'Femenino',O:'Otro'};
-
-  if(!p.name){
-    el.innerHTML=`<div class="empty-state">
-      <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--muted2)" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
-      <div class="empty-title">Sin perfil configurado</div>
-      <div class="empty-desc">Añade tu información para personalizar el progreso.</div>
-      <button class="empty-cta" onclick="openModal('edit-profile')">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
-        Crear perfil
-      </button>
-    </div>`;
-    return;
-  }
-
-  const initials=p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-  const avatarHtml=p.photo
-    ?`<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()"><div class="profile-avatar" style="padding:0"><img src="${p.photo}" class="avatar-photo" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div><div class="profile-avatar-overlay">Cambiar foto</div></div>`
-    :`<div class="profile-avatar-wrap" onclick="document.getElementById('photo-input').click()"><div class="profile-avatar">${initials}</div><div class="profile-avatar-overlay">Añadir foto</div></div>`;
-
-  const totalH=Math.round((STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60+(p.prior_hours||0))*10)/10;
-  const sessionH=Math.round(STATE.sessions.reduce((s,x)=>s+(parseInt(x.duration)||0),0)/60*10)/10;
-  const gradeLabel=p.stripe&&p.stripe!=='0'?`${p.stripe==='1'?'1er':''+p.stripe+'º'} grado`:'0 grados';
-
-  el.innerHTML=`
-    <div class="profile-hero">
-      ${avatarHtml}
-      <div>
-        <div class="profile-name">${p.name}</div>
-        <div class="profile-since">${p.gym||'—'} · desde ${fmtDate(p.start)||'—'}</div>
-        <div class="belt-badge-hero"><div class="belt-visual"></div><div class="belt-text">Cinturón ${beltLabels[p.belt]||p.belt} · ${gradeLabel}</div></div>
-      </div>
-    </div>
-    <div class="profile-data-grid">
-      <div class="pd-card"><div class="pd-label">Peso</div><div class="pd-value">${p.weight||'—'}<span class="pd-unit">${p.weight?'kg':''}</span></div></div>
-      <div class="pd-card"><div class="pd-label">Altura</div><div class="pd-value">${p.height||'—'}<span class="pd-unit">${p.height?'cm':''}</span></div></div>
-      <div class="pd-card"><div class="pd-label">Sexo</div><div class="pd-value" style="font-size:16px;padding-top:6px">${sexLabels[p.sex]||'—'}</div></div>
-    </div>
-    <div class="profile-table">
-      <div class="profile-row"><div class="pr-label">Nombre</div><div class="pr-right"><div class="pr-value">${p.name}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
-      <div class="profile-row"><div class="pr-label">Academia</div><div class="pr-right"><div class="pr-value">${p.gym||'—'}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
-      <div class="profile-row"><div class="pr-label">Cinturón</div><div class="pr-right"><div class="pr-value">${beltLabels[p.belt]||p.belt} · ${gradeLabel}</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
-      <div class="profile-row"><div class="pr-label">Horas en sesiones</div><div class="pr-right"><div class="pr-value">${sessionH}h registradas</div></div></div>
-      <div class="profile-row"><div class="pr-label">Horas previas</div><div class="pr-right"><div class="pr-value">${p.prior_hours||0}h antes de la app</div><div class="pr-edit" onclick="openEditProfile()">Editar</div></div></div>
-      <div class="profile-row" style="background:rgba(235,94,40,.04)"><div class="pr-label" style="font-weight:500;color:var(--cream)">Horas totales</div><div class="pr-right"><div class="pr-value" style="color:var(--orange);font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700">${totalH}h</div></div></div>
-    </div>
-
-    <!-- Integraciones -->
-    <div style="margin-top:16px;margin-bottom:16px">
-      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:10px;font-weight:500">Integraciones</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div style="background:var(--bg2);border:1px solid ${STATE.gcal_token?'rgba(76,175,138,.35)':'var(--border3)'};border-radius:var(--r);padding:16px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-            <div style="display:flex;align-items:center;gap:8px">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${STATE.gcal_token?'var(--green)':'var(--muted2)'}" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-              <span style="font-size:13px;font-weight:500">Google Calendar</span>
-            </div>
-            ${STATE.gcal_token?'<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:rgba(76,175,138,.15);color:var(--green);font-weight:600">✓ Conectado</span>':''}
-          </div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5;margin-bottom:10px">${STATE.gcal_token?`Última sync: ${STATE.gcal_last_sync?new Date(STATE.gcal_last_sync).toLocaleDateString('es-ES'):'Nunca'}`:'Suma automáticamente las horas de tus eventos de BJJ.'}</div>
-          ${STATE.gcal_token
-            ?`<div style="display:flex;gap:8px"><button onclick="syncGoogleCalendar()" style="flex:1;padding:7px;background:var(--green);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">↻ Sincronizar</button><button onclick="disconnectGcal()" style="padding:7px 10px;background:none;border:1px solid var(--border2);border-radius:var(--r2);font-size:11px;color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">Desconectar</button></div>`
-            :`<button onclick="connectGoogleCalendar()" style="width:100%;padding:8px;background:var(--orange);border:none;border-radius:var(--r2);font-size:12px;font-weight:600;color:#fff;cursor:pointer;font-family:'DM Sans',sans-serif">Conectar Google Calendar</button>`
-          }
-        </div>
-        <div style="background:var(--bg2);border:1px dashed var(--border3);border-radius:var(--r);padding:16px;opacity:.6">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            <span style="font-size:13px;font-weight:500">Bot de WhatsApp</span>
-          </div>
-          <div style="font-size:11px;color:var(--muted2);line-height:1.5">Registra sesiones desde el vestuario en lenguaje natural.</div>
-          <div style="margin-top:10px;font-size:11px;padding:3px 10px;border-radius:99px;background:var(--bg3);color:var(--muted2);display:inline-block">Fase 2 · Próximamente</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Backup -->
-    <div style="padding:16px 0;border-top:1px solid var(--border)">
-      <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:12px;font-weight:500">Copia de seguridad</div>
-      <div style="font-size:12px;color:var(--muted2);margin-bottom:14px;line-height:1.6">Exporta tus datos antes de actualizar la app. Importa para restaurarlos.</div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn-primary" style="flex:none;padding:10px 18px;font-size:13px" onclick="exportData()">↓ Exportar datos</button>
-        <label style="flex:none;padding:10px 18px;font-size:13px;font-weight:600;border:1px solid var(--border2);border-radius:var(--r2);color:var(--muted2);cursor:pointer;font-family:'DM Sans',sans-serif">↑ Importar datos<input type="file" accept=".json" style="display:none" onchange="importData(this)"></label>
-        <button class="btn-danger" onclick="confirmReset()">Borrar todo</button>
-      </div>
-    </div>`;
-}
-
-function openEditProfile(){
-  const p=STATE.profile;
-  document.getElementById('profile-name').value=p.name||'';
-  document.getElementById('profile-gym').value=p.gym||'';
-  document.getElementById('profile-belt').value=p.belt||'white';
-  document.getElementById('profile-stripe').value=p.stripe||'0';
-  document.getElementById('profile-start').value=p.start||'';
-  document.getElementById('profile-prior-hours').value=p.prior_hours||'';
-  document.getElementById('profile-weight').value=p.weight||'';
-  document.getElementById('profile-height').value=p.height||'';
-  document.getElementById('profile-sex').value=p.sex||'';
-  openModal('edit-profile');
-}
-
-function saveProfile(){
-  STATE.profile={
-    name:document.getElementById('profile-name').value.trim(),
-    gym:document.getElementById('profile-gym').value.trim(),
-    belt:document.getElementById('profile-belt').value,
-    stripe:document.getElementById('profile-stripe').value,
-    start:document.getElementById('profile-start').value,
-    prior_hours:parseFloat(document.getElementById('profile-prior-hours').value)||0,
-    weight:document.getElementById('profile-weight').value,
-    height:document.getElementById('profile-height').value,
-    sex:document.getElementById('profile-sex').value,
-    photo:STATE.profile.photo
-  };
-  saveState();
-  syncToSupabase();
-  closeModal('edit-profile');
-  renderProfile();
-  renderProgreso();
-  updateSidebar();
-}
-
-function updateSidebar(){
-  const p=STATE.profile;
-  const ava=document.getElementById('sidebar-avatar');
-  const nameEl=document.getElementById('sidebar-name');
-  const beltEl=document.getElementById('sidebar-belt');
-  const beltLabels={white:'Blanco',blue:'Azul',purple:'Morado',brown:'Marrón'};
-  if(p.name){
-    const initials=p.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
-    ava.className='avatar';
-    ava.style.padding='0';
-    ava.innerHTML=p.photo?`<img src="${p.photo}" class="avatar-photo">`:initials;
-    nameEl.textContent=p.name;
-    const totalMin=STATE.sessions.reduce((sum,s)=>sum+(parseInt(s.duration)||0),0);
-    const totalH=Math.round(((totalMin/60)+(p.prior_hours||0))*10)/10;
-    const stripeLabel=p.stripe&&p.stripe!=='0'?` · ${p.stripe==='1'?'1er':''+p.stripe+'º'} grado`:'';
-    beltEl.textContent=`${beltLabels[p.belt]||'Blanco'}${stripeLabel} · ${totalH}h totales`;
-  } else {
-    ava.className='avatar empty';
-    ava.style.padding='';
-    ava.innerHTML=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>`;
-    nameEl.textContent='Configurar perfil';
-    beltEl.textContent='Toca para empezar';
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// PHOTO UPLOAD
-// ═══════════════════════════════════════════════════════
-function uploadPhoto(input){
-  const file=input.files[0];
-  if(!file) return;
-  compressImage(file,200,(base64)=>{
-    STATE.profile.photo=base64;
-    saveState();
-    syncToSupabase();
-    updateSidebar();
-    renderProfile();
-  });
-  input.value='';
-}
-
-function compressImage(file,maxSize,callback){
-  const reader=new FileReader();
-  reader.onload=(e)=>{
-    const img=new Image();
-    img.onload=()=>{
-      const canvas=document.createElement('canvas');
-      const scale=Math.min(maxSize/img.width,maxSize/img.height,1);
-      canvas.width=img.width*scale;
-      canvas.height=img.height*scale;
-      const ctx=canvas.getContext('2d');
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      callback(canvas.toDataURL('image/jpeg',0.8));
-    };
-    img.src=e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-// ═══════════════════════════════════════════════════════
-// GOOGLE CALENDAR
-// ═══════════════════════════════════════════════════════
-const GCAL_CLIENT_ID='129790894790-9kcg5ifm2q4cv57dmstand05pd1atr3m.apps.googleusercontent.com';
-const GCAL_SCOPE='https://www.googleapis.com/auth/calendar.readonly';
-const BJJ_KEYWORDS=['bjj','kalmma','jiu-jitsu','jiujitsu','grappling'];
-const BJJ_SECONDARY=['no gi','nogi','sparring','openmat','open mat'];
-
-function isBjjEvent(title){
-  const t=title.toLowerCase();
-  if(BJJ_KEYWORDS.some(k=>t.includes(k))) return true;
-  if(BJJ_SECONDARY.some(k=>t.includes(k))) return true;
-  if(/\bgi\b/.test(t)) return true;
-  return false;
-}
-
-function connectGoogleCalendar(){
-  const params=new URLSearchParams({
-    client_id:GCAL_CLIENT_ID,
-    redirect_uri:'https://hicarlosierra.github.io/bjj-journey/',
-    response_type:'token',
-    scope:GCAL_SCOPE,
-    prompt:'consent',
-    state:'gcal_auth'
-  });
-  window.location.href=`https://accounts.google.com/o/oauth2/v2/auth?${params}`;
-}
-
-function handleGcalCallback(){
-  const hash=window.location.hash;
-  if(!hash.includes('access_token')) return;
-  const params=new URLSearchParams(hash.slice(1));
-  const token=params.get('access_token');
-  const expiresIn=parseInt(params.get('expires_in')||'3600');
-  if(token){
-    STATE.gcal_token=token;
-    STATE.gcal_token_expiry=Date.now()+(expiresIn*1000);
-    saveState();
-    window.history.replaceState({},'',window.location.pathname);
-    syncGoogleCalendar();
-    switchView('perfil');
-  }
-}
-
-async function syncGoogleCalendar(){
-  const token=STATE.gcal_token;
-  if(!token) return;
-  if(STATE.gcal_token_expiry&&Date.now()>STATE.gcal_token_expiry){
-    STATE.gcal_token=null;saveState();renderProfile();
-    alert('La sesión de Google Calendar ha expirado. Vuelve a conectar.');return;
-  }
-  try {
-    const timeMin=new Date();timeMin.setFullYear(timeMin.getFullYear()-2);
-    const timeMax=new Date();timeMax.setMonth(timeMax.getMonth()+1);
-    const url=`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${timeMin.toISOString()}&timeMax=${timeMax.toISOString()}&maxResults=1000&singleEvents=true&orderBy=startTime`;
-    const res=await fetch(url,{headers:{Authorization:`Bearer ${token}`}});
-    if(!res.ok){
-      if(res.status===401){STATE.gcal_token=null;saveState();renderProfile();alert('Sesión expirada. Reconecta Google Calendar.');}
-      return;
-    }
-    const data=await res.json();
-    const bjjEvents=(data.items||[]).filter(ev=>isBjjEvent(ev.summary||''));
-    const gcalSessions=bjjEvents.map(ev=>{
-      const start=new Date(ev.start.dateTime||ev.start.date);
-      const end=new Date(ev.end.dateTime||ev.end.date);
-      const durationMin=Math.round((end-start)/60000);
-      const title=(ev.summary||'').toLowerCase();
-      let type='Gi';
-      if(title.includes('no gi')||title.includes('nogi')) type='NoGi';
-      else if(title.includes('open mat')||title.includes('openmat')||title.includes('sparring')) type='Open mat';
-      return {id:ev.id,date:start.toISOString().slice(0,10),type,duration:durationMin,notes:ev.summary||'',from_gcal:true};
-    });
-    const manualSessions=STATE.sessions.filter(s=>!s.from_gcal);
-    STATE.sessions=[...manualSessions,...gcalSessions];
-    STATE.gcal_last_sync=new Date().toISOString();
-    saveState();
-    renderProgreso();renderSessions();updateSidebar();renderProfile();
-    alert(`✓ Sincronizado — ${gcalSessions.length} sesiones de BJJ importadas.`);
-  } catch(err){
-    alert('Error al sincronizar. Comprueba tu conexión.');
-  }
-}
-
-function disconnectGcal(){
-  if(!confirm('¿Desconectar Google Calendar? Se eliminarán las sesiones importadas.')) return;
-  STATE.gcal_token=null;STATE.gcal_token_expiry=null;STATE.gcal_last_sync=null;
-  STATE.sessions=STATE.sessions.filter(s=>!s.from_gcal);
-  saveState();renderProfile();renderProgreso();renderSessions();updateSidebar();
-}
-
-// ═══════════════════════════════════════════════════════
-// EXPORT / IMPORT
-// ═══════════════════════════════════════════════════════
-function exportData(){
-  const blob=new Blob([JSON.stringify({version:'bjj_journey_v1',exported_at:new Date().toISOString(),data:STATE},null,2)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.download=`bjj-journey-backup-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();URL.revokeObjectURL(url);
-}
-
-function importData(input){
-  const file=input.files[0];
-  if(!file) return;
-  const reader=new FileReader();
-  reader.onload=(e)=>{
-    try {
-      const parsed=JSON.parse(e.target.result);
-      const imported=parsed.data||parsed;
-      if(!imported.profile||!imported.sessions||!imported.techniques){alert('Archivo no válido.');return;}
-      if(confirm(`¿Importar datos de ${parsed.exported_at?new Date(parsed.exported_at).toLocaleDateString('es-ES'):'backup'}? Esto reemplazará los datos actuales.`)){
-        STATE=imported;
-        TECHNIQUES.forEach(t=>{if(!STATE.techniques[t.id]) STATE.techniques[t.id]={seen:false,status:'new',notes:'',sessions:[]};});
-        if(STATE.onboarding_dismissed===undefined) STATE.onboarding_dismissed=false;
-        if(!STATE.gcal_token) STATE.gcal_token=null;
-        saveState();updateSidebar();renderProgreso();renderEnc(currentFilter);renderSessions();renderProfile();
-        alert('✓ Datos importados correctamente.');
-      }
-    } catch(err){alert('Error al leer el archivo.');}
-    input.value='';
-  };
-  reader.readAsText(file);
-}
-
-async function confirmReset(){
-  if(confirm('¿Seguro que quieres borrar todos los datos? Esta acción no se puede deshacer.')){
-    // Borrar de Supabase
-    try {
-      await sb.from('sessions').eq('user_id', USER_ID).delete();
-      await sb.from('techniques').eq('user_id', USER_ID).delete();
-      await sb.from('profiles').eq('user_id', USER_ID).delete();
-    } catch(e) { console.warn('Error borrando de Supabase:', e); }
-    localStorage.removeItem('bjj_journey_v1');
-    location.reload();
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// NAVIGATION
-// ═══════════════════════════════════════════════════════
-// Collapsible state per position
-const collapsedPositions = new Set();
 
 function switchMovTab(tab) {
   currentFilter = tab === 'mine' ? 'seen' : 'all';
@@ -1862,8 +1306,8 @@ function switchMovTab(tab) {
 function togglePosition(posId) {
   if (collapsedPositions.has(posId)) collapsedPositions.delete(posId);
   else collapsedPositions.add(posId);
-  const content = document.getElementById('pos-content-' + posId.replace(/[^a-z0-9]/gi,'_'));
-  const chevron = document.getElementById('pos-chevron-' + posId.replace(/[^a-z0-9]/gi,'_'));
+  const content = document.getElementById('pos-content-' + posId);
+  const chevron = document.getElementById('pos-chevron-' + posId);
   if (content) content.style.display = collapsedPositions.has(posId) ? 'none' : 'block';
   if (chevron) chevron.style.transform = collapsedPositions.has(posId) ? 'rotate(-90deg)' : 'rotate(0deg)';
 }
@@ -2037,7 +1481,7 @@ function renderCalendar() {
     ? selSessions.map(s => {
         const realIdx = STATE.sessions.indexOf(s);
         const focosHtml = s.focos?.length
-          ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">${s.focos.map(f=>`<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:var(--bg4);color:var(--muted2);border:1px solid var(--border)">${f.position}${f.intent?' · '+INTENT_LABEL[f.intent]:''}</span>`).join('')}</div>`
+          ? `<div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:8px">${s.focos.map(f=>`<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:${f.category?CAT_COLOR[f.category]+'22':'var(--bg4)'};color:${f.category?CAT_COLOR[f.category]:'var(--muted2)'};border:1px solid var(--border)">${f.category?CAT_LABEL[f.category]:''}${f.position?' · '+f.position:''}</span>`).join('')}</div>`
           : '';
         const gymBadge = s.gym ? `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg4);color:var(--muted2);border:1px solid var(--border)">📍 ${s.gym}</span>` : '';
         const partnersBadge = s.training_partners ? `<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:var(--bg4);color:var(--muted2);border:1px solid var(--border)">👥 ${s.training_partners}</span>` : '';
