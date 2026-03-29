@@ -120,7 +120,11 @@ EJEMPLOS:
 - "qué tiempo hace" → "Solo hablo de BJJ 🥋 para el tiempo mejor Meteored"
 - "dame consejos para mejorar mi guardia" → consejo real basado en su historial
 
-IMPORTANTE: El bloque SAVE_SESSION solo aparece cuando tengas TODOS los datos necesarios (mínimo fecha, tipo y duración). Nunca inventes una duración."""
+IMPORTANTE: El bloque SAVE_SESSION solo aparece cuando tengas TODOS los datos necesarios (mínimo fecha, tipo y duración). Nunca inventes una duración.
+
+CONFIRMACIÓN AL GUARDAR: Cuando incluyas SAVE_SESSION, tu respuesta visible DEBE empezar siempre con exactamente:
+✅ Sesión guardada
+Seguido de una línea con el resumen (tipo, duración, fecha). Sin variaciones."""
 
 async def call_claude(messages: list, context: str) -> str:
     url = "https://api.anthropic.com/v1/messages"
