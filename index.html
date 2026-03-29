@@ -531,11 +531,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);ov
       <div id="feeling-label" style="font-size:12px;color:var(--muted2);margin-top:6px;min-height:16px"></div>
     </div>
 
-    <!-- FOCOS -->
+    <!-- MOVIMIENTOS -->
     <div class="input-group">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <label class="input-label" style="margin:0">Focos <span style="color:var(--muted2);font-size:10px">lo que trabajaste — añade hasta 5</span></label>
-        <button onclick="addFoco()" style="font-size:11px;padding:4px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--orange);cursor:pointer;font-family:'DM Sans',sans-serif">+ Añadir foco</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <label class="input-label" style="margin:0">Movimientos <span style="color:var(--muted2);font-size:10px">lo que trabajaste hoy</span></label>
+        <button onclick="addFoco()" style="font-size:11px;padding:4px 10px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);color:var(--orange);cursor:pointer;font-family:'DM Sans',sans-serif">+ Añadir</button>
       </div>
       <div id="focos-list" style="display:flex;flex-direction:column;gap:8px"></div>
     </div>
@@ -1102,49 +1102,132 @@ function renderFocos() {
   const list = document.getElementById('focos-list');
   if (!list) return;
   if (!currentFocos.length) {
-    list.innerHTML = `<div style="font-size:12px;color:var(--muted2);font-style:italic;padding:6px 0">Sin focos — opcional pero recomendado</div>`;
+    list.innerHTML = `<div style="font-size:12px;color:var(--muted2);font-style:italic;padding:4px 0">Nada añadido aún — opcional</div>`;
     return;
   }
   list.innerHTML = currentFocos.map((f, i) => {
-    const catColor = f.category ? CAT_COLOR[f.category] : 'var(--muted2)';
-    const posTechs = TECHNIQUES.filter(t =>
+    const catColor = f.category ? CAT_COLOR[f.category] : 'var(--border2)';
+
+    // Category pills
+    const catPills = CATEGORIES.map(c => `
+      <button onclick="currentFocos[${i}].category='${c.id}';currentFocos[${i}].position='';currentFocos[${i}].technique='';renderFocos()"
+        style="padding:5px 10px;border-radius:99px;font-size:11px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;
+        background:${f.category===c.id?c.color+'22':'var(--bg4)'};
+        color:${f.category===c.id?c.color:'var(--muted2)'};
+        border:1.5px solid ${f.category===c.id?c.color:'var(--border2)'}">${c.label}</button>
+    `).join('');
+
+    // Position pills — filtered by category
+    const relPositions = f.category
+      ? [...new Set(TECHNIQUES.filter(t=>t.category===f.category).flatMap(t=>t.positions))]
+      : POSITIONS;
+    const posPills = relPositions.map(p => `
+      <button onclick="currentFocos[${i}].position='${p}';currentFocos[${i}].technique='';renderFocos()"
+        style="padding:4px 9px;border-radius:99px;font-size:10px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .12s;
+        background:${f.position===p?(catColor+'22'):'var(--bg4)'};
+        color:${f.position===p?catColor:'var(--muted2)'};
+        border:1.5px solid ${f.position===p?catColor:'var(--border2)'}">${p}</button>
+    `).join('');
+
+    // Technique dropdown — filtered
+    const techs = TECHNIQUES.filter(t =>
       (!f.category || t.category === f.category) &&
       (!f.position || t.positions.includes(f.position))
     );
-    return `<div style="background:var(--bg3);border:1px solid var(--border2);border-left:3px solid ${catColor};border-radius:var(--r2);padding:12px;position:relative">
-      <button onclick="removeFoco(${i})" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:13px">✕</button>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Categoría</div>
-          <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
-            onchange="currentFocos[${i}].category=this.value;currentFocos[${i}].technique='';renderFocos()">
-            <option value="">— Categoría —</option>
-            ${CATEGORIES.map(c=>`<option value="${c.id}" ${f.category===c.id?'selected':''}>${c.label}</option>`).join('')}
-          </select>
-        </div>
-        <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Posición</div>
-          <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
-            onchange="currentFocos[${i}].position=this.value;currentFocos[${i}].technique='';renderFocos()">
-            <option value="">— Posición —</option>
-            ${POSITIONS.map(p=>`<option value="${p}" ${f.position===p?'selected':''}>${p}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-      <div>
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:4px">Técnica <span style="color:var(--muted);font-size:9px">opcional</span></div>
-        <select style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
-          onchange="currentFocos[${i}].technique=this.value">
+    const techSelect = techs.length ? `
+      <div style="margin-top:8px">
+        <div style="font-size:10px;color:var(--muted2);margin-bottom:4px">Técnica <span style="opacity:.6">opcional</span></div>
+        <select onchange="currentFocos[${i}].technique=this.value"
+          style="width:100%;background:var(--bg4);border:1px solid var(--border2);border-radius:var(--r2);padding:7px 10px;font-size:12px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none">
           <option value="">— Sin técnica específica —</option>
-          ${posTechs.map(t=>`<option value="${t.id}" ${f.technique===t.id?'selected':''}>${t.name}</option>`).join('')}
+          ${techs.map(t=>`<option value="${t.id}" ${f.technique===t.id?'selected':''}>${t.name}</option>`).join('')}
         </select>
-      </div>
+      </div>` : '';
+
+    return `<div style="background:var(--bg3);border:1px solid var(--border2);border-left:3px solid ${catColor};border-radius:var(--r2);padding:12px;position:relative">
+      <button onclick="removeFoco(${i})" style="position:absolute;top:8px;right:8px;background:none;border:none;color:var(--muted2);cursor:pointer;font-size:13px;line-height:1">✕</button>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:6px">Categoría</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px">${catPills}</div>
+      ${f.category ? `
+        <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--muted2);margin-bottom:6px">Posición</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">${posPills}</div>
+        ${techSelect}
+      ` : ''}
     </div>`;
   }).join('');
 }
 
+// ─── SESSION DETAIL PANEL ─────────────────────────────
+function openSessionDetail(idx){
+  const s=STATE.sessions[idx];
+  if(!s) return;
+  const typeColors={Gi:'var(--purple)',NoGi:'var(--green)','Open mat':'var(--orange)',Gym:'var(--amber)','Competición':'#E05050'};
+  const types=['Gi','NoGi','Open mat','Gym','Competición'];
+  const feelingEmojis=['🤕','😴','🙂','💪','🔥'];
+
+  const typePills=types.map(t=>`<button class="type-pill${s.type===t?' sel':''}" style="font-size:11px;padding:5px 10px"
+    onclick="updateSessionField(${idx},'type','${t}');this.closest('.type-pills').querySelectorAll('.type-pill').forEach(p=>p.classList.remove('sel'));this.classList.add('sel')">${t}</button>`).join('');
+  const feelingBtns=feelingEmojis.map((e,i)=>`<button class="feeling-btn${s.feeling===(i+1)?' sel':''}"
+    onclick="updateSessionField(${idx},'feeling',${i+1});document.querySelectorAll('#sdp-feelings .feeling-btn').forEach(b=>b.classList.remove('sel'));this.classList.add('sel')">${e}</button>`).join('');
+
+  // Focos display — new category model
+  const focos=s.focos||[];
+  const focosHtml=focos.length ? focos.map(f=>{
+    const col=f.category?CAT_COLOR[f.category]:'var(--muted2)';
+    const techName=f.technique?getTech(f.technique)?.name:'';
+    return `<div style="background:var(--bg3);border-left:3px solid ${col};border-radius:var(--r2);padding:8px 12px;margin-bottom:6px">
+      <div style="font-size:12px;font-weight:600;color:${col}">${f.category?CAT_LABEL[f.category]:''}</div>
+      <div style="font-size:11px;color:var(--muted2)">${f.position||''}${techName?' · '+techName:''}</div>
+    </div>`;
+  }).join('') : `<div style="font-size:12px;color:var(--muted2);font-style:italic">Sin focos registrados</div>`;
+
+  document.getElementById('detail-content').innerHTML=`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+      <div style="width:10px;height:10px;border-radius:50%;background:${typeColors[s.type]||'var(--muted2)'}"></div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;line-height:1">${fmtDate(s.date)}</div>
+    </div>
+    <div style="font-size:12px;color:var(--muted2);margin-bottom:18px">${s.from_gcal?'📅 Importado de Google Calendar':'Sesión manual'}</div>
+    <div class="dp-section">Tipo</div>
+    <div class="type-pills" style="flex-wrap:wrap;gap:6px;margin-bottom:4px">${typePills}</div>
+    <div class="dp-section">Duración</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <input type="number" id="sdp-duration" value="${s.duration||''}" min="1" inputmode="numeric"
+        style="width:80px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:8px 10px;font-size:14px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+        oninput="updateSessionField(${idx},'duration',parseInt(this.value)||0);document.getElementById('sdp-dur-label').textContent=Math.round((parseInt(this.value)||0)/60*10)/10+'h'"
+        onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
+      <span id="sdp-dur-label" style="font-size:13px;color:var(--muted2)">${Math.round((s.duration||0)/60*10)/10}h</span>
+    </div>
+    <div class="dp-section">Feeling</div>
+    <div class="feeling-btns" id="sdp-feelings">${feelingBtns}</div>
+    <div class="dp-section">Focos</div>
+    ${focosHtml}
+    <div class="dp-section">Notas</div>
+    <textarea class="dp-notes-field" placeholder="Qué trabajaste, qué salió bien, qué mejorar..." oninput="updateSessionField(${idx},'notes',this.value)">${s.notes||''}</textarea>
+    <div class="dp-section">Gimnasio</div>
+    <input type="text" value="${s.gym||''}" placeholder="Tu academia"
+      style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 12px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+      oninput="updateSessionField(${idx},'gym',this.value)"
+      onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
+    <div class="dp-section">Compañeros</div>
+    <input type="text" value="${s.training_partners||''}" placeholder="John, Paco..."
+      style="width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--r2);padding:9px 12px;font-size:13px;color:var(--cream);font-family:'DM Sans',sans-serif;outline:none"
+      oninput="updateSessionField(${idx},'training_partners',this.value)"
+      onfocus="this.style.borderColor='var(--orange)'" onblur="this.style.borderColor='var(--border2)'">
+    <div style="margin-top:18px">
+      <button onclick="deleteSession(${idx});closeDetail()" style="width:100%;padding:10px;background:none;border:1px solid rgba(224,80,80,.3);border-radius:var(--r2);font-size:13px;color:#E05050;font-family:'DM Sans',sans-serif;cursor:pointer">Eliminar sesión</button>
+    </div>`;
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function updateSessionField(idx,field,value){
+  if(!STATE.sessions[idx]) return;
+  STATE.sessions[idx][field]=value;
+  saveState(); syncToSupabase();
+  if(field==='duration'){renderProgreso();updateSidebar();}
+  renderCalendar();
+}
+
 // ─── ENCYCLOPEDIA ─────────────────────────────────────
-// ═══════════════════════════════════════════════════════
 let currentFilter='all', activeDetailId=null;
 const collapsedPositions = new Set();
 
